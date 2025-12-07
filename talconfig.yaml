@@ -56,3 +56,5 @@ controlPlane:
       systemExtensions:
         officialExtensions:
           - siderolabs/intel-ucode
+
+allowSchedulingOnControlPlanes: true

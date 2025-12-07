@@ -46,6 +46,11 @@ nodes:
         dhcp: true
 
 controlPlane:
+  patches:
+    - |-
+      cluster:
+        proxy:
+          disabled: true
   schematic:
     customization:
       systemExtensions:

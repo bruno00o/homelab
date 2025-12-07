@@ -60,18 +60,14 @@ controlPlane:
                 kind: PodSecurityConfiguration
                 exemptions:
                   namespaces:
-                    - openebs
+                    - longhorn-system
     - |-
       machine:
-        sysctls:
-          vm.nr_hugepages: "1024"
-        nodeLabels:
-          openebs.io/engine: mayastor
         kubelet:
           extraMounts:
-            - destination: /var/local
+            - destination: /var/lib/longhorn
               type: bind
-              source: /var/local
+              source: /var/lib/longhorn
               options:
                 - bind
                 - rshared
@@ -82,3 +78,5 @@ controlPlane:
       systemExtensions:
         officialExtensions:
           - siderolabs/intel-ucode
+          - siderolabs/iscsi-tools
+          - siderolabs/util-linux-tools

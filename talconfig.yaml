@@ -1,0 +1,53 @@
+---
+clusterName: going-merry
+endpoint: https://192.168.1.9:6443
+
+talosVersion: v1.11.5
+kubernetesVersion: v1.34.1
+
+cniConfig:
+  name: none
+additionalApiServerCertSans:
+  - 192.168.1.9
+additionalMachineCertSans:
+  - 192.168.1.9
+  - 192.168.1.10
+  - 192.168.1.11
+  - 192.168.1.12
+
+nodes:
+  - hostname: luffy
+    ipAddress: 192.168.1.10
+    controlPlane: true
+    installDiskSelector:
+      model: CT500P310SSD8
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: true
+        vip:
+          ip: 192.168.1.9
+
+  - hostname: zoro
+    ipAddress: 192.168.1.11
+    controlPlane: true
+    installDiskSelector:
+      model: CT500P310SSD8
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: true
+
+  - hostname: nami
+    ipAddress: 192.168.1.12
+    controlPlane: true
+    installDiskSelector:
+      model: CT500P310SSD8
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: true
+
+controlPlane:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/intel-ucode

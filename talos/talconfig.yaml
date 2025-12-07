@@ -72,6 +72,9 @@ controlPlane:
       cluster:
         proxy:
           disabled: true
+        etcd:
+          extraArgs:
+            listen-metrics-urls: http://0.0.0.0:2381
         apiServer:
           admissionControl:
             - name: PodSecurity
@@ -81,9 +84,14 @@ controlPlane:
                 exemptions:
                   namespaces:
                     - longhorn-system
+        extraManifests:
+          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+          - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
     - |-
       machine:
         kubelet:
+          extraArgs:
+            rotate-server-certificates: true
           extraMounts:
             - destination: /var/lib/longhorn
               type: bind

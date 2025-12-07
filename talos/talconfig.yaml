@@ -1,13 +1,12 @@
 ---
 clusterName: going-merry
 endpoint: https://192.168.1.9:6443
-
 talosVersion: v1.11.5
 kubernetesVersion: v1.34.1
-
 cniConfig:
   name: none
 allowSchedulingOnControlPlanes: true
+
 additionalApiServerCertSans:
   - 192.168.1.9
 additionalMachineCertSans:
@@ -27,6 +26,13 @@ nodes:
         dhcp: true
         vip:
           ip: 192.168.1.9
+    patches:
+      - |-
+        machine:
+          disks:
+            - device: /dev/disk/by-id/nvme-CT2000T500SSD8_25104E9DE40A
+              partitions:
+                - mountpoint: /var/mnt/longhorn
 
   - hostname: zoro
     ipAddress: 192.168.1.11
@@ -36,6 +42,13 @@ nodes:
     networkInterfaces:
       - interface: enp1s0
         dhcp: true
+    patches:
+      - |-
+        machine:
+          disks:
+            - device: /dev/disk/by-id/nvme-CT2000T500SSD8_252050D38FC7
+              partitions:
+                - mountpoint: /var/mnt/longhorn
 
   - hostname: nami
     ipAddress: 192.168.1.12
@@ -45,6 +58,13 @@ nodes:
     networkInterfaces:
       - interface: enp1s0
         dhcp: true
+    patches:
+      - |-
+        machine:
+          disks:
+            - device: /dev/disk/by-id/nvme-CT2000T500SSD8_25104E9DE271
+              partitions:
+                - mountpoint: /var/mnt/longhorn
 
 controlPlane:
   patches:
@@ -68,6 +88,13 @@ controlPlane:
             - destination: /var/lib/longhorn
               type: bind
               source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
+            - destination: /var/mnt/longhorn
+              type: bind
+              source: /var/mnt/longhorn
               options:
                 - bind
                 - rshared

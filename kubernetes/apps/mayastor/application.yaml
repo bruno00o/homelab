@@ -10,6 +10,7 @@ spec:
     chart: mayastor
     targetRevision: 2.10.0
     helm:
+      skipCrds: false
       values: |
         csi:
           node:
@@ -23,6 +24,7 @@ spec:
               type: simple
           persistence:
             enabled: false
+          replicaCount: 1
   destination:
     server: https://kubernetes.default.svc
     namespace: mayastor
@@ -32,3 +34,10 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
+  ignoreDifferences:
+    - group: batch
+      kind: Job
+      jsonPointers:
+        - /spec/selector
+        - /spec/template/metadata/labels

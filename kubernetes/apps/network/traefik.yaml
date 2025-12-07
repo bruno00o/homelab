@@ -16,19 +16,16 @@ spec:
             enabled: true
 
         gateway:
-          enabled: true
-          name: traefik-gateway
-          listeners:
-            web:
-              port: 8000
-              protocol: HTTP
+          enabled: false
 
         ingressRoute:
           dashboard:
             enabled: true
-            matchRule: Host(`traefik.localhost`)
+            matchRule: Host(`traefik.local`)
             entryPoints:
-              - web
+              - websecure
+            tls:
+              secretName: traefik-dashboard-tls
 
         service:
           type: LoadBalancer

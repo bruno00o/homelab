@@ -15,6 +15,14 @@ spec:
           node:
             initContainers:
               enabled: false
+        etcd:
+          auth:
+            rbac:
+              create: false
+            token:
+              type: simple
+          persistence:
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: mayastor

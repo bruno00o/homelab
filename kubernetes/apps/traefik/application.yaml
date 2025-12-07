@@ -45,3 +45,22 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/bruno00o/homelab.git
+    targetRevision: main
+    path: kubernetes/apps/traefik/resources
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -22,9 +22,6 @@ spec:
             web:
               port: 8000
               protocol: HTTP
-            websecure:
-              port: 8443
-              protocol: HTTPS
 
         ingressRoute:
           dashboard:

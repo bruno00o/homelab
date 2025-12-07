@@ -25,6 +25,9 @@ spec:
             node:
               initContainers:
                 enabled: false
+        etcd:
+          persistence:
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: openebs

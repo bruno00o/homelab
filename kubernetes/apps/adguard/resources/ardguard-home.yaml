@@ -149,3 +149,5 @@ spec:
           port: 3000
   tls:
     secretName: adguard-tls
+    domains:
+      - main: adguard.local

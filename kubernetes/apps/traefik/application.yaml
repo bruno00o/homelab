@@ -21,7 +21,7 @@ spec:
         ingressRoute:
           dashboard:
             enabled: true
-            matchRule: Host(`traefik.local`)
+            matchRule: Host(`traefik.home`)
             entryPoints:
               - websecure
             tls:

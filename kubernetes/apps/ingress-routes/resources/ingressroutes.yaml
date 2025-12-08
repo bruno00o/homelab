@@ -12,9 +12,9 @@ spec:
   issuerRef:
     name: mugiwara-ca-issuer
     kind: ClusterIssuer
-  commonName: grafana.local
+  commonName: grafana.home
   dnsNames:
-    - grafana.local
+    - grafana.home
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -25,7 +25,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`grafana.local`)
+    - match: Host(`grafana.home`)
       kind: Rule
       services:
         - name: kube-prometheus-stack-grafana
@@ -47,9 +47,9 @@ spec:
   issuerRef:
     name: mugiwara-ca-issuer
     kind: ClusterIssuer
-  commonName: argocd.local
+  commonName: argocd.home
   dnsNames:
-    - argocd.local
+    - argocd.home
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -60,7 +60,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`argocd.local`)
+    - match: Host(`argocd.home`)
       kind: Rule
       services:
         - name: argocd-server
@@ -83,9 +83,9 @@ spec:
   issuerRef:
     name: mugiwara-ca-issuer
     kind: ClusterIssuer
-  commonName: longhorn.local
+  commonName: longhorn.home
   dnsNames:
-    - longhorn.local
+    - longhorn.home
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -96,7 +96,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`longhorn.local`)
+    - match: Host(`longhorn.home`)
       kind: Rule
       services:
         - name: longhorn-frontend

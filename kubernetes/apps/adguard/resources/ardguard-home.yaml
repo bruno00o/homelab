@@ -128,7 +128,7 @@ spec:
   duration: 2160h
   renewBefore: 360h
   dnsNames:
-    - adguard.local
+    - adguard.home
   issuerRef:
     name: mugiwara-ca-issuer
     kind: ClusterIssuer
@@ -142,7 +142,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`adguard.local`)
+    - match: Host(`adguard.home`)
       kind: Rule
       services:
         - name: adguard-web
@@ -150,4 +150,4 @@ spec:
   tls:
     secretName: adguard-tls
     domains:
-      - main: adguard.local
+      - main: adguard.home

@@ -28,8 +28,8 @@ spec:
     - match: Host(`traefik.local`)
       kind: Rule
       services:
-        - name: api@internal
-          kind: TraefikService
+        - kind: TraefikService
+          name: api@internal
   tls:
     secretName: traefik-tls
 
@@ -169,7 +169,7 @@ spec:
     - match: Host(`adguard.local`)
       kind: Rule
       services:
-        - name: adguard-home
+        - name: adguard-web
           port: 80
   tls:
     secretName: adguard-tls

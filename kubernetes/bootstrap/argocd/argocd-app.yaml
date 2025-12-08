@@ -5,10 +5,13 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://github.com/bruno00o/homelab.git
-    targetRevision: main
-    path: kubernetes/bootstrap/argocd
+  sources:
+    - repoURL: https://github.com/argoproj/argo-cd.git
+      targetRevision: v2.14.2
+      path: manifests/install
+    - repoURL: https://github.com/bruno00o/homelab.git
+      targetRevision: main
+      path: kubernetes/bootstrap/argocd/patches
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

@@ -18,6 +18,13 @@ spec:
         gateway:
           enabled: false
 
+        ports:
+          web:
+            redirections:
+              entryPoint:
+                to: websecure
+                scheme: https
+
         ingressRoute:
           dashboard:
             enabled: true

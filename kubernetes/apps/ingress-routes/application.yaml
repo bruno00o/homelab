@@ -1,0 +1,175 @@
+# ===================
+# Traefik Dashboard
+# ===================
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-tls
+  namespace: traefik
+spec:
+  secretName: traefik-tls
+  issuerRef:
+    name: mugiwara-ca-issuer
+    kind: ClusterIssuer
+  commonName: traefik.local
+  dnsNames:
+    - traefik.local
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik.local`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    secretName: traefik-tls
+
+# ===================
+# Grafana
+# ===================
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-tls
+  namespace: monitoring
+spec:
+  secretName: grafana-tls
+  issuerRef:
+    name: mugiwara-ca-issuer
+    kind: ClusterIssuer
+  commonName: grafana.local
+  dnsNames:
+    - grafana.local
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`grafana.local`)
+      kind: Rule
+      services:
+        - name: kube-prometheus-stack-grafana
+          port: 80
+  tls:
+    secretName: grafana-tls
+
+# ===================
+# ArgoCD
+# ===================
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-tls
+  namespace: argocd
+spec:
+  secretName: argocd-tls
+  issuerRef:
+    name: mugiwara-ca-issuer
+    kind: ClusterIssuer
+  commonName: argocd.local
+  dnsNames:
+    - argocd.local
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`argocd.local`)
+      kind: Rule
+      services:
+        - name: argocd-server
+          port: 443
+          scheme: https
+  tls:
+    secretName: argocd-tls
+
+# ===================
+# Longhorn
+# ===================
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: longhorn-tls
+  namespace: longhorn-system
+spec:
+  secretName: longhorn-tls
+  issuerRef:
+    name: mugiwara-ca-issuer
+    kind: ClusterIssuer
+  commonName: longhorn.local
+  dnsNames:
+    - longhorn.local
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`longhorn.local`)
+      kind: Rule
+      services:
+        - name: longhorn-frontend
+          port: 80
+  tls:
+    secretName: longhorn-tls
+
+# ===================
+# AdGuard Home
+# ===================
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: adguard-tls
+  namespace: adguard
+spec:
+  secretName: adguard-tls
+  issuerRef:
+    name: mugiwara-ca-issuer
+    kind: ClusterIssuer
+  commonName: adguard.local
+  dnsNames:
+    - adguard.local
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: adguard
+  namespace: adguard
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`adguard.local`)
+      kind: Rule
+      services:
+        - name: adguard-home
+          port: 80
+  tls:
+    secretName: adguard-tls

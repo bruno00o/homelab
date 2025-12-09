@@ -11,6 +11,11 @@ spec:
     chart: kube-prometheus-stack
     helm:
       values: |
+        prometheusOperator:
+          admissionWebhooks:
+            patch:
+              ttlSecondsAfterFinished: 60
+
         grafana:
           enabled: true
           admin:

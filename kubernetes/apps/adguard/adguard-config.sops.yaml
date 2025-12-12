@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: adguard-config
+    namespace: adguard
+stringData:
+    AdGuardHome.yaml: ENC[AES256_GCM,data:8lY21ogNBCa8t52/MeHZc1RiS2l1dLMEn01rghVDslW4BLsmOtG6LxOAM02t+EbN5MzA/CU/2KEFFwMTyTk50+7bwkAjVf2009ibHrLudcE6Z1ChxFN0QJ4Eo3P7IhW5qKZp42+d55LCPG/2MGeu1njDy2d8zYvmq6Dus++S4wwqkxzwt8w0mlLD7pzWx8lbGpUTVPTeyHZkrnr+mnErkXrCHzUcxmhI5rrIqjDISDEleumen8BXC6GG0yPQyLbEDGxo8vT6qsEnve18F+Oo3f/Lg7JyyhedxJQx4TVqg6p/rIahxaWXVDXdAeeroX6V4pMVb4Ltk9o7IZF0sl1HIReHYM3twQl8kVL5Ir3nwzYajn6vJ6XfkvX2teYB00osm2e0I3rF5SIZLVIId/mdC6QiOP0EYapGHV+bHmTLkOGgAvXiKpUTGs6jV+qaBirSHiVmk2l0YW368Tmtp0kN5PapU9QxDFP2v2kKZxxz4sKRjp6f5QOmySYDHgsZfhgvXQmk91La9oNzU2vtt/o5FWnk3ODJCXvZmM9MYoAIemFkNQo7jpZ8pc2Qg22nY3ldjbpikHgDGr1nQdvMFFX5Hs7ESJXAgyTqjNMIEjK8n8sq1ivG53xL+K5dbGY5yZhxyOVQSmQKOzfUECQxzHxczaJNwbjdZ11gXYFVg2EcgxRLHb5Ql2xnNJbv71XTo8kAjvqHB/i3y51WmD0yh/JKzVa8YJrJhA0OUqQkc8cOT7wL+XR7xsPbKfTNp77rK3sdEt2l8XdtBQyo6BB32aUfjSguEQguv/2aO+KKWvwNmdivYXO6W4uS6pC4PGnP6cRscyTKnUaSqxt0KC0rc7MT0LeJ5AHrDXs7i4o7owSrFzYTYwRmO6ZkG1PnwQJC045uLiX+Hi6i24iQoP5f8KGR6/BLHqFaCTzWo6nb0Z7eZQAWwhAMOxLEUgDOvpDufHYNJG4f3dG9EEqrxjemUtNg2y9RkzJB7DgR63Yjt6LGCwE1NAD84/OR2tLifWySZBr+RaHk8RSw+u/khsq1sbE5AdXiYzettx/qoBL3UKVcgp7KfXM0W3CC/oq4O9EXA+pO8g4uyzORm4XwPPoqQHu4SClscK29fLzBAw8edCbu51yM0WIr3vTiD6v1k8VPtzyrfdlDnI0MGoaVz3xUxiK+HNq5sBGa7CGv5hn6Mw4wpyL9JRW97nfJprOuWQZj1TS3lqM2mph6wK89Ys+JDl1zFkbxe4gGdCYkijhA7EhDdLEedgbo5mPESCxeSZ+bdRpa/TQtXvzNL3q7z4sIdSY8fzqOR2sPL8oTSI6HjnHr/tNpO+WXgc7zODrd+Kd7hQaxLXmk,iv:kmKJcpcvn6otKTg3FyD3+VwDqQk+pxzmdgvEgxa1jS4=,tag:TUhCNV0BPMpetz4u01NGiA==,type:str]
+sops:
+    age:
+        - recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB5MUtWbVRBdW10akgxOHo0
+            NzB4TW9ZWXk5QUl0NGMxRlJkUXdEa1lFSVdZCmhNUEVPazVXU3Fsc1FKN1BJak9G
+            ZHlRZ1ljOEl2UHZtQ2QrcWtlbExMdjgKLS0tIENMMU9kaTNNS1hMRk9yb1V0SmUz
+            citGYUUwK2lWOXVWUERjR2kyb2NBZGsKGHDFDcPt7dp1YYbxvshze0Zqb4RqEWLc
+            yk3yutdIAQiCZgmslT2zp4qJYosSPF7UIN9oa8DPsrrjfjGXHOjHag==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-12-12T21:29:43Z"
+    mac: ENC[AES256_GCM,data:2rhwE3dcHIFuvil8AhgW2OA/i/7Fgz75jKQ050CI46z5vZYt0MIkugvFFPn4YP6oHdop47uqVr2WBB/i3Cp9qVMaau7Pdj7YyNUXYXzWqw2TGtEbLiyKv0rX3DE7g88rfNN6NCjxBPBWIYct5gRP2fahRHs8w5y1pmGCHwGYEZ4=,iv:WtosSpmZUhhp7DVoqHW5v8xl1FmAqKTWwpf+K6o0LAM=,tag:qc7yXun0JaAQ9cmwPTqRYg==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

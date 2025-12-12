@@ -42,7 +42,7 @@ spec:
               mountPath: /opt/adguardhome/conf
       containers:
         - name: adguard-home
-          image: adguard/adguardhome:v0.107.55
+          image: adguard/adguardhome:v0.107.71
           ports:
             - name: dns-tcp
               containerPort: 53

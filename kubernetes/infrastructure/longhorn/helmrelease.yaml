@@ -14,7 +14,12 @@ spec:
         name: longhorn
         namespace: flux-system
   values:
-    defaultSettings:
-      defaultDataPath: /var/lib/longhorn
     preUpgradeChecker:
       jobEnabled: false
+    defaultSettings:
+      defaultDataPath: /var/lib/longhorn
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 3
+      defaultFsType: ext4
+      reclaimPolicy: Delete

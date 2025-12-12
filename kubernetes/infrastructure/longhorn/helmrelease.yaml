@@ -18,6 +18,15 @@ spec:
       jobEnabled: false
     defaultSettings:
       defaultDataPath: /var/lib/longhorn
+      replicaAutoBalance: ignored
+      replicaSoftAntiAffinity: ignored
+      replicaZoneSoftAntiAffinity: ignored
+      replicaDiskSoftAntiAffinity: ignored
+      backupCompressionMethod: lz4
+      snapshotDataIntegrity: ignored
+      freezeFilesystemForSnapshot: ignored
+      restoreVolumeRecurringJob: ignored
+      offlineReplicaRebuilding: ignored
     persistence:
       defaultClass: true
       defaultClassReplicaCount: 3

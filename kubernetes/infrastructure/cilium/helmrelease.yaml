@@ -25,8 +25,12 @@ spec:
     kubeProxyReplacement: true
     l2announcements:
       enabled: true
+    l2podAnnouncements:
+      enabled: true
+      interface: enp1s0
     externalIPs:
       enabled: true
+    devices: enp1s0
     securityContext:
       capabilities:
         ciliumAgent:

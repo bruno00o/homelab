@@ -1,0 +1,243 @@
+---
+version: "3"
+
+vars:
+  TALOS_DIR: talos
+  TALOS_CONFIG: "{{.TALOS_DIR}}/clusterconfig/talosconfig"
+  CLUSTER_NAME: going-merry
+  NODES: "192.168.1.10,192.168.1.11,192.168.1.12"
+  NODE_LUFFY: "192.168.1.10"
+  NODE_ZORO: "192.168.1.11"
+  NODE_NAMI: "192.168.1.12"
+
+env:
+  TALOSCONFIG: "{{.TALOS_CONFIG}}"
+
+tasks:
+  # =============================================================================
+  # Talos
+  # =============================================================================
+  talos:genconfig:
+    desc: Generate Talos configs from talconfig.yaml
+    dir: "{{.TALOS_DIR}}"
+    cmds:
+      - talhelper genconfig
+    sources:
+      - talconfig.yaml
+      - talsecret.sops.yaml
+    generates:
+      - clusterconfig/*.yaml
+
+  talos:apply:
+    desc: Apply config to a node (e.g. task talos:apply NODE=luffy)
+    dir: "{{.TALOS_DIR}}"
+    requires:
+      vars: [NODE]
+    vars:
+      NODE_IP:
+        sh: |
+          case "{{.NODE}}" in
+            luffy) echo "192.168.1.10" ;;
+            zoro) echo "192.168.1.11" ;;
+            nami) echo "192.168.1.12" ;;
+            *) echo "{{.NODE}}" ;;
+          esac
+    cmds:
+      - talosctl apply-config --nodes {{.NODE_IP}} --file clusterconfig/{{.CLUSTER_NAME}}-{{.NODE}}.yaml
+
+  talos:apply-all:
+    desc: Apply config to all nodes
+    cmds:
+      - task: talos:apply
+        vars: { NODE: luffy }
+      - task: talos:apply
+        vars: { NODE: zoro }
+      - task: talos:apply
+        vars: { NODE: nami }
+
+  talos:upgrade:
+    desc: Upgrade Talos on a node (e.g. task talos:upgrade NODE=luffy)
+    requires:
+      vars: [NODE]
+    vars:
+      NODE_IP:
+        sh: |
+          case "{{.NODE}}" in
+            luffy) echo "192.168.1.10" ;;
+            zoro) echo "192.168.1.11" ;;
+            nami) echo "192.168.1.12" ;;
+            *) echo "{{.NODE}}" ;;
+          esac
+      TALOS_VERSION:
+        sh: yq '.talosVersion' {{.TALOS_DIR}}/talconfig.yaml
+      SCHEMATIC_ID:
+        sh: |
+          talosctl get extensions -n {{.NODE_IP}} -o json 2>/dev/null | \
+            jq -r '.[0].metadata.id // empty' || echo ""
+    preconditions:
+      - sh: test -n "{{.TALOS_VERSION}}"
+        msg: "Cannot read talosVersion from talconfig.yaml"
+    prompt: "Upgrade {{.NODE}} ({{.NODE_IP}}) to Talos {{.TALOS_VERSION}}?"
+    cmds:
+      - |
+        echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
+        talosctl upgrade \
+          --nodes {{.NODE_IP}} \
+          --image factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.TALOS_VERSION}} \
+          --preserve
+      - task: talos:wait-healthy
+        vars: { NODE_IP: "{{.NODE_IP}}" }
+
+  talos:upgrade-all:
+    desc: Upgrade Talos on all nodes sequentially
+    prompt: "Upgrade ALL nodes to the new Talos version?"
+    cmds:
+      - task: talos:upgrade
+        vars: { NODE: luffy }
+      - task: talos:upgrade
+        vars: { NODE: zoro }
+      - task: talos:upgrade
+        vars: { NODE: nami }
+
+  talos:upgrade-k8s:
+    desc: Upgrade Kubernetes version
+    vars:
+      K8S_VERSION:
+        sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/talconfig.yaml
+    prompt: "Upgrade Kubernetes to {{.K8S_VERSION}}?"
+    cmds:
+      - |
+        echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
+        talosctl upgrade-k8s \
+          --nodes {{.NODE_LUFFY}} \
+          --to {{.K8S_VERSION}}
+
+  talos:wait-healthy:
+    desc: Wait for a node to become healthy
+    internal: true
+    vars:
+      NODE_IP: "{{.NODE_IP | default .NODE_LUFFY}}"
+    cmds:
+      - |
+        echo "Waiting for node {{.NODE_IP}}..."
+        until talosctl health --nodes {{.NODE_IP}} 2>/dev/null; do
+          sleep 5
+        done
+        echo "Node {{.NODE_IP}} is healthy"
+
+  talos:status:
+    desc: Show Talos cluster status
+    cmds:
+      - talosctl get members --nodes {{.NODE_LUFFY}}
+      - echo ""
+      - kubectl get nodes -o wide
+
+  talos:dashboard:
+    desc: Open interactive Talos dashboard
+    cmds:
+      - talosctl dashboard --nodes {{.NODES}}
+
+  # =============================================================================
+  # Flux
+  # =============================================================================
+  flux:reconcile:
+    desc: Force Flux reconciliation
+    cmds:
+      - flux reconcile source git flux-system
+      - flux reconcile kustomization flux-system
+      - flux reconcile kustomization infrastructure
+      - flux reconcile kustomization apps
+
+  flux:status:
+    desc: Show Flux status
+    cmds:
+      - flux get all -A
+
+  flux:logs:
+    desc: Show Flux logs
+    cmds:
+      - flux logs --all-namespaces
+
+  flux:hr:
+    desc: List all HelmReleases
+    cmds:
+      - kubectl get helmreleases -A
+
+  # =============================================================================
+  # SOPS
+  # =============================================================================
+  sops:encrypt:
+    desc: Encrypt a file (e.g. task sops:encrypt FILE=secret.sops.yaml)
+    requires:
+      vars: [FILE]
+    dir: kubernetes
+    cmds:
+      - sops --encrypt --in-place {{.FILE}}
+
+  sops:decrypt:
+    desc: Decrypt a file for reading
+    requires:
+      vars: [FILE]
+    dir: kubernetes
+    cmds:
+      - sops --decrypt {{.FILE}}
+
+  sops:edit:
+    desc: Edit an encrypted file
+    requires:
+      vars: [FILE]
+    dir: kubernetes
+    cmds:
+      - sops {{.FILE}}
+
+  # =============================================================================
+  # Kubernetes
+  # =============================================================================
+  k8s:pods:
+    desc: List all pods
+    cmds:
+      - kubectl get pods -A
+
+  k8s:events:
+    desc: Show recent events
+    cmds:
+      - kubectl get events -A --sort-by='.lastTimestamp' | tail -20
+
+  k8s:top:
+    desc: Show resource usage
+    cmds:
+      - kubectl top nodes
+      - echo ""
+      - kubectl top pods -A --sort-by=memory | head -15
+
+  # =============================================================================
+  # Utilities
+  # =============================================================================
+  deps:check:
+    desc: Check if required dependencies are installed
+    cmds:
+      - command -v talosctl >/dev/null || echo "talosctl missing"
+      - command -v talhelper >/dev/null || echo "talhelper missing"
+      - command -v kubectl >/dev/null || echo "kubectl missing"
+      - command -v flux >/dev/null || echo "flux missing"
+      - command -v sops >/dev/null || echo "sops missing"
+      - command -v yq >/dev/null || echo "yq missing"
+      - command -v jq >/dev/null || echo "jq missing"
+      - echo "Check complete"
+
+  deps:install:
+    desc: Install dependencies via Homebrew
+    cmds:
+      - brew install siderolabs/tap/talosctl
+      - brew install budimanjojo/tap/talhelper
+      - brew install kubectl
+      - brew install fluxcd/tap/flux
+      - brew install sops age
+      - brew install yq jq
+
+  clean:
+    desc: Clean generated files
+    cmds:
+      - rm -f {{.TALOS_DIR}}/clusterconfig/going-merry-*.yaml
+      - rm -f {{.TALOS_DIR}}/clusterconfig/talosconfig
+      - echo "Generated files removed"

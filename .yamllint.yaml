@@ -1,0 +1,40 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 200
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+
+  document-start: disable
+
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  comments:
+    require-starting-space: true
+    ignore-shebangs: true
+    min-spaces-from-content: 1
+
+  trailing-spaces: enable
+
+  truthy:
+    allowed-values: ["true", "false", "yes", "no"]
+    check-keys: false
+
+  key-duplicates: enable
+
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+ignore: |
+  kubernetes/flux/flux-system/gotk-components.yaml
+  **/*.sops.yaml
+  talos/clusterconfig/

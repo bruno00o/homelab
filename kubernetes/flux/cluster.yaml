@@ -48,6 +48,23 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: cilium
+      namespace: kube-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cilium-operator
+      namespace: kube-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cert-manager
+      namespace: cert-manager
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: longhorn-driver-deployer
+      namespace: longhorn-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -78,6 +95,11 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: traefik
+      namespace: traefik
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -108,3 +130,12 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: kube-prometheus-stack-grafana
+      namespace: monitoring
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: adguard-home
+      namespace: adguard

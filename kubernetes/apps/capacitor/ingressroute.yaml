@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: capacitor
+  namespace: flux-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`flux.${CLUSTER_DOMAIN}`)
+      kind: Rule
+      services:
+        - name: capacitor-next
+          port: 9000
+  tls:
+    secretName: capacitor-tls

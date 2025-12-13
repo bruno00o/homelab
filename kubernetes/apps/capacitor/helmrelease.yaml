@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: capacitor-next
+  namespace: flux-system
+spec:
+  interval: 30m
+  timeout: 5m
+
+  chartRef:
+    kind: OCIRepository
+    name: capacitor-next-helm
+    namespace: flux-system
+
+  install:
+    remediation:
+      retries: 3
+
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
+  values:
+    env:
+      AUTH: noauth
+      AUTH_DEBUG: "true"
+      IMPERSONATE_SA_RULES: "noauth=flux-system:capacitor-next-preset-clusteradmin"
+    existingSecret:
+      name: capacitor-next

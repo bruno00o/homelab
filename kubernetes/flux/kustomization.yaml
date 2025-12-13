@@ -6,3 +6,4 @@ resources:
   - repositories.yaml
   - cluster.yaml
   - vars
+  - notifications

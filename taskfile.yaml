@@ -9,13 +9,22 @@ vars:
   NODE_LUFFY: "192.168.1.10"
   NODE_ZORO: "192.168.1.11"
   NODE_NAMI: "192.168.1.12"
+  CILIUM_VERSION: "1.18.4"
 
 env:
   TALOSCONFIG: "{{.TALOS_CONFIG}}"
 
 tasks:
   # =============================================================================
-  # Talos
+  # Default
+  # =============================================================================
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  # =============================================================================
+  # Talos - Configuration
   # =============================================================================
   talos:genconfig:
     desc: Generate Talos configs from talconfig.yaml
@@ -28,9 +37,11 @@ tasks:
     generates:
       - clusterconfig/*.yaml
 
-  talos:apply:
-    desc: Apply config to a node (e.g. task talos:apply NODE=luffy)
-    dir: "{{.TALOS_DIR}}"
+  # =============================================================================
+  # Talos - Fresh Install (insecure mode)
+  # =============================================================================
+  talos:apply-insecure:
+    desc: Apply config to a node in insecure mode (fresh install)
     requires:
       vars: [NODE]
     vars:
@@ -42,8 +53,55 @@ tasks:
             nami) echo "192.168.1.12" ;;
             *) echo "{{.NODE}}" ;;
           esac
+      NODE_NAME:
+        sh: |
+          case "{{.NODE}}" in
+            192.168.1.10) echo "luffy" ;;
+            192.168.1.11) echo "zoro" ;;
+            192.168.1.12) echo "nami" ;;
+            *) echo "{{.NODE}}" ;;
+          esac
     cmds:
-      - talosctl apply-config --nodes {{.NODE_IP}} --file clusterconfig/{{.CLUSTER_NAME}}-{{.NODE}}.yaml
+      - echo "Applying config to {{.NODE_NAME}} ({{.NODE_IP}}) in insecure mode..."
+      - talosctl apply-config --nodes {{.NODE_IP}} --file {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-{{.NODE_NAME}}.yaml --insecure
+
+  talos:apply-insecure-all:
+    desc: Apply config to ALL nodes in insecure mode (fresh install)
+    cmds:
+      - task: talos:apply-insecure
+        vars: { NODE: luffy }
+      - task: talos:apply-insecure
+        vars: { NODE: zoro }
+      - task: talos:apply-insecure
+        vars: { NODE: nami }
+      - echo "Config applied to all nodes. Wait for them to reboot and install."
+
+  # =============================================================================
+  # Talos - Normal Operations
+  # =============================================================================
+  talos:apply:
+    desc: Apply config to a node (e.g. task talos:apply NODE=luffy)
+    requires:
+      vars: [NODE]
+    vars:
+      NODE_IP:
+        sh: |
+          case "{{.NODE}}" in
+            luffy) echo "192.168.1.10" ;;
+            zoro) echo "192.168.1.11" ;;
+            nami) echo "192.168.1.12" ;;
+            *) echo "{{.NODE}}" ;;
+          esac
+      NODE_NAME:
+        sh: |
+          case "{{.NODE}}" in
+            192.168.1.10) echo "luffy" ;;
+            192.168.1.11) echo "zoro" ;;
+            192.168.1.12) echo "nami" ;;
+            *) echo "{{.NODE}}" ;;
+          esac
+    cmds:
+      - talosctl apply-config --nodes {{.NODE_IP}} --file {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-{{.NODE_NAME}}.yaml
 
   talos:apply-all:
     desc: Apply config to all nodes
@@ -55,6 +113,49 @@ tasks:
       - task: talos:apply
         vars: { NODE: nami }
 
+  # =============================================================================
+  # Talos - Bootstrap
+  # =============================================================================
+  talos:bootstrap:
+    desc: Bootstrap the Kubernetes cluster (run once on first node)
+    prompt: "Bootstrap Kubernetes cluster on luffy ({{.NODE_LUFFY}})? This should only be done ONCE."
+    cmds:
+      - echo "Bootstrapping Kubernetes cluster..."
+      - talosctl bootstrap --nodes {{.NODE_LUFFY}}
+      - echo "Kubernetes bootstrapped. Run 'task talos:kubeconfig' to get credentials."
+
+  talos:kubeconfig:
+    desc: Fetch kubeconfig from the cluster
+    cmds:
+      - talosctl kubeconfig --nodes {{.NODE_LUFFY}} --force
+      - echo "Kubeconfig saved to ~/.kube/config"
+
+  # =============================================================================
+  # Talos - Reset
+  # =============================================================================
+  talos:reset-soft:
+    desc: Reset cluster state but keep Talos installed (wipe Kubernetes only)
+    prompt: "SOFT RESET - This will wipe Kubernetes state but keep Talos installed. Continue?"
+    cmds:
+      - echo "Resetting cluster state (keeping Talos)..."
+      - talosctl reset --nodes {{.NODES}} --system-labels-to-wipe=STATE --system-labels-to-wipe=EPHEMERAL --graceful=false --reboot
+      - echo ""
+      - echo "Reset initiated. Nodes will reboot."
+      - echo "After reboot run 'task talos:apply-insecure-all' then 'task talos:bootstrap' then 'task talos:kubeconfig' then 'task bootstrap:full'"
+
+  talos:reset-hard:
+    desc: Full reset - wipes everything including Talos (requires USB reinstall)
+    prompt: "HARD RESET - This will COMPLETELY WIPE all disks including Talos. You will need USB reinstall. Continue?"
+    cmds:
+      - echo "Performing HARD reset (wiping everything)..."
+      - talosctl reset --nodes {{.NODES}} --graceful=false --reboot
+      - echo ""
+      - echo "Nodes will boot to UEFI shell."
+      - echo "Boot each node from Talos USB, then run the bootstrap tasks."
+
+  # =============================================================================
+  # Talos - Upgrades
+  # =============================================================================
   talos:upgrade:
     desc: Upgrade Talos on a node (e.g. task talos:upgrade NODE=luffy)
     requires:
@@ -71,20 +172,14 @@ tasks:
       TALOS_VERSION:
         sh: yq '.talosVersion' {{.TALOS_DIR}}/talconfig.yaml
       SCHEMATIC_ID:
-        sh: |
-          talosctl get extensions -n {{.NODE_IP}} -o json 2>/dev/null | \
-            jq -r '.[0].metadata.id // empty' || echo ""
+        sh: talosctl get extensions -n {{.NODE_IP}} -o json 2>/dev/null | jq -r '.[0].metadata.id // empty' || echo ""
     preconditions:
       - sh: test -n "{{.TALOS_VERSION}}"
         msg: "Cannot read talosVersion from talconfig.yaml"
     prompt: "Upgrade {{.NODE}} ({{.NODE_IP}}) to Talos {{.TALOS_VERSION}}?"
     cmds:
-      - |
-        echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
-        talosctl upgrade \
-          --nodes {{.NODE_IP}} \
-          --image factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.TALOS_VERSION}} \
-          --preserve
+      - echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
+      - talosctl upgrade --nodes {{.NODE_IP}} --image factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.TALOS_VERSION}} --preserve
       - task: talos:wait-healthy
         vars: { NODE_IP: "{{.NODE_IP}}" }
 
@@ -106,11 +201,30 @@ tasks:
         sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/talconfig.yaml
     prompt: "Upgrade Kubernetes to {{.K8S_VERSION}}?"
     cmds:
-      - |
-        echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
-        talosctl upgrade-k8s \
-          --nodes {{.NODE_LUFFY}} \
-          --to {{.K8S_VERSION}}
+      - echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
+      - talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}}
+
+  # =============================================================================
+  # Talos - Status & Monitoring
+  # =============================================================================
+  talos:status:
+    desc: Show Talos cluster status
+    cmds:
+      - echo "=== Talos Members ==="
+      - talosctl get members --nodes {{.NODE_LUFFY}} 2>/dev/null || echo "Cannot reach cluster"
+      - echo ""
+      - echo "=== Kubernetes Nodes ==="
+      - kubectl get nodes -o wide 2>/dev/null || echo "Cannot reach Kubernetes API"
+
+  talos:health:
+    desc: Check cluster health
+    cmds:
+      - talosctl health --nodes {{.NODES}}
+
+  talos:dashboard:
+    desc: Open interactive Talos dashboard
+    cmds:
+      - talosctl dashboard --nodes {{.NODES}}
 
   talos:wait-healthy:
     desc: Wait for a node to become healthy
@@ -118,24 +232,96 @@ tasks:
     vars:
       NODE_IP: "{{.NODE_IP | default .NODE_LUFFY}}"
     cmds:
+      - echo "Waiting for node {{.NODE_IP}} to be healthy..."
+      - until talosctl health --nodes {{.NODE_IP}} 2>/dev/null; do sleep 5; done
+      - echo "Node {{.NODE_IP}} is healthy"
+
+  talos:wait-ready:
+    desc: Wait for all nodes to be Ready in Kubernetes
+    cmds:
+      - echo "Waiting for all nodes to be Ready..."
+      - kubectl wait --for=condition=ready node --all --timeout=300s
+      - echo "All nodes are Ready"
+
+  # =============================================================================
+  # Bootstrap - Fresh Cluster Setup
+  # =============================================================================
+  bootstrap:cilium:
+    desc: Install Cilium CNI (required before Flux on fresh cluster)
+    cmds:
+      - helm repo add cilium https://helm.cilium.io/ 2>/dev/null || true
+      - helm repo update cilium
+      - echo "Installing Cilium {{.CILIUM_VERSION}}..."
+      - >-
+        helm install cilium cilium/cilium --version {{.CILIUM_VERSION}}
+        --namespace kube-system
+        --set cgroup.autoMount.enabled=false
+        --set cgroup.hostRoot=/sys/fs/cgroup
+        --set ipam.mode=kubernetes
+        --set k8sServiceHost=localhost
+        --set k8sServicePort=7445
+        --set kubeProxyReplacement=true
+        --set l2announcements.enabled=true
+        --set l2podAnnouncements.enabled=true
+        --set l2podAnnouncements.interface=enp1s0
+        --set externalIPs.enabled=true
+        --set devices=enp1s0
+        --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+        --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+      - echo "Waiting for Cilium pods to be created..."
+      - sleep 30
+      - echo "Waiting for Cilium to be ready..."
+      - kubectl -n kube-system wait --for=condition=ready pod -l k8s-app=cilium --timeout=300s
+      - task: talos:wait-ready
+      - echo "Cilium installed and nodes are Ready"
+
+  bootstrap:sops-secret:
+    desc: Create SOPS Age secret for Flux
+    cmds:
+      - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -
       - |
-        echo "Waiting for node {{.NODE_IP}}..."
-        until talosctl health --nodes {{.NODE_IP}} 2>/dev/null; do
-          sleep 5
-        done
-        echo "Node {{.NODE_IP}} is healthy"
+        if kubectl -n flux-system get secret sops-age &>/dev/null; then
+          echo "SOPS secret already exists"
+          exit 0
+        fi
+        AGE_KEY=""
+        if [ -f "$HOME/Library/Application Support/sops/age/keys.txt" ]; then
+          AGE_KEY="$HOME/Library/Application Support/sops/age/keys.txt"
+        elif [ -f "$HOME/.config/sops/age/keys.txt" ]; then
+          AGE_KEY="$HOME/.config/sops/age/keys.txt"
+        fi
+        if [ -z "$AGE_KEY" ]; then
+          echo "Age key not found. Create SOPS secret manually."
+          exit 1
+        fi
+        echo "Creating SOPS Age secret..."
+        cat "$AGE_KEY" | kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=/dev/stdin
+        echo "SOPS secret created"
 
-  talos:status:
-    desc: Show Talos cluster status
+  bootstrap:flux:
+    desc: Bootstrap Flux GitOps (after Cilium)
+    preconditions:
+      - sh: kubectl get nodes -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep -q True
+        msg: "Nodes are not Ready. Run 'task bootstrap:cilium' first."
     cmds:
-      - talosctl get members --nodes {{.NODE_LUFFY}}
+      - task: bootstrap:sops-secret
+      - |
+        if [ -z "$GITHUB_TOKEN" ]; then
+          echo "GITHUB_TOKEN not set. Run 'export GITHUB_TOKEN=your-token' first."
+          exit 1
+        fi
+      - echo "Bootstrapping Flux..."
+      - flux bootstrap github --owner=bruno00o --repository=homelab --branch=main --path=kubernetes/flux --personal
+      - echo "Flux bootstrapped"
+
+  bootstrap:full:
+    desc: Full cluster bootstrap (Cilium + Flux)
+    cmds:
+      - task: bootstrap:cilium
+      - task: bootstrap:flux
       - echo ""
-      - kubectl get nodes -o wide
-
-  talos:dashboard:
-    desc: Open interactive Talos dashboard
-    cmds:
-      - talosctl dashboard --nodes {{.NODES}}
+      - echo "Cluster fully bootstrapped!"
+      - echo "Watch progress with 'flux get kustomizations -w'"
 
   # =============================================================================
   # Flux
@@ -144,9 +330,10 @@ tasks:
     desc: Force Flux reconciliation
     cmds:
       - flux reconcile source git flux-system
-      - flux reconcile kustomization flux-system
-      - flux reconcile kustomization infrastructure
-      - flux reconcile kustomization apps
+      - flux reconcile kustomization flux-system --with-source
+      - flux reconcile kustomization cluster-vars --with-source
+      - flux reconcile kustomization infrastructure --with-source
+      - flux reconcile kustomization apps --with-source
 
   flux:status:
     desc: Show Flux status
@@ -154,20 +341,31 @@ tasks:
       - flux get all -A
 
   flux:logs:
-    desc: Show Flux logs
+    desc: Show Flux controller logs
     cmds:
-      - flux logs --all-namespaces
+      - flux logs --all-namespaces --since=10m
 
   flux:hr:
     desc: List all HelmReleases
     cmds:
       - kubectl get helmreleases -A
 
+  flux:suspend:
+    desc: Suspend all Flux reconciliation
+    prompt: "Suspend all Flux kustomizations?"
+    cmds:
+      - flux suspend kustomization --all -n flux-system
+
+  flux:resume:
+    desc: Resume all Flux reconciliation
+    cmds:
+      - flux resume kustomization --all -n flux-system
+
   # =============================================================================
   # SOPS
   # =============================================================================
   sops:encrypt:
-    desc: Encrypt a file (e.g. task sops:encrypt FILE=secret.sops.yaml)
+    desc: Encrypt a secret file (e.g. task sops:encrypt FILE=secret.sops.yaml)
     requires:
       vars: [FILE]
     dir: kubernetes
@@ -191,53 +389,75 @@ tasks:
       - sops {{.FILE}}
 
   # =============================================================================
-  # Kubernetes
+  # Kubernetes - Quick Commands
   # =============================================================================
-  k8s:pods:
+  k:pods:
     desc: List all pods
     cmds:
       - kubectl get pods -A
 
-  k8s:events:
-    desc: Show recent events
+  k:events:
+    desc: Show recent cluster events
     cmds:
-      - kubectl get events -A --sort-by='.lastTimestamp' | tail -20
+      - kubectl get events -A --sort-by='.lastTimestamp' | tail -30
 
-  k8s:top:
+  k:top:
     desc: Show resource usage
     cmds:
+      - echo "=== Nodes ==="
       - kubectl top nodes
       - echo ""
+      - echo "=== Top Pods by Memory ==="
       - kubectl top pods -A --sort-by=memory | head -15
 
+  k:errors:
+    desc: Show pods with errors
+    cmds:
+      - kubectl get pods -A | grep -v Running | grep -v Completed
+
   # =============================================================================
-  # Utilities
+  # Dependencies
   # =============================================================================
   deps:check:
-    desc: Check if required dependencies are installed
+    desc: Check if required tools are installed
     cmds:
-      - command -v talosctl >/dev/null || echo "talosctl missing"
-      - command -v talhelper >/dev/null || echo "talhelper missing"
-      - command -v kubectl >/dev/null || echo "kubectl missing"
-      - command -v flux >/dev/null || echo "flux missing"
-      - command -v sops >/dev/null || echo "sops missing"
-      - command -v yq >/dev/null || echo "yq missing"
-      - command -v jq >/dev/null || echo "jq missing"
-      - echo "Check complete"
+      - |
+        echo "Checking dependencies..."
+        MISSING=""
+        command -v talosctl >/dev/null || MISSING="$MISSING talosctl"
+        command -v talhelper >/dev/null || MISSING="$MISSING talhelper"
+        command -v kubectl >/dev/null || MISSING="$MISSING kubectl"
+        command -v flux >/dev/null || MISSING="$MISSING flux"
+        command -v helm >/dev/null || MISSING="$MISSING helm"
+        command -v sops >/dev/null || MISSING="$MISSING sops"
+        command -v yq >/dev/null || MISSING="$MISSING yq"
+        command -v jq >/dev/null || MISSING="$MISSING jq"
+        if [ -n "$MISSING" ]; then
+          echo "Missing:$MISSING"
+          echo "Run 'task deps:install'"
+          exit 1
+        fi
+        echo "All dependencies installed"
 
   deps:install:
-    desc: Install dependencies via Homebrew
+    desc: Install all dependencies via Homebrew
     cmds:
       - brew install siderolabs/tap/talosctl
       - brew install budimanjojo/tap/talhelper
       - brew install kubectl
       - brew install fluxcd/tap/flux
+      - brew install helm
       - brew install sops age
       - brew install yq jq
+      - echo "All dependencies installed"
 
+  # =============================================================================
+  # Cleanup
+  # =============================================================================
   clean:
-    desc: Clean generated files
+    desc: Clean generated Talos config files
+    prompt: "Delete generated config files?"
     cmds:
-      - rm -f {{.TALOS_DIR}}/clusterconfig/going-merry-*.yaml
+      - rm -f {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-*.yaml
       - rm -f {{.TALOS_DIR}}/clusterconfig/talosconfig
       - echo "Generated files removed"

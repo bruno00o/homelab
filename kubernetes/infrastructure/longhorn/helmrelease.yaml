@@ -20,6 +20,8 @@ spec:
   dependsOn:
     - name: cilium
       namespace: kube-system
+    - name: cert-manager
+      namespace: cert-manager
 
   install:
     crds: CreateReplace

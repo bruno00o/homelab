@@ -11,7 +11,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install yamllint
         run: pip install yamllint
@@ -24,7 +24,7 @@ jobs:
     name: Kubernetes Manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install kubeconform
         run: |
@@ -51,7 +51,7 @@ jobs:
     name: Flux HelmReleases
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@main
@@ -72,7 +72,7 @@ jobs:
     name: Renovate Config
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate Renovate config
         run: |

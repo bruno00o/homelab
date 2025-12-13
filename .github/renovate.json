@@ -1,0 +1,156 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "docker:enableMajor",
+    ":disableRateLimiting",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":automergeBranch"
+  ],
+
+  "dependencyDashboardTitle": "🚢 Renovate Dashboard - Going Merry",
+  "suppressNotifications": ["prIgnoreNotification"],
+  "rebaseWhen": "conflicted",
+  "timezone": "Europe/Paris",
+
+  "flux": {
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+  },
+  "helm-values": {
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+  },
+
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Talos version in talconfig.yaml",
+      "fileMatch": ["talos/talconfig\\.ya?ml$"],
+      "matchStrings": [
+        "talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "siderolabs/talos",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "Kubernetes version in talconfig.yaml",
+      "fileMatch": ["talos/talconfig\\.ya?ml$"],
+      "matchStrings": [
+        "kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "kubernetes/kubernetes",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates (sauf 0.x)",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
+      "description": "Automerge digest updates",
+      "matchUpdateTypes": ["digest"],
+      "automerge": true
+    },
+
+    {
+      "description": "Group Cilium",
+      "matchPackagePatterns": ["^cilium"],
+      "groupName": "Cilium",
+      "labels": ["infrastructure", "networking"]
+    },
+    {
+      "description": "Group cert-manager",
+      "matchPackagePatterns": ["^cert-manager"],
+      "groupName": "cert-manager",
+      "labels": ["infrastructure", "security"]
+    },
+    {
+      "description": "Group Longhorn",
+      "matchPackagePatterns": ["^longhorn"],
+      "groupName": "Longhorn",
+      "labels": ["infrastructure", "storage"]
+    },
+    {
+      "description": "Group Traefik",
+      "matchPackagePatterns": ["^traefik"],
+      "groupName": "Traefik",
+      "labels": ["infrastructure", "networking"]
+    },
+
+    {
+      "description": "Group monitoring stack",
+      "matchPackagePatterns": [
+        "prometheus",
+        "grafana",
+        "alertmanager",
+        "kube-state-metrics",
+        "node-exporter"
+      ],
+      "groupName": "Monitoring Stack",
+      "labels": ["monitoring"]
+    },
+
+    {
+      "description": "Group Flux components",
+      "matchPackagePatterns": ["^flux", "^fluxcd"],
+      "groupName": "Flux",
+      "labels": ["gitops"]
+    },
+
+    {
+      "description": "Talos - review manually",
+      "matchPackageNames": ["siderolabs/talos"],
+      "labels": ["talos", "infrastructure"],
+      "automerge": false
+    },
+    {
+      "description": "Kubernetes - review manually",
+      "matchPackageNames": ["kubernetes/kubernetes"],
+      "labels": ["kubernetes", "infrastructure"],
+      "automerge": false
+    },
+
+    {
+      "description": "Label major updates",
+      "matchUpdateTypes": ["major"],
+      "labels": ["major"],
+      "automerge": false
+    },
+    {
+      "description": "Label minor updates",
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["minor"]
+    },
+    {
+      "description": "Label patch updates",
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["patch"]
+    },
+
+    {
+      "description": "Helm charts",
+      "matchDatasources": ["helm"],
+      "addLabels": ["helm"]
+    },
+
+    {
+      "description": "Docker images",
+      "matchDatasources": ["docker"],
+      "addLabels": ["docker"]
+    },
+
+    {
+      "description": "Weekly schedule for major updates",
+      "matchUpdateTypes": ["major"],
+      "schedule": ["before 9am on monday"]
+    }
+  ]
+}

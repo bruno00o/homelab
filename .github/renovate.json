@@ -145,12 +145,6 @@
       "description": "Docker images",
       "matchDatasources": ["docker"],
       "addLabels": ["docker"]
-    },
-
-    {
-      "description": "Weekly schedule for major updates",
-      "matchUpdateTypes": ["major"],
-      "schedule": ["before 9am on monday"]
     }
   ]
 }

@@ -44,6 +44,17 @@
       ],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "Cilium version in Taskfile",
+      "fileMatch": ["[Tt]askfile\\.ya?ml$"],
+      "matchStrings": [
+        "CILIUM_VERSION:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+      ],
+      "depNameTemplate": "cilium/cilium",
+      "datasourceTemplate": "helm",
+      "registryUrlTemplate": "https://helm.cilium.io"
     }
   ],
 

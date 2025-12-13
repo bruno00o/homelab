@@ -4,7 +4,9 @@ metadata:
   name: cert-manager
   namespace: cert-manager
 spec:
-  interval: 1h
+  interval: 30m
+  timeout: 10m
+
   chart:
     spec:
       chart: cert-manager
@@ -13,6 +15,27 @@ spec:
         kind: HelmRepository
         name: jetstack
         namespace: flux-system
+      interval: 1h
+
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
+
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
   values:
     installCRDs: true
     prometheus:

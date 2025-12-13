@@ -4,8 +4,9 @@ metadata:
   name: kube-prometheus-stack
   namespace: monitoring
 spec:
-  interval: 1h
-  timeout: 15m
+  interval: 30m
+  timeout: 20m
+
   chart:
     spec:
       chart: kube-prometheus-stack
@@ -14,6 +15,29 @@ spec:
         kind: HelmRepository
         name: prometheus-community
         namespace: flux-system
+      interval: 1h
+
+  dependsOn:
+    - name: longhorn
+      namespace: longhorn-system
+    - name: traefik
+      namespace: traefik
+
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
   values:
     prometheusOperator:
       admissionWebhooks:

@@ -4,7 +4,9 @@ metadata:
   name: cilium
   namespace: kube-system
 spec:
-  interval: 1h
+  interval: 30m
+  timeout: 15m
+
   chart:
     spec:
       chart: cilium
@@ -13,6 +15,23 @@ spec:
         kind: HelmRepository
         name: cilium
         namespace: flux-system
+      interval: 1h
+
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
   values:
     cgroup:
       autoMount:

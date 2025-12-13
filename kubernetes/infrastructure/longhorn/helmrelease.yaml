@@ -4,7 +4,9 @@ metadata:
   name: longhorn
   namespace: longhorn-system
 spec:
-  interval: 1h
+  interval: 30m
+  timeout: 15m
+
   chart:
     spec:
       chart: longhorn
@@ -13,6 +15,27 @@ spec:
         kind: HelmRepository
         name: longhorn
         namespace: flux-system
+      interval: 1h
+
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
+
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
   values:
     preUpgradeChecker:
       jobEnabled: false

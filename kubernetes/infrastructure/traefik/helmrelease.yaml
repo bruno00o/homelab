@@ -4,7 +4,9 @@ metadata:
   name: traefik
   namespace: traefik
 spec:
-  interval: 1h
+  interval: 30m
+  timeout: 10m
+
   chart:
     spec:
       chart: traefik
@@ -13,6 +15,29 @@ spec:
         kind: HelmRepository
         name: traefik
         namespace: flux-system
+      interval: 1h
+
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
+    - name: cert-manager
+      namespace: cert-manager
+
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
   values:
     providers:
       kubernetesGateway:

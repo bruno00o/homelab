@@ -4,5 +4,3 @@ resources:
   - cilium
   - cert-manager
   - longhorn
-  - traefik
-  - configs

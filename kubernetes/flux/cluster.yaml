@@ -23,7 +23,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure
+  name: infrastructure-controllers
   namespace: flux-system
 spec:
   interval: 10m
@@ -32,11 +32,41 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/infrastructure
+  path: ./kubernetes/infrastructure/controllers
   prune: true
   wait: true
   dependsOn:
     - name: cluster-vars
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets
+        optional: true
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-configs
+  namespace: flux-system
+spec:
+  interval: 10m
+  timeout: 15m
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/infrastructure/configs
+  prune: true
+  wait: true
+  dependsOn:
+    - name: infrastructure-controllers
   decryption:
     provider: sops
     secretRef:
@@ -66,7 +96,7 @@ spec:
   prune: true
   wait: true
   dependsOn:
-    - name: infrastructure
+    - name: infrastructure-configs
   decryption:
     provider: sops
     secretRef:

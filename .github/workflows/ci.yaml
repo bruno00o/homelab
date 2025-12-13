@@ -33,9 +33,9 @@ jobs:
 
       - name: Download Flux CRDs
         run: |
-          mkdir -p /tmp/crds
+          mkdir -p /tmp/flux-crds
           curl -sL https://github.com/fluxcd/flux2/releases/latest/download/crd-schemas.tar.gz | \
-            tar xz -C /tmp/crds
+            tar xz -C /tmp/flux-crds
 
       - name: Validate Kubernetes manifests
         run: |
@@ -44,7 +44,7 @@ jobs:
               -strict \
               -ignore-missing-schemas \
               -schema-location default \
-              -schema-location '/tmp/crds/{{ .ResourceKind }}_{{ .ResourceAPIVersion | replace "/" "_" }}.json' \
+              -schema-location '/tmp/flux-crds/{{ .ResourceKind }}{{ .KindSuffix }}.json' \
               -summary
 
   flux-validate:

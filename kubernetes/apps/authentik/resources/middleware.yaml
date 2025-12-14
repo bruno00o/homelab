@@ -30,4 +30,4 @@ spec:
   headers:
     customRequestHeaders:
       X-Forwarded-Proto: "https"
-      X-Forwarded-Host: "auth.internal"
+      X-Forwarded-Host: "auth.${CLUSTER_DOMAIN}"

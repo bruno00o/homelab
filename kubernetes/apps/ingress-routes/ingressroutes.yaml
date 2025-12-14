@@ -59,6 +59,9 @@ spec:
   routes:
     - match: Host(`longhorn.${CLUSTER_DOMAIN}`)
       kind: Rule
+      middlewares:
+        - name: authentik-forward-auth
+          namespace: authentik
       services:
         - name: longhorn-frontend
           port: 80

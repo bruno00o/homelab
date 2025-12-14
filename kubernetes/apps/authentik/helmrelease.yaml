@@ -65,6 +65,12 @@ spec:
         - name: AUTHENTIK_REDIS__HOST
           value: "dragonfly.dragonfly-system.svc.cluster.local"
 
+      providers:
+        kubernetesGateway:
+          enabled: true
+        kubernetesCRD:
+          allowCrossNamespace: true
+
     authentik:
       error_reporting:
         enabled: false

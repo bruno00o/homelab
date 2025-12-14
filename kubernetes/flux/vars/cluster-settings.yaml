@@ -5,7 +5,7 @@ metadata:
   name: cluster-settings
   namespace: flux-system
 data:
-  CLUSTER_DOMAIN: "home.arpa"
+  CLUSTER_DOMAIN: "merry.home.arpa"
   TIMEZONE: "Europe/Paris"
   DEFAULT_STORAGE_CLASS: "longhorn"
   CLUSTER_NAME: "going-merry"

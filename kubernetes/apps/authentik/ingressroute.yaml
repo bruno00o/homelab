@@ -9,6 +9,9 @@ spec:
   routes:
     - match: Host(`auth.${CLUSTER_DOMAIN}`)
       kind: Rule
+      middlewares:
+        - name: https-scheme
+          namespace: authentik
       services:
         - name: authentik-server
           port: 80

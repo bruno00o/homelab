@@ -10,6 +10,9 @@ spec:
     - match: PathPrefix(`/outpost.goauthentik.io/`)
       kind: Rule
       priority: 15
+      middlewares:
+        - name: https-scheme
+          namespace: authentik
       services:
         - name: authentik-server
           port: 80

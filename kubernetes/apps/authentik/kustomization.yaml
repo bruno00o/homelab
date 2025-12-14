@@ -8,3 +8,4 @@ resources:
   - certificate.yaml
   - ingressroute.yaml
   - resources/middleware.yaml
+  - resources/outpost-route.yaml

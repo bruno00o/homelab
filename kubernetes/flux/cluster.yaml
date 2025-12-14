@@ -88,6 +88,10 @@ spec:
       kind: Deployment
       name: longhorn-driver-deployer
       namespace: longhorn-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cloudnative-pg
+      namespace: cnpg-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

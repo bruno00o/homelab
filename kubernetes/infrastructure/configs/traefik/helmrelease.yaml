@@ -43,6 +43,8 @@ spec:
     providers:
       kubernetesGateway:
         enabled: true
+      kubernetesCRD:
+        allowCrossNamespace: true
     gateway:
       enabled: false
     ports:

@@ -30,3 +30,4 @@ spec:
   headers:
     customRequestHeaders:
       X-Forwarded-Proto: "https"
+      X-Forwarded-Host: "auth.internal"

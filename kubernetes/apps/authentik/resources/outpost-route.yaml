@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: PathPrefix(`/outpost.goauthentik.io/`)
+    - match: Host(`auth.internal`) && PathPrefix(`/outpost.goauthentik.io/`)
       kind: Rule
       priority: 15
       middlewares:

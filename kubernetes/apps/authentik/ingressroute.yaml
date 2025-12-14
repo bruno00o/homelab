@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`auth.${CLUSTER_DOMAIN}`)
+    - match: Host(`auth.internal`)
       kind: Rule
       middlewares:
         - name: https-scheme

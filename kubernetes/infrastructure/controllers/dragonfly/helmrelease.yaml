@@ -58,16 +58,7 @@ spec:
         memory: 512Mi
 
     serviceMonitor:
-      enabled: true
+      enabled: false
 
     prometheusRule:
-      enabled: true
-      spec:
-        - alert: DragonflyDown
-          expr: absent(dragonfly_uptime_in_seconds) == 1
-          for: 1m
-          labels:
-            severity: critical
-          annotations:
-            summary: "Dragonfly is down"
-            description: "Dragonfly instance has been down for more than 1 minute"
+      enabled: false

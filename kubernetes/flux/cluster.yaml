@@ -92,6 +92,10 @@ spec:
       kind: Deployment
       name: cloudnative-pg
       namespace: cnpg-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: dragonfly
+      namespace: dragonfly-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

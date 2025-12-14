@@ -170,3 +170,11 @@ spec:
       kind: Deployment
       name: adguard-home
       namespace: adguard
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: authentik-server
+      namespace: authentik
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: authentik-worker
+      namespace: authentik

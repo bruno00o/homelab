@@ -62,3 +62,12 @@ spec:
   type: oci
   interval: 1h
   url: oci://ghcr.io/dragonflydb/dragonfly/helm
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: authentik
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.goauthentik.io

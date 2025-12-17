@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprint-groups
+  namespace: authentik
+  labels:
+    blueprints.goauthentik.io/enabled: "true"
+data:
+  groups.yaml: |
+    version: 1
+    metadata:
+      name: Homelab Groups
+      labels:
+        blueprints.goauthentik.io/instantiate: "true"
+    entries:
+      - model: authentik_core.group
+        id: group-homelab-admins
+        state: present
+        identifiers:
+          name: homelab-admins
+        attrs:
+          is_superuser: false
+
+      - model: authentik_core.group
+        id: group-homelab-users
+        state: present
+        identifiers:
+          name: homelab-users
+        attrs:
+          is_superuser: false

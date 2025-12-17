@@ -9,3 +9,4 @@ resources:
   - ingressroute.yaml
   - resources/middleware.yaml
   - resources/outpost-route.yaml
+  - blueprints/

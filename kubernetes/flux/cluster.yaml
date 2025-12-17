@@ -92,6 +92,10 @@ spec:
       kind: Deployment
       name: cloudnative-pg
       namespace: cnpg-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: dragonfly
+      namespace: dragonfly-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -166,3 +170,11 @@ spec:
       kind: Deployment
       name: adguard-home
       namespace: adguard
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: authentik-server
+      namespace: authentik
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: authentik-worker
+      namespace: authentik

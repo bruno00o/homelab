@@ -20,3 +20,15 @@ data:
           external_host: https://auth.merry.home.arpa
           cookie_domain: merry.home.arpa
           access_token_validity: hours=24
+
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-admin-forward-auth
+        state: present
+        identifiers:
+          name: Admin Forward Auth
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          mode: forward_domain
+          external_host: https://auth.merry.home.arpa
+          cookie_domain: merry.home.arpa
+          access_token_validity: hours=24

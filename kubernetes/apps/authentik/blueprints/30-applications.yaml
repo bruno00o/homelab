@@ -36,7 +36,7 @@ data:
           slug: admin-services
         attrs:
           name: Admin Services
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Admin Forward Auth]]
           meta_launch_url: https://homepage.merry.home.arpa
           policy_engine_mode: all
 

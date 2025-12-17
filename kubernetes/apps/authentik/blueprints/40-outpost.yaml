@@ -3,15 +3,11 @@ kind: ConfigMap
 metadata:
   name: authentik-blueprint-outpost
   namespace: authentik
-  labels:
-    blueprints.goauthentik.io/enabled: "true"
 data:
   outpost.yaml: |
     version: 1
     metadata:
       name: Homelab Outpost Config
-      labels:
-        blueprints.goauthentik.io/instantiate: "true"
     entries:
       - model: authentik_outposts.outpost
         state: present

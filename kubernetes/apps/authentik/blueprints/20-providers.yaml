@@ -3,15 +3,11 @@ kind: ConfigMap
 metadata:
   name: authentik-blueprint-providers
   namespace: authentik
-  labels:
-    blueprints.goauthentik.io/enabled: "true"
 data:
   providers.yaml: |
     version: 1
     metadata:
       name: Homelab Providers
-      labels:
-        blueprints.goauthentik.io/instantiate: "true"
     entries:
       - model: authentik_providers_proxy.proxyprovider
         id: provider-homelab-forward-auth
@@ -21,6 +17,6 @@ data:
         attrs:
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
           mode: forward_domain
-          external_host: https://auth.${CLUSTER_DOMAIN}
-          cookie_domain: ${CLUSTER_DOMAIN}
+          external_host: https://auth.merry.home.arpa
+          cookie_domain: merry.home.arpa
           access_token_validity: hours=24

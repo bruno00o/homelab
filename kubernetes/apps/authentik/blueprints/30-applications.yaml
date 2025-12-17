@@ -3,15 +3,11 @@ kind: ConfigMap
 metadata:
   name: authentik-blueprint-applications
   namespace: authentik
-  labels:
-    blueprints.goauthentik.io/enabled: "true"
 data:
   applications.yaml: |
     version: 1
     metadata:
       name: Homelab Applications
-      labels:
-        blueprints.goauthentik.io/instantiate: "true"
     entries:
       - model: authentik_core.application
         id: app-homelab-forward-auth
@@ -21,5 +17,5 @@ data:
         attrs:
           name: Homelab Forward Auth
           provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
-          meta_launch_url: https://homepage.${CLUSTER_DOMAIN}
+          meta_launch_url: https://homepage.merry.home.arpa
           policy_engine_mode: any

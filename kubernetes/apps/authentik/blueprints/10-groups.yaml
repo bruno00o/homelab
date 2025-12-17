@@ -3,15 +3,11 @@ kind: ConfigMap
 metadata:
   name: authentik-blueprint-groups
   namespace: authentik
-  labels:
-    blueprints.goauthentik.io/enabled: "true"
 data:
   groups.yaml: |
     version: 1
     metadata:
       name: Homelab Groups
-      labels:
-        blueprints.goauthentik.io/instantiate: "true"
     entries:
       - model: authentik_core.group
         id: group-homelab-admins

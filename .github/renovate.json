@@ -52,7 +52,7 @@
       "matchStrings": [
         "CILIUM_VERSION:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
       ],
-      "depNameTemplate": "cilium/cilium",
+      "depNameTemplate": "cilium",
       "datasourceTemplate": "helm",
       "registryUrlTemplate": "https://helm.cilium.io"
     }

@@ -171,15 +171,15 @@ tasks:
           esac
       TALOS_VERSION:
         sh: yq '.talosVersion' {{.TALOS_DIR}}/talconfig.yaml
-      SCHEMATIC_ID:
-        sh: talosctl get extensions -n {{.NODE_IP}} -o json 2>/dev/null | jq -r '.[0].metadata.id // empty' || echo ""
+      INSTALLER_IMAGE:
+        sh: yq '.machine.install.image' {{.TALOS_DIR}}/clusterconfig/going-merry-{{.NODE}}.yaml
     preconditions:
-      - sh: test -n "{{.TALOS_VERSION}}"
-        msg: "Cannot read talosVersion from talconfig.yaml"
+      - sh: test -n "{{.INSTALLER_IMAGE}}"
+        msg: "Cannot read installer image. Run 'task talos:genconfig' first."
     prompt: "Upgrade {{.NODE}} ({{.NODE_IP}}) to Talos {{.TALOS_VERSION}}?"
     cmds:
       - echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
-      - talosctl upgrade --nodes {{.NODE_IP}} --image factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.TALOS_VERSION}} --preserve
+      - talosctl upgrade --nodes {{.NODE_IP}} --image {{.INSTALLER_IMAGE}} --preserve --talosconfig {{.TALOS_DIR}}/clusterconfig/talosconfig
       - task: talos:wait-healthy
         vars: { NODE_IP: "{{.NODE_IP}}" }
 

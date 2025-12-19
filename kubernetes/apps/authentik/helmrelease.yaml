@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: authentik
-      version: "2025.10.2"
+      version: "2025.10.3"
       sourceRef:
         kind: HelmRepository
         name: authentik
@@ -80,6 +80,32 @@ spec:
         limits:
           cpu: 1000m
           memory: 1Gi
+      volumes:
+        - name: blueprints-groups
+          configMap:
+            name: authentik-blueprint-groups
+        - name: blueprints-providers
+          configMap:
+            name: authentik-blueprint-providers
+        - name: blueprints-applications
+          configMap:
+            name: authentik-blueprint-applications
+        - name: blueprints-outpost
+          configMap:
+            name: authentik-blueprint-outpost
+      volumeMounts:
+        - name: blueprints-groups
+          mountPath: /blueprints/custom/groups.yaml
+          subPath: groups.yaml
+        - name: blueprints-providers
+          mountPath: /blueprints/custom/providers.yaml
+          subPath: providers.yaml
+        - name: blueprints-applications
+          mountPath: /blueprints/custom/applications.yaml
+          subPath: applications.yaml
+        - name: blueprints-outpost
+          mountPath: /blueprints/custom/outpost.yaml
+          subPath: outpost.yaml
 
     worker:
       replicas: 1
@@ -90,6 +116,32 @@ spec:
         limits:
           cpu: 500m
           memory: 512Mi
+      volumes:
+        - name: blueprints-groups
+          configMap:
+            name: authentik-blueprint-groups
+        - name: blueprints-providers
+          configMap:
+            name: authentik-blueprint-providers
+        - name: blueprints-applications
+          configMap:
+            name: authentik-blueprint-applications
+        - name: blueprints-outpost
+          configMap:
+            name: authentik-blueprint-outpost
+      volumeMounts:
+        - name: blueprints-groups
+          mountPath: /blueprints/custom/groups.yaml
+          subPath: groups.yaml
+        - name: blueprints-providers
+          mountPath: /blueprints/custom/providers.yaml
+          subPath: providers.yaml
+        - name: blueprints-applications
+          mountPath: /blueprints/custom/applications.yaml
+          subPath: applications.yaml
+        - name: blueprints-outpost
+          mountPath: /blueprints/custom/outpost.yaml
+          subPath: outpost.yaml
 
     postgresql:
       enabled: false

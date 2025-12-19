@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprint-applications
+  namespace: authentik
+data:
+  applications.yaml: |
+    version: 1
+    metadata:
+      name: Homelab Applications
+    entries:
+      - model: authentik_policies_expression.expressionpolicy
+        id: policy-require-admins
+        state: present
+        identifiers:
+          name: require-homelab-admins
+        attrs:
+          expression: |
+            return ak_is_group_member(request.user, name="homelab-admins")
+
+      - model: authentik_core.application
+        id: app-homelab-forward-auth
+        state: present
+        identifiers:
+          slug: homelab-forward-auth
+        attrs:
+          name: Homelab Forward Auth
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          meta_launch_url: https://homarr.merry.home.arpa
+          policy_engine_mode: any
+
+      - model: authentik_core.application
+        id: app-admin-services
+        state: present
+        identifiers:
+          slug: admin-services
+        attrs:
+          name: Admin Services
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Admin Forward Auth]]
+          meta_launch_url: https://homepage.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-admin-policy
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, admin-services]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30

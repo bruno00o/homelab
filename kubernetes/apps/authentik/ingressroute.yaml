@@ -10,7 +10,7 @@ spec:
     - match: Host(`auth.${CLUSTER_DOMAIN}`)
       kind: Rule
       middlewares:
-        - name: https-scheme
+        - name: authentik-headers
           namespace: authentik
       services:
         - name: authentik-server

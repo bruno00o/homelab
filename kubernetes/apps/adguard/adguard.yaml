@@ -34,11 +34,11 @@ spec:
             - sh
             - -c
             - |
-              cp /secret-config/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml
+              cp /configmap/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml
               chmod 644 /opt/adguardhome/conf/AdGuardHome.yaml
           volumeMounts:
-            - name: secret-config
-              mountPath: /secret-config
+            - name: configmap
+              mountPath: /configmap
             - name: config
               mountPath: /opt/adguardhome/conf
       containers:
@@ -67,9 +67,9 @@ spec:
               cpu: 500m
               memory: 512Mi
       volumes:
-        - name: secret-config
-          secret:
-            secretName: adguard-config
+        - name: configmap
+          configMap:
+            name: adguard-config
         - name: config
           emptyDir: {}
         - name: work
@@ -134,6 +134,9 @@ spec:
   routes:
     - match: Host(`adguard.${CLUSTER_DOMAIN}`)
       kind: Rule
+      middlewares:
+        - name: authentik-forward-auth
+          namespace: authentik
       services:
         - name: adguard-web
           port: 80

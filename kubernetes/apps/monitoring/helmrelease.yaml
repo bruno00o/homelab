@@ -4,6 +4,8 @@ kind: HelmRelease
 metadata:
   name: kube-prometheus-stack
   namespace: monitoring
+  annotations:
+    reloader.stakater.com/search: "true"
 spec:
   interval: 30m
   timeout: 20m

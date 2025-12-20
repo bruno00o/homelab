@@ -3,6 +3,8 @@ kind: HelmRelease
 metadata:
   name: authentik
   namespace: authentik
+  annotations:
+    reloader.stakater.com/search: "true"
 spec:
   interval: 30m
   timeout: 15m

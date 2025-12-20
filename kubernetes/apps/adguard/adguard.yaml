@@ -17,6 +17,8 @@ kind: Deployment
 metadata:
   name: adguard-home
   namespace: adguard
+  annotations:
+    reloader.stakater.com/search: "true"
 spec:
   replicas: 1
   selector:

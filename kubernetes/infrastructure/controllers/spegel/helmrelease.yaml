@@ -1,0 +1,55 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: spegel
+  namespace: kube-system
+spec:
+  interval: 30m
+  timeout: 10m
+
+  chart:
+    spec:
+      chart: spegel
+      version: "v0.0.25"
+      sourceRef:
+        kind: HelmRepository
+        name: spegel
+        namespace: flux-system
+      interval: 1h
+
+  install:
+    crds: Skip
+    remediation:
+      retries: 3
+
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
+  values:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+    serviceMonitor:
+      enabled: true
+
+    priorityClassName: system-node-critical
+
+    spegel:
+      registries:
+        - https://registry.k8s.io
+        - https://ghcr.io
+        - https://docker.io
+        - https://quay.io
+        - https://gcr.io

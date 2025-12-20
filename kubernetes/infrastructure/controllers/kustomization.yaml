@@ -6,3 +6,5 @@ resources:
   - longhorn
   - cloudnative-pg
   - dragonfly
+  - reloader
+  - spegel

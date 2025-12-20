@@ -21,14 +21,18 @@ data:
           cookie_domain: merry.home.arpa
           access_token_validity: hours=24
 
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider-admin-forward-auth
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-grafana-oidc
         state: present
         identifiers:
-          name: Admin Forward Auth
+          name: Grafana OIDC
         attrs:
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          mode: forward_domain
-          external_host: https://auth.merry.home.arpa
-          cookie_domain: merry.home.arpa
-          access_token_validity: hours=24
+          client_type: confidential
+          client_id: grafana
+          redirect_uris: |
+            https://grafana.merry.home.arpa/login/generic_oauth
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]

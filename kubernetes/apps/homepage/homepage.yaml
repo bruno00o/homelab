@@ -231,6 +231,9 @@ spec:
   routes:
     - match: Host(`homepage.${CLUSTER_DOMAIN}`)
       kind: Rule
+      middlewares:
+        - name: authentik-forward-auth
+          namespace: authentik
       services:
         - name: homepage
           port: 3000

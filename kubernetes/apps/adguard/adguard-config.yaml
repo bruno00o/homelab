@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adguard-config
+  namespace: adguard
+data:
+  AdGuardHome.yaml: |
+    http:
+      pprof:
+        port: 6060
+        enabled: false
+      address: 0.0.0.0:80
+      session_ttl: 720h
+    users: []
+    auth_attempts: 0
+    block_auth_min: 0
+    dns:
+      bind_hosts:
+        - 0.0.0.0
+      port: 53
+      ratelimit: 20
+      refuse_any: true
+      upstream_dns:
+        - https://dns10.quad9.net/dns-query
+      bootstrap_dns:
+        - 9.9.9.10
+        - 149.112.112.10
+      cache_enabled: true
+      cache_size: 4194304
+      enable_dnssec: false
+      hostsfile_enabled: true
+    tls:
+      enabled: false
+    querylog:
+      interval: 2160h
+      enabled: true
+      file_enabled: true
+    statistics:
+      interval: 24h
+      enabled: true
+    filters:
+      - enabled: true
+        url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt
+        name: AdGuard DNS filter
+        id: 1
+    filtering:
+      rewrites:
+        - domain: '*.merry.home.arpa'
+          answer: 192.168.1.4
+          enabled: true
+      filtering_enabled: true
+      rewrites_enabled: true
+      protection_enabled: true
+    log:
+      enabled: true
+      verbose: false
+    schema_version: 32

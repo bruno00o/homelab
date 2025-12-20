@@ -6,3 +6,4 @@ resources:
   - ingress-routes
   - homepage
   - authentik
+  - homarr

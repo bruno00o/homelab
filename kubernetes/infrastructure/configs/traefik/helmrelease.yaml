@@ -23,6 +23,8 @@ spec:
       namespace: kube-system
     - name: cert-manager
       namespace: cert-manager
+    - name: authentik
+      namespace: authentik
 
   install:
     crds: CreateReplace
@@ -59,6 +61,9 @@ spec:
         matchRule: Host(`traefik.${CLUSTER_DOMAIN}`)
         entryPoints:
           - websecure
+        middlewares:
+          - name: authentik-forward-auth
+            namespace: authentik
         tls:
           secretName: traefik-dashboard-tls
     service:

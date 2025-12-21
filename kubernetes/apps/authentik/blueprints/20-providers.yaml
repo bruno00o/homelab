@@ -16,6 +16,7 @@ data:
           name: Homelab Forward Auth
         attrs:
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
           mode: forward_domain
           external_host: https://auth.merry.home.arpa
           cookie_domain: merry.home.arpa

@@ -246,34 +246,24 @@ tasks:
   # =============================================================================
   # Bootstrap - Fresh Cluster Setup
   # =============================================================================
-  bootstrap:cilium:
-    desc: Install Cilium CNI (required before Flux on fresh cluster)
+  bootstrap:helmfile:
+    desc: Install Cilium CNI + Prometheus CRDs via helmfile (required before Flux)
+    dir: bootstrap
     cmds:
-      - helm repo add cilium https://helm.cilium.io/ 2>/dev/null || true
-      - helm repo update cilium
-      - echo "Installing Cilium {{.CILIUM_VERSION}}..."
-      - >-
-        helm install cilium cilium/cilium --version {{.CILIUM_VERSION}}
-        --namespace kube-system
-        --set cgroup.autoMount.enabled=false
-        --set cgroup.hostRoot=/sys/fs/cgroup
-        --set ipam.mode=kubernetes
-        --set k8sServiceHost=localhost
-        --set k8sServicePort=7445
-        --set kubeProxyReplacement=true
-        --set l2announcements.enabled=true
-        --set l2podAnnouncements.enabled=true
-        --set l2podAnnouncements.interface=enp1s0
-        --set externalIPs.enabled=true
-        --set devices=enp1s0
-        --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
-        --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+      - echo "Installing Cilium + Prometheus CRDs via helmfile..."
+      - helmfile apply
       - echo "Waiting for Cilium pods to be created..."
       - sleep 30
       - echo "Waiting for Cilium to be ready..."
       - kubectl -n kube-system wait --for=condition=ready pod -l k8s-app=cilium --timeout=300s
       - task: talos:wait-ready
-      - echo "Cilium installed and nodes are Ready"
+      - echo "Bootstrap complete: Cilium CNI + Prometheus CRDs installed"
+
+  bootstrap:cilium:
+    desc: "[DEPRECATED] Use bootstrap:helmfile instead"
+    cmds:
+      - echo "This task is deprecated. Use 'task bootstrap:helmfile' instead."
+      - task: bootstrap:helmfile
 
   bootstrap:sops-secret:
     desc: Create SOPS Age secret for Flux
@@ -315,9 +305,9 @@ tasks:
       - echo "Flux bootstrapped"
 
   bootstrap:full:
-    desc: Full cluster bootstrap (Cilium + Flux)
+    desc: Full cluster bootstrap (Helmfile + Flux)
     cmds:
-      - task: bootstrap:cilium
+      - task: bootstrap:helmfile
       - task: bootstrap:flux
       - echo ""
       - echo "Cluster fully bootstrapped!"
@@ -429,6 +419,7 @@ tasks:
         command -v kubectl >/dev/null || MISSING="$MISSING kubectl"
         command -v flux >/dev/null || MISSING="$MISSING flux"
         command -v helm >/dev/null || MISSING="$MISSING helm"
+        command -v helmfile >/dev/null || MISSING="$MISSING helmfile"
         command -v sops >/dev/null || MISSING="$MISSING sops"
         command -v yq >/dev/null || MISSING="$MISSING yq"
         command -v jq >/dev/null || MISSING="$MISSING jq"
@@ -447,6 +438,7 @@ tasks:
       - brew install kubectl
       - brew install fluxcd/tap/flux
       - brew install helm
+      - brew install helmfile
       - brew install sops age
       - brew install yq jq
       - echo "All dependencies installed"

@@ -18,10 +18,6 @@ spec:
         namespace: flux-system
       interval: 1h
 
-  dependsOn:
-    - name: kube-prometheus-stack
-      namespace: monitoring
-
   install:
     crds: Skip
     remediation:

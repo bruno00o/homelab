@@ -22,8 +22,6 @@ spec:
       namespace: kube-system
     - name: longhorn
       namespace: longhorn-system
-    - name: kube-prometheus-stack
-      namespace: monitoring
 
   install:
     remediation:

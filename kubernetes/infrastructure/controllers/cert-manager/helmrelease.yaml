@@ -20,6 +20,8 @@ spec:
   dependsOn:
     - name: cilium
       namespace: kube-system
+    - name: kube-prometheus-stack
+      namespace: monitoring
 
   install:
     crds: CreateReplace

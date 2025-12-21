@@ -21,8 +21,8 @@ spec:
       interval: 1h
 
   dependsOn:
-    - name: longhorn
-      namespace: longhorn-system
+    - name: cilium
+      namespace: kube-system
 
   install:
     crds: CreateReplace

@@ -23,8 +23,6 @@ spec:
   dependsOn:
     - name: longhorn
       namespace: longhorn-system
-    - name: traefik
-      namespace: traefik
 
   install:
     crds: CreateReplace

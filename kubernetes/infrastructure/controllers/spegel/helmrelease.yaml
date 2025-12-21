@@ -47,6 +47,7 @@ spec:
     priorityClassName: system-node-critical
 
     spegel:
+      containerdRegistryConfigPath: /etc/cri/conf.d/hosts
       registries:
         - https://registry.k8s.io
         - https://ghcr.io

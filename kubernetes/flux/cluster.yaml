@@ -96,6 +96,10 @@ spec:
       kind: Deployment
       name: dragonfly
       namespace: dragonfly-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: kube-prometheus-stack-grafana
+      namespace: monitoring
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -162,10 +166,6 @@ spec:
         name: cluster-secrets
         optional: true
   healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: kube-prometheus-stack-grafana
-      namespace: monitoring
     - apiVersion: apps/v1
       kind: Deployment
       name: adguard-home

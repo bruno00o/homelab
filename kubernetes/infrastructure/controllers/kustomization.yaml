@@ -4,6 +4,7 @@ resources:
   - cilium
   - cert-manager
   - longhorn
+  - monitoring
   - cloudnative-pg
   - dragonfly
   - reloader

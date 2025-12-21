@@ -33,7 +33,8 @@ data:
           client_type: confidential
           client_id: grafana
           redirect_uris:
-            - https://grafana.merry.home.arpa/login/generic_oauth
+            - matching_mode: strict
+              url: https://grafana.merry.home.arpa/login/generic_oauth
           property_mappings:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]

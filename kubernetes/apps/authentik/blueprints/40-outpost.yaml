@@ -8,4 +8,12 @@ data:
     version: 1
     metadata:
       name: Homelab Outpost Config
-    entries: []
+    entries:
+      - model: authentik_outposts.outpost
+        state: present
+        identifiers:
+          name: authentik Embedded Outpost
+        attrs:
+          type: proxy
+          providers:
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]

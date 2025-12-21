@@ -44,6 +44,13 @@ spec:
       admissionWebhooks:
         patch:
           ttlSecondsAfterFinished: 60
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
 
     grafana:
       enabled: true
@@ -57,10 +64,24 @@ spec:
         enabled: true
         storageClassName: ${DEFAULT_STORAGE_CLASS}
         size: 5Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
 
     prometheus:
       prometheusSpec:
         retention: 7d
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -79,6 +100,13 @@ spec:
 
     alertmanager:
       alertmanagerSpec:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
         storage:
           volumeClaimTemplate:
             spec:
@@ -90,6 +118,22 @@ spec:
 
     nodeExporter:
       enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
 
     kubeStateMetrics:
       enabled: true

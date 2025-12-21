@@ -16,4 +16,9 @@ data:
         attrs:
           type: proxy
           providers:
-            - !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Hubble Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Homepage Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]

@@ -50,6 +50,12 @@ spec:
     externalIPs:
       enabled: true
     devices: enp1s0
+    hubble:
+      enabled: true
+      relay:
+        enabled: true
+      ui:
+        enabled: true
     securityContext:
       capabilities:
         ciliumAgent:

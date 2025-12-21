@@ -19,6 +19,29 @@ data:
             return ak_is_group_member(request.user, name="homelab-admins")
 
       - model: authentik_core.application
+        id: app-hubble
+        state: present
+        identifiers:
+          slug: hubble
+        attrs:
+          name: Hubble
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          meta_launch_url: https://hubble.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-hubble-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, hubble]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      - model: authentik_core.application
         id: app-longhorn
         state: present
         identifiers:

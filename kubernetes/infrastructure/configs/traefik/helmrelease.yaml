@@ -23,8 +23,6 @@ spec:
       namespace: kube-system
     - name: cert-manager
       namespace: cert-manager
-    - name: authentik
-      namespace: authentik
 
   install:
     crds: CreateReplace

@@ -57,3 +57,30 @@ spec:
       defaultClassReplicaCount: 3
       defaultFsType: ext4
       reclaimPolicy: Delete
+
+    longhornManager:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128Mi
+        limits:
+          cpu: 250m
+          memory: 512Mi
+
+    longhornDriver:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi
+
+    longhornUI:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi

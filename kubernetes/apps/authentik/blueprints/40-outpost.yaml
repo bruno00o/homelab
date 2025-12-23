@@ -8,4 +8,17 @@ data:
     version: 1
     metadata:
       name: Homelab Outpost Config
-    entries: []
+    entries:
+      - model: authentik_outposts.outpost
+        state: present
+        identifiers:
+          name: authentik Embedded Outpost
+        attrs:
+          type: proxy
+          providers:
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Hubble Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Homepage Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]

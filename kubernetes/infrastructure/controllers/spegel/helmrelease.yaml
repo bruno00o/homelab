@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: spegel
-      version: "v0.0.25"
+      version: "0.6.0"
       sourceRef:
         kind: HelmRepository
         name: spegel
@@ -47,6 +47,7 @@ spec:
     priorityClassName: system-node-critical
 
     spegel:
+      containerdRegistryConfigPath: /etc/cri/conf.d/hosts
       registries:
         - https://registry.k8s.io
         - https://ghcr.io

@@ -58,7 +58,7 @@ spec:
         memory: 512Mi
 
     serviceMonitor:
-      enabled: false
+      enabled: true
 
     prometheusRule:
-      enabled: false
+      enabled: true

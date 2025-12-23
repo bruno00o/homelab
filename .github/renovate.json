@@ -60,10 +60,16 @@
 
   "packageRules": [
     {
-      "description": "Automerge non-major updates (sauf 0.x)",
+      "description": "Automerge non-major updates",
       "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": "!/^0/",
+      "matchCurrentVersion": "!/^v?0/",
       "automerge": true
+    },
+    {
+      "description": "Never automerge 0.x versions (unstable)",
+      "matchCurrentVersion": "/^v?0/",
+      "automerge": false,
+      "labels": ["unstable", "review-required"]
     },
     {
       "description": "Automerge digest updates",

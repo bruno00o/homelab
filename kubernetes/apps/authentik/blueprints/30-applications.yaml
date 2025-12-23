@@ -9,6 +9,9 @@ data:
     metadata:
       name: Homelab Applications
     entries:
+      # ===================
+      # Policy: require-homelab-admins
+      # ===================
       - model: authentik_policies_expression.expressionpolicy
         id: policy-require-admins
         state: present
@@ -18,6 +21,35 @@ data:
           expression: |
             return ak_is_group_member(request.user, name="homelab-admins")
 
+      # ===================
+      # Hubble (admins only)
+      # ===================
+      - model: authentik_core.application
+        id: app-hubble
+        state: present
+        identifiers:
+          slug: hubble
+        attrs:
+          name: Hubble
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Hubble Proxy]]
+          meta_launch_url: https://hubble.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-hubble-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, hubble]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # ===================
+      # Longhorn (admins only)
+      # ===================
       - model: authentik_core.application
         id: app-longhorn
         state: present
@@ -25,7 +57,7 @@ data:
           slug: longhorn
         attrs:
           name: Longhorn
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
           meta_launch_url: https://longhorn.merry.home.arpa
           policy_engine_mode: all
 
@@ -41,6 +73,9 @@ data:
           negate: false
           timeout: 30
 
+      # ===================
+      # Traefik Dashboard (admins only)
+      # ===================
       - model: authentik_core.application
         id: app-traefik
         state: present
@@ -48,7 +83,7 @@ data:
           slug: traefik
         attrs:
           name: Traefik Dashboard
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
           meta_launch_url: https://traefik.merry.home.arpa
           policy_engine_mode: all
 
@@ -64,6 +99,9 @@ data:
           negate: false
           timeout: 30
 
+      # ===================
+      # AdGuard (admins only)
+      # ===================
       - model: authentik_core.application
         id: app-adguard
         state: present
@@ -71,7 +109,7 @@ data:
           slug: adguard
         attrs:
           name: AdGuard Home
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
           meta_launch_url: https://adguard.merry.home.arpa
           policy_engine_mode: all
 
@@ -87,6 +125,9 @@ data:
           negate: false
           timeout: 30
 
+      # ===================
+      # Homepage (admins only)
+      # ===================
       - model: authentik_core.application
         id: app-homepage
         state: present
@@ -94,7 +135,7 @@ data:
           slug: homepage
         attrs:
           name: Homepage
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homepage Proxy]]
           meta_launch_url: https://homepage.merry.home.arpa
           policy_engine_mode: all
 
@@ -110,6 +151,9 @@ data:
           negate: false
           timeout: 30
 
+      # ===================
+      # Homarr (open to all authenticated users)
+      # ===================
       - model: authentik_core.application
         id: app-homarr
         state: present
@@ -117,10 +161,13 @@ data:
           slug: homarr
         attrs:
           name: Homarr
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homelab Forward Auth]]
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]
           meta_launch_url: https://homarr.merry.home.arpa
           policy_engine_mode: any
 
+      # ===================
+      # Grafana (admins only, OIDC)
+      # ===================
       - model: authentik_core.application
         id: app-grafana
         state: present

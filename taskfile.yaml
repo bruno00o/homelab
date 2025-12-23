@@ -256,8 +256,9 @@ tasks:
       - sleep 30
       - echo "Waiting for Cilium to be ready..."
       - kubectl -n kube-system wait --for=condition=ready pod -l k8s-app=cilium --timeout=300s
-      - task: talos:wait-ready
-      - echo "Bootstrap complete: Cilium CNI + Prometheus CRDs installed"
+      - echo "Waiting for all nodes to be Ready..."
+      - kubectl wait --for=condition=ready node --all --timeout=300s
+      - echo "Bootstrap complete - Cilium CNI + Prometheus CRDs installed"
 
   bootstrap:cilium:
     desc: "[DEPRECATED] Use bootstrap:helmfile instead"

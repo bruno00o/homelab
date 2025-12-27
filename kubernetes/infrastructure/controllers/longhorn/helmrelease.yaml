@@ -52,6 +52,9 @@ spec:
       freezeFilesystemForSnapshot: ignored
       restoreVolumeRecurringJob: ignored
       offlineReplicaRebuilding: ignored
+      backupTarget: nfs://192.168.1.25:/volume1/backups
+      backupConcurrentLimit: 2
+      backupstorePollInterval: 300
     persistence:
       defaultClass: true
       defaultClassReplicaCount: 3

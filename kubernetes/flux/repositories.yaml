@@ -90,3 +90,13 @@ spec:
   type: oci
   interval: 1h
   url: oci://ghcr.io/spegel-org/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: garage
+  namespace: flux-system
+spec:
+  type: oci
+  interval: 1h
+  url: oci://ghcr.io/wittdennis/charts

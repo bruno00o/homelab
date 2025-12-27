@@ -92,11 +92,12 @@ spec:
   url: oci://ghcr.io/spegel-org/helm-charts
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+kind: GitRepository
 metadata:
   name: garage
   namespace: flux-system
 spec:
-  type: oci
   interval: 1h
-  url: oci://ghcr.io/wittdennis/charts
+  url: https://git.deuxfleurs.fr/Deuxfleurs/garage.git
+  ref:
+    tag: v2.1.0

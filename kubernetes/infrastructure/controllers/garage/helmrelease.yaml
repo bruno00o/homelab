@@ -10,10 +10,9 @@ spec:
 
   chart:
     spec:
-      chart: garage
-      version: "1.1.2"
+      chart: script/helm/garage
       sourceRef:
-        kind: HelmRepository
+        kind: GitRepository
         name: garage
         namespace: flux-system
       interval: 1h
@@ -38,12 +37,14 @@ spec:
     keepHistory: false
 
   values:
-    replicaCount: 3
+    deployment:
+      kind: StatefulSet
+      replicaCount: 3
 
     garage:
-      replicationFactor: 2
+      replicationFactor: "2"
       consistencyMode: consistent
-      dbEngine: sqlite
+      dbEngine: lmdb
 
     persistence:
       enabled: true
@@ -54,16 +55,9 @@ spec:
         storageClass: longhorn
         size: 50Gi
 
-    service:
-      s3:
-        port: 3900
-      web:
-        port: 3902
-      admin:
-        port: 3903
-
-    serviceMonitor:
-      enabled: true
+    monitoring:
+      serviceMonitor:
+        enabled: true
 
     resources:
       requests:

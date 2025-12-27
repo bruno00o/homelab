@@ -22,6 +22,19 @@ spec:
       secret:
         name: authentik-postgres-credentials
 
+  backup:
+    barmanObjectStore:
+      destinationPath: "s3://cnpg-backups/authentik"
+      endpointURL: "http://garage.garage.svc.cluster.local:3900"
+      s3Credentials:
+        accessKeyId:
+          name: cnpg-s3-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: cnpg-s3-credentials
+          key: ACCESS_SECRET_KEY
+    retentionPolicy: "30d"
+
   monitoring:
     enablePodMonitor: true
 

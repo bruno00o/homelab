@@ -1,0 +1,107 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: garage-init
+  namespace: garage
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: garage-init
+  namespace: garage
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec"]
+    verbs: ["get", "list", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: garage-init
+  namespace: garage
+subjects:
+  - kind: ServiceAccount
+    name: garage-init
+    namespace: garage
+roleRef:
+  kind: Role
+  name: garage-init
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-init
+  namespace: garage
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: garage-init
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: garage-init
+          image: bitnami/kubectl:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              GARAGE_POD="garage-0"
+
+              # Wait for Garage pod to be ready
+              echo "Waiting for Garage pod..."
+              kubectl wait --for=condition=ready pod/$GARAGE_POD -n garage --timeout=300s
+
+              # Wait for layout to be configured (max 5 min)
+              echo "Checking layout..."
+              LAYOUT_READY=false
+              for i in $(seq 1 30); do
+                if kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout show 2>/dev/null | grep -q "Current cluster layout version: [1-9]"; then
+                  echo "Layout is configured"
+                  LAYOUT_READY=true
+                  break
+                fi
+                echo "Layout not configured yet, waiting... ($i/30)"
+                sleep 10
+              done
+
+              if [ "$LAYOUT_READY" = "false" ]; then
+                echo "ERROR: Layout not configured after 5 minutes."
+                echo "Configure layout manually, then delete this job to re-run:"
+                echo "  kubectl delete job garage-init -n garage"
+                exit 1
+              fi
+
+              # Create bucket if not exists
+              if ! kubectl exec -n garage $GARAGE_POD -c garage -- ./garage bucket list 2>/dev/null | grep -q "cnpg-backups"; then
+                echo "Creating bucket cnpg-backups..."
+                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage bucket create cnpg-backups
+              else
+                echo "Bucket cnpg-backups already exists"
+              fi
+
+              # Create key if not exists
+              if ! kubectl exec -n garage $GARAGE_POD -c garage -- ./garage key list 2>/dev/null | grep -q "cnpg-backup-key"; then
+                echo "Creating key cnpg-backup-key..."
+                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage key create cnpg-backup-key
+                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage bucket allow cnpg-backups --read --write --key cnpg-backup-key
+              else
+                echo "Key cnpg-backup-key already exists"
+              fi
+
+              # Show key info
+              echo "=== Key Info ==="
+              kubectl exec -n garage $GARAGE_POD -c garage -- ./garage key info cnpg-backup-key

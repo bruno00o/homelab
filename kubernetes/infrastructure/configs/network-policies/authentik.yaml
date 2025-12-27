@@ -91,6 +91,7 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # DNS
     - to:
         - namespaceSelector:
             matchLabels:
@@ -100,11 +101,20 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    # API server access
     - ports:
         - protocol: TCP
           port: 443
         - protocol: TCP
           port: 6443
+    # Garage S3 for backups
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: garage
+      ports:
+        - protocol: TCP
+          port: 3900
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

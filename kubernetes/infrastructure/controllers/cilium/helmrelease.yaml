@@ -42,6 +42,10 @@ spec:
     k8sServiceHost: localhost
     k8sServicePort: 7445
     kubeProxyReplacement: true
+    socketLB:
+      enabled: true
+    hostServices:
+      enabled: true
     l2announcements:
       enabled: true
     l2podAnnouncements:

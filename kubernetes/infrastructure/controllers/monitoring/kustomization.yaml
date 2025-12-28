@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - grafana-secret.sops.yaml
+  - grafana-oauth-secret.sops.yaml
   - alertmanager-discord.sops.yaml
   - helmrelease.yaml

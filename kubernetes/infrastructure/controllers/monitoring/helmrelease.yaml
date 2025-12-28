@@ -72,6 +72,12 @@ spec:
           cpu: 500m
           memory: 512Mi
 
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            name: grafana-oauth
+            key: client-secret
+
       grafana.ini:
         server:
           root_url: https://grafana.${CLUSTER_DOMAIN}
@@ -82,7 +88,6 @@ spec:
           name: Authentik
           allow_sign_up: false
           client_id: grafana
-          client_secret: ${GRAFANA_OAUTH_CLIENT_SECRET}
           scopes: openid profile email
           auth_url: https://auth.${CLUSTER_DOMAIN}/application/o/authorize/
           token_url: https://auth.${CLUSTER_DOMAIN}/application/o/token/

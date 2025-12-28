@@ -15,8 +15,8 @@ spec:
 
   chart:
     spec:
-      chart: loki-stack
-      version: "2.10.2"
+      chart: loki
+      version: "6.23.0"
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -37,10 +37,31 @@ spec:
     keepHistory: false
 
   values:
+    deploymentMode: SingleBinary
+
     loki:
+      auth_enabled: false
+      commonConfig:
+        replication_factor: 1
+      storage:
+        type: filesystem
+      schemaConfig:
+        configs:
+          - from: 2024-01-01
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: index_
+              period: 24h
+      limits_config:
+        retention_period: 168h  # 7 days
+
+    singleBinary:
+      replicas: 1
       persistence:
         enabled: true
-        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        storageClass: ${DEFAULT_STORAGE_CLASS}
         size: 10Gi
       resources:
         requests:
@@ -49,41 +70,28 @@ spec:
         limits:
           cpu: 500m
           memory: 512Mi
-      config:
-        auth_enabled: false
-        server:
-          http_listen_port: 3100
-        common:
-          path_prefix: /loki
-          storage:
-            filesystem:
-              chunks_directory: /loki/chunks
-              rules_directory: /loki/rules
-          replication_factor: 1
-        limits_config:
-          retention_period: 168h # 7 days
-        schema_config:
-          configs:
-            - from: 2024-01-01
-              store: tsdb
-              object_store: filesystem
-              schema: v13
-              index:
-                prefix: index_
-                period: 24h
 
-    promtail:
-      enabled: true
-      resources:
-        requests:
-          cpu: 25m
-          memory: 64Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
+    # Disable components not needed in SingleBinary mode
+    backend:
+      replicas: 0
+    read:
+      replicas: 0
+    write:
+      replicas: 0
 
-    grafana:
+    # Disable gateway (optional, we access directly)
+    gateway:
       enabled: false
 
-    prometheus:
+    # Disable test
+    test:
       enabled: false
+
+    # Disable self-monitoring
+    monitoring:
+      selfMonitoring:
+        enabled: false
+        grafanaAgent:
+          installOperator: false
+      lokiCanary:
+        enabled: false

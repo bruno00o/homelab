@@ -54,6 +54,7 @@ spec:
 
     grafana:
       enabled: true
+      assertNoLeakedSecrets: false
       deploymentStrategy:
         type: Recreate
       admin:

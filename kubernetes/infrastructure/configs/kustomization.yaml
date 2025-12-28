@@ -5,3 +5,4 @@ resources:
   - traefik
   - network-policies
   - kyverno-policies
+  - grafana-dashboards

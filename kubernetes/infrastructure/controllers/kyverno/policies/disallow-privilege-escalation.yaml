@@ -1,0 +1,34 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privilege-escalation
+  annotations:
+    policies.kyverno.io/title: Disallow Privilege Escalation
+    policies.kyverno.io/category: Pod Security Standards (Restricted)
+    policies.kyverno.io/severity: high
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: privilege-escalation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kyverno-system
+                - longhorn-system
+                - cilium
+                - trivy-system
+      validate:
+        message: "Privilege escalation is not allowed."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false

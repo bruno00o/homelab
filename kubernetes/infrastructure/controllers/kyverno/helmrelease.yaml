@@ -1,0 +1,88 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: kyverno-system
+spec:
+  interval: 30m
+  timeout: 15m
+
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
+
+  chart:
+    spec:
+      chart: kyverno
+      version: "3.6.1"
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
+        namespace: flux-system
+      interval: 1h
+
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
+  values:
+    admissionController:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+    backgroundController:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 256Mi
+
+    cleanupController:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 256Mi
+
+    reportsController:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 256Mi
+
+    config:
+      webhooks:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: NotIn
+                values:
+                  - kube-system
+                  - kyverno-system
+
+    serviceMonitor:
+      enabled: true

@@ -116,6 +116,10 @@ spec:
       kind: Deployment
       name: trivy-operator
       namespace: trivy-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: kyverno-admission-controller
+      namespace: kyverno-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

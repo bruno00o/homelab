@@ -1,0 +1,30 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-registries
+  annotations:
+    policies.kyverno.io/title: Restrict Image Registries
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: validate-registries
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kyverno-system
+      validate:
+        message: "Images must come from approved registries (ghcr.io, docker.io, quay.io, registry.k8s.io, gcr.io)"
+        pattern:
+          spec:
+            containers:
+              - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/*"

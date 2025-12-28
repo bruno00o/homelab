@@ -112,6 +112,10 @@ spec:
       kind: StatefulSet
       name: loki
       namespace: loki-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: trivy-operator
+      namespace: trivy-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

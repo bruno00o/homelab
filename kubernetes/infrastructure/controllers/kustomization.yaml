@@ -11,3 +11,4 @@ resources:
   - spegel
   - garage
   - loki
+  - trivy-operator

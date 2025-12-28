@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - l2-announcements.yaml
+  - pdb.yaml

@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - helmrelease.yaml
   - promtail.yaml
+  - pdb.yaml

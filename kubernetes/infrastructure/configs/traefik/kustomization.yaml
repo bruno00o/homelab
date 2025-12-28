@@ -5,3 +5,4 @@ resources:
   - helmrelease.yaml
   - certificate.yaml
   - middlewares.yaml
+  - pdb.yaml

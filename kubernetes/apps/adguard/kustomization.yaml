@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - adguard-config.yaml
   - adguard.yaml
+  - pdb.yaml

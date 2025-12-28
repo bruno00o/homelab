@@ -11,3 +11,4 @@ resources:
   - resources/middleware.yaml
   - resources/outpost-route.yaml
   - blueprints/
+  - pdb.yaml

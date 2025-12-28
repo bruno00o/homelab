@@ -4,3 +4,4 @@ resources:
   - issuers.yaml
   - traefik
   - network-policies
+  - kyverno-policies

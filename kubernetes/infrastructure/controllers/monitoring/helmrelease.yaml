@@ -91,8 +91,8 @@ spec:
           client_id: grafana
           scopes: openid profile email
           auth_url: https://auth.${CLUSTER_DOMAIN}/application/o/authorize/
-          token_url: https://auth.${CLUSTER_DOMAIN}/application/o/token/
-          api_url: https://auth.${CLUSTER_DOMAIN}/application/o/userinfo/
+          token_url: http://authentik-server.authentik.svc/application/o/token/
+          api_url: http://authentik-server.authentik.svc/application/o/userinfo/
           role_attribute_path: contains(groups[*], 'homelab-admins') && 'Admin' || 'Viewer'
 
       sidecar:

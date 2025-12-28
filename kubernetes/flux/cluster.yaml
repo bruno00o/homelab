@@ -100,6 +100,14 @@ spec:
       kind: Deployment
       name: kube-prometheus-stack-grafana
       namespace: monitoring
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: reloader
+      namespace: kube-system
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: spegel
+      namespace: kube-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

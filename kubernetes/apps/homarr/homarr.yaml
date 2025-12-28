@@ -30,6 +30,8 @@ kind: Deployment
 metadata:
   name: homarr
   namespace: homarr
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   strategy:

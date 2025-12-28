@@ -71,6 +71,12 @@ spec:
         limits:
           cpu: 500m
           memory: 512Mi
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          url: http://loki.loki-system.svc:3100
+          access: proxy
+          isDefault: false
 
     prometheus:
       prometheusSpec:

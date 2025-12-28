@@ -10,3 +10,4 @@ resources:
   - reloader
   - spegel
   - garage
+  - loki

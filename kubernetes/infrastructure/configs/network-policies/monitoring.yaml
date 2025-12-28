@@ -44,6 +44,12 @@ spec:
           port: 9500 # Longhorn manager
         - protocol: TCP
           port: 9808 # Spegel
+        - protocol: TCP
+          port: 9962 # Cilium agent
+        - protocol: TCP
+          port: 9963 # Cilium operator
+        - protocol: TCP
+          port: 9965 # Hubble
     # Kubernetes API for service discovery
     - ports:
         - protocol: TCP

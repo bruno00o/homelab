@@ -209,3 +209,23 @@ spec:
       ports:
         - protocol: TCP
           port: 9300
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape-postgres
+  namespace: authentik
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: authentik-postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9187

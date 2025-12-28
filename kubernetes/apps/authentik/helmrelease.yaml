@@ -74,9 +74,10 @@ spec:
     blueprints:
       configMaps:
         - authentik-blueprint-groups
-        - authentik-blueprint-providers
         - authentik-blueprint-applications
         - authentik-blueprint-outpost
+      secrets:
+        - authentik-blueprint-providers
 
     server:
       replicas: 1

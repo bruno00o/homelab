@@ -29,9 +29,19 @@ spec:
       labels:
         app: adguard-home
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       initContainers:
         - name: copy-config
           image: busybox:1.37
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           command:
             - sh
             - -c
@@ -46,6 +56,12 @@ spec:
       containers:
         - name: adguard-home
           image: adguard/adguardhome:v0.107.71
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
           ports:
             - name: dns-tcp
               containerPort: 53

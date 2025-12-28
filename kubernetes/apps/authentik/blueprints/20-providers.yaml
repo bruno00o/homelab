@@ -91,6 +91,7 @@ data:
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
           client_type: confidential
           client_id: grafana
+          client_secret: GfvdkVZHo410fWfoZxjofO4uHUVjIVYB
           redirect_uris:
             - matching_mode: strict
               url: https://grafana.merry.home.arpa/login/generic_oauth

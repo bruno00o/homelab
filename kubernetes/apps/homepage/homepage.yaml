@@ -234,6 +234,10 @@ spec:
     - match: Host(`homepage.${CLUSTER_DOMAIN}`)
       kind: Rule
       middlewares:
+        - name: rate-limit
+          namespace: traefik
+        - name: secure-headers
+          namespace: traefik
         - name: authentik-forward-auth
           namespace: authentik
       services:

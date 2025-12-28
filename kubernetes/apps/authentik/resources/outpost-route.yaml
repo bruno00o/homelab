@@ -11,6 +11,10 @@ spec:
       kind: Rule
       priority: 15
       middlewares:
+        - name: rate-limit
+          namespace: traefik
+        - name: secure-headers
+          namespace: traefik
         - name: authentik-headers
           namespace: authentik
       services:

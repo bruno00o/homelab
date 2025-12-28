@@ -50,6 +50,10 @@ spec:
           port: 9963 # Cilium operator
         - protocol: TCP
           port: 9965 # Hubble
+        - protocol: TCP
+          port: 10250 # Kubelet metrics
+        - protocol: TCP
+          port: 3101 # Promtail metrics
     # Kubernetes API for service discovery
     - ports:
         - protocol: TCP

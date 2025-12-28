@@ -47,7 +47,7 @@ spec:
         type: filesystem
       schemaConfig:
         configs:
-          - from: 2024-01-01
+          - from: "2024-01-01"
             store: tsdb
             object_store: filesystem
             schema: v13
@@ -85,6 +85,12 @@ spec:
 
     # Disable test
     test:
+      enabled: false
+
+    # Disable caches (not needed for SingleBinary)
+    chunksCache:
+      enabled: false
+    resultsCache:
       enabled: false
 
     # Disable self-monitoring

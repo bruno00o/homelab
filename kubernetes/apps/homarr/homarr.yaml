@@ -1,5 +1,45 @@
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homarr
+  namespace: homarr
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homarr
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "secrets", "namespaces", "nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["traefik.io"]
+    resources: ["ingressroutes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homarr
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homarr
+subjects:
+  - kind: ServiceAccount
+    name: homarr
+    namespace: homarr
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: homarr-config
@@ -44,6 +84,8 @@ spec:
       labels:
         app: homarr
     spec:
+      serviceAccountName: homarr
+      automountServiceAccountToken: true
       containers:
         - name: homarr
           image: ghcr.io/homarr-labs/homarr:v1.48.0

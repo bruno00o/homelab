@@ -126,32 +126,6 @@ data:
           timeout: 30
 
       # ===================
-      # Homepage (admins only)
-      # ===================
-      - model: authentik_core.application
-        id: app-homepage
-        state: present
-        identifiers:
-          slug: homepage
-        attrs:
-          name: Homepage
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homepage Proxy]]
-          meta_launch_url: https://homepage.merry.home.arpa
-          policy_engine_mode: all
-
-      - model: authentik_policies.policybinding
-        id: binding-homepage-admin
-        state: present
-        identifiers:
-          order: 0
-          target: !Find [authentik_core.application, [slug, homepage]]
-          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
-        attrs:
-          enabled: true
-          negate: false
-          timeout: 30
-
-      # ===================
       # Homarr (open to all authenticated users)
       # ===================
       - model: authentik_core.application

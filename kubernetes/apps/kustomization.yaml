@@ -3,6 +3,5 @@ kind: Kustomization
 resources:
   - adguard
   - ingress-routes
-  - homepage
   - authentik
   - homarr

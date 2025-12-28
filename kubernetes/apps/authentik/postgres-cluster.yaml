@@ -4,7 +4,7 @@ metadata:
   name: authentik-postgres
   namespace: authentik
 spec:
-  instances: 1
+  instances: 3
 
   storage:
     storageClass: ${DEFAULT_STORAGE_CLASS}

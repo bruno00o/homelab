@@ -72,6 +72,13 @@ spec:
       type: LoadBalancer
       spec:
         loadBalancerIP: ${LB_TRAEFIK}
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
     logs:
       general:
         level: INFO

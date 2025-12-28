@@ -38,3 +38,4 @@ ignore: |
   kubernetes/flux/flux-system/gotk-components.yaml
   **/*.sops.yaml
   talos/clusterconfig/
+  kubernetes/infrastructure/configs/grafana-dashboards/

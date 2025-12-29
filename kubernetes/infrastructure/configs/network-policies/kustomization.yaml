@@ -3,6 +3,5 @@ kind: Kustomization
 resources:
   - default-deny.yaml
   - dns-egress.yaml
-  - authentik.yaml
   - database.yaml
   - monitoring.yaml

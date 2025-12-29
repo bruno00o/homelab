@@ -250,6 +250,8 @@ tasks:
     desc: Install Cilium CNI + Prometheus CRDs via helmfile (required before Flux)
     dir: bootstrap
     cmds:
+      - echo "Updating Helm repositories..."
+      - helm repo update
       - echo "Installing Cilium + Prometheus CRDs via helmfile..."
       - helmfile apply
       - echo "Waiting for Cilium pods to be created..."
@@ -435,7 +437,7 @@ tasks:
     desc: Install all dependencies via Homebrew
     cmds:
       - brew install siderolabs/tap/talosctl
-      - brew install budimanjojo/tap/talhelper
+      - brew install talhelper
       - brew install kubectl
       - brew install fluxcd/tap/flux
       - brew install helm

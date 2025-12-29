@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: authentik-blueprint-outpost
+  name: authentik-blueprint-40-outpost
   namespace: authentik
 data:
   outpost.yaml: |
@@ -20,5 +20,4 @@ data:
             - !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
-            - !Find [authentik_providers_proxy.proxyprovider, [name, Homepage Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]

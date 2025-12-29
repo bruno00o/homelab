@@ -73,11 +73,11 @@ spec:
 
     blueprints:
       configMaps:
-        - authentik-blueprint-groups
-        - authentik-blueprint-applications
-        - authentik-blueprint-outpost
+        - authentik-blueprint-10-groups
+        - authentik-blueprint-30-applications
+        - authentik-blueprint-40-outpost
       secrets:
-        - authentik-blueprint-providers
+        - authentik-blueprint-20-providers
 
     server:
       replicas: 1

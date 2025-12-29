@@ -60,7 +60,6 @@ metadata:
   name: garage-init
   namespace: garage
 spec:
-  ttlSecondsAfterFinished: 300
   template:
     spec:
       serviceAccountName: garage-init

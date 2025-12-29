@@ -39,7 +39,7 @@ rules:
     verbs: ["get", "create", "update", "patch"]
   - apiGroups: [""]
     resources: ["namespaces"]
-    verbs: ["get", "list"]
+    verbs: ["get", "list", "create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -89,24 +89,32 @@ spec:
               echo "Waiting for Garage pod..."
               kubectl wait --for=condition=ready pod/$GARAGE_POD -n garage --timeout=300s
 
-              # Wait for layout to be configured (max 5 min)
+              # Check if layout is already configured
               echo "Checking layout..."
-              LAYOUT_READY=false
-              for i in $(seq 1 30); do
-                if kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout show 2>/dev/null | grep -q "Current cluster layout version: [1-9]"; then
-                  echo "Layout is configured"
-                  LAYOUT_READY=true
-                  break
-                fi
-                echo "Layout not configured yet, waiting... ($i/30)"
-                sleep 10
-              done
+              if kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout show 2>/dev/null | grep -q "Current cluster layout version: [1-9]"; then
+                echo "Layout is already configured"
+              else
+                echo "Layout not configured, setting up automatically..."
 
-              if [ "$LAYOUT_READY" = "false" ]; then
-                echo "ERROR: Layout not configured after 5 minutes."
-                echo "Configure layout manually, then delete this job to re-run:"
-                echo "  kubectl delete job garage-init -n garage"
-                exit 1
+                # Get all node IDs from garage status
+                NODE_IDS=$(kubectl exec -n garage $GARAGE_POD -c garage -- ./garage status 2>/dev/null | grep "NO ROLE ASSIGNED" | awk '{print $1}')
+
+                if [ -z "$NODE_IDS" ]; then
+                  echo "ERROR: No nodes found in garage status"
+                  exit 1
+                fi
+
+                # Assign each node to zone dc1 with 50G capacity
+                for NODE_ID in $NODE_IDS; do
+                  echo "Assigning node $NODE_ID..."
+                  kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout assign "$NODE_ID" -z dc1 -c 50G
+                done
+
+                # Apply the layout
+                echo "Applying layout..."
+                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout apply --version 1
+
+                echo "Layout configured successfully"
               fi
 
               # Create bucket if not exists

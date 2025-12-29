@@ -5,4 +5,5 @@ resources:
   - adguard
   - ingress-routes
   - authentik
+  - garage
   - homarr

@@ -11,14 +11,7 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    - from:
-        - ipBlock:
-            cidr: ${NODE_LUFFY}/32
-        - ipBlock:
-            cidr: ${NODE_ZORO}/32
-        - ipBlock:
-            cidr: ${NODE_NAMI}/32
-      ports:
+    - ports:
         - protocol: TCP
           port: 9443
 ---

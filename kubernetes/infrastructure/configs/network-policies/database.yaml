@@ -52,28 +52,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ingress-from-cnpg-operator
-  namespace: authentik
-spec:
-  podSelector:
-    matchLabels:
-      cnpg.io/cluster: authentik-postgres
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: cnpg-system
-      ports:
-        - protocol: TCP
-          port: 5432
-        - protocol: TCP
-          port: 8000
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-prometheus-scrape
   namespace: cnpg-system
 spec:

@@ -172,7 +172,7 @@ tasks:
       TALOS_VERSION:
         sh: yq '.talosVersion' {{.TALOS_DIR}}/talconfig.yaml
       INSTALLER_IMAGE:
-        sh: yq '.machine.install.image' {{.TALOS_DIR}}/clusterconfig/going-merry-{{.NODE}}.yaml
+        sh: yq '.machine.install.image' {{.TALOS_DIR}}/clusterconfig/going-merry-{{.NODE}}.yaml | head -1
     preconditions:
       - sh: test -n "{{.INSTALLER_IMAGE}}"
         msg: "Cannot read installer image. Run 'task talos:genconfig' first."

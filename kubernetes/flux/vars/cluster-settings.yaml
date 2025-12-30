@@ -18,3 +18,4 @@ data:
   LB_POOL_START: "192.168.1.4"
   LB_POOL_END: "192.168.1.8"
   CLUSTER_ISSUER: "mugiwara-ca-issuer"
+  NFS_BACKUP_TARGET: "nfs://192.168.1.25:/volume1/backups"

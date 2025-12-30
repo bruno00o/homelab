@@ -46,7 +46,7 @@ data:
     filtering:
       rewrites:
         - domain: '*.merry.home.arpa'
-          answer: 192.168.1.4
+          answer: ${LB_TRAEFIK}
           enabled: true
       filtering_enabled: true
       rewrites_enabled: true

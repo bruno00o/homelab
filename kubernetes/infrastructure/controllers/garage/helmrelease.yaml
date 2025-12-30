@@ -37,6 +37,21 @@ spec:
     keepHistory: false
 
   values:
+    image:
+      registry: docker.io
+      repository: dxflrs/amd64_garage
+      tag: v2.1.0
+
+    initContainers:
+      image:
+        registry: docker.io
+        repository: busybox
+        tag: "1.37"
+
+    securityContext:
+      container:
+        allowPrivilegeEscalation: false
+
     deployment:
       kind: StatefulSet
       replicaCount: 3

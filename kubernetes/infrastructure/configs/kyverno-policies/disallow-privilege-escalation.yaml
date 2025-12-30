@@ -25,6 +25,7 @@ spec:
                 - longhorn-system
                 - cilium
                 - trivy-system
+                - garage
       validate:
         message: "Privilege escalation is not allowed."
         pattern:

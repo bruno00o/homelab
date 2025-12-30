@@ -26,6 +26,7 @@ spec:
                 - cilium
                 - trivy-system
                 - garage
+                - authentik
       validate:
         message: "Privilege escalation is not allowed."
         pattern:

@@ -126,6 +126,15 @@ spec:
               value: ${TIMEZONE}
             - name: BASE_URL
               value: https://homarr.${CLUSTER_DOMAIN}
+            - name: SECRET_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homarr-secrets
+                  key: SECRET_ENCRYPTION_KEY
+            - name: REDIS_HOST
+              value: dragonfly.dragonfly-system.svc.cluster.local
+            - name: REDIS_PORT
+              value: "6379"
           volumeMounts:
             - name: config
               mountPath: /app/data/configs

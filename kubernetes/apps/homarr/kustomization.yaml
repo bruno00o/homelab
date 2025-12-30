@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - homarr.yaml
+  - homarr-secrets.sops.yaml
   - network-policies.yaml

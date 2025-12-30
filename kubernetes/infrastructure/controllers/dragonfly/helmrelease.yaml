@@ -39,6 +39,16 @@ spec:
   values:
     replicaCount: 2
 
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: dragonfly
+              topologyKey: kubernetes.io/hostname
+
     podSecurityContext:
       runAsNonRoot: true
       runAsUser: 1000

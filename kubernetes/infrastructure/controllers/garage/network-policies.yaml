@@ -98,3 +98,28 @@ spec:
       ports:
         - protocol: TCP
           port: 3903
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-init-job-egress
+  namespace: garage
+spec:
+  podSelector:
+    matchLabels:
+      job-name: garage-init
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: garage
+      ports:
+        - protocol: TCP
+          port: 3900

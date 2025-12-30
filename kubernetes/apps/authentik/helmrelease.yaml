@@ -24,6 +24,8 @@ spec:
       namespace: longhorn-system
     - name: cloudnative-pg
       namespace: cnpg-system
+    - name: dragonfly
+      namespace: dragonfly-system
 
   install:
     crds: CreateReplace

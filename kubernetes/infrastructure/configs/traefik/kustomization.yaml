@@ -5,3 +5,5 @@ resources:
   - helmrelease.yaml
   - certificate.yaml
   - pdb.yaml
+  - network-policies.yaml
+  - middlewares.yaml

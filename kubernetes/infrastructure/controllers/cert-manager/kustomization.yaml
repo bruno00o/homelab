@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - helmrelease.yaml
   - mugiwara-ca-secret.sops.yaml
+  - network-policies.yaml

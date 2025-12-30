@@ -5,3 +5,4 @@ resources:
   - adguard-config.yaml
   - adguard.yaml
   - pdb.yaml
+  - network-policies.yaml

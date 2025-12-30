@@ -10,8 +10,9 @@ kind: ClusterRole
 metadata:
   name: homarr
 rules:
+  # Removed 'secrets' - too permissive for dashboard
   - apiGroups: [""]
-    resources: ["pods", "services", "configmaps", "secrets", "namespaces", "nodes"]
+    resources: ["pods", "services", "configmaps", "namespaces", "nodes"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["apps"]
     resources: ["deployments", "statefulsets", "daemonsets"]
@@ -78,11 +79,12 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: homarr
+      app.kubernetes.io/name: homarr
   template:
     metadata:
       labels:
-        app: homarr
+        app.kubernetes.io/name: homarr
+        app.kubernetes.io/instance: homarr
     spec:
       serviceAccountName: homarr
       automountServiceAccountToken: true
@@ -103,6 +105,22 @@ spec:
             - name: http
               containerPort: 7575
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           env:
             - name: TZ
               value: ${TIMEZONE}
@@ -136,7 +154,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: homarr
+    app.kubernetes.io/name: homarr
   ports:
     - name: http
       port: 7575

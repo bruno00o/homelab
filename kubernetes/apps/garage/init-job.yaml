@@ -29,6 +29,28 @@ roleRef:
   name: garage-init
   apiGroup: rbac.authorization.k8s.io
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: garage-init-namespaces
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: garage-init-namespaces
+subjects:
+  - kind: ServiceAccount
+    name: garage-init
+    namespace: garage
+roleRef:
+  kind: ClusterRole
+  name: garage-init-namespaces
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: batch/v1
 kind: Job
 metadata:

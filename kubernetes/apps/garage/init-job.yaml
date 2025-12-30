@@ -87,60 +87,89 @@ spec:
             - |
               set -e
 
-              GARAGE_POD="garage-0"
+              GARAGE_REPLICAS=3
 
-              # Wait for Garage pod to be ready
-              echo "Waiting for Garage pod..."
-              kubectl wait --for=condition=ready pod/$GARAGE_POD -n garage --timeout=300s
+              # Wait for all Garage pods to be ready
+              echo "Waiting for all Garage pods..."
+              for i in $(seq 0 $((GARAGE_REPLICAS - 1))); do
+                echo "Waiting for garage-$i..."
+                kubectl wait --for=condition=ready pod/garage-$i -n garage --timeout=300s
+              done
 
               # Check if layout is already configured
               echo "Checking layout..."
-              if kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout show 2>/dev/null | grep -q "Current cluster layout version: [1-9]"; then
+              if kubectl exec -n garage garage-0 -c garage -- ./garage layout show 2>/dev/null | grep -q "Current cluster layout version: [1-9]"; then
                 echo "Layout is already configured"
               else
                 echo "Layout not configured, setting up automatically..."
 
-                # Get all node IDs from garage status
-                NODE_IDS=$(kubectl exec -n garage $GARAGE_POD -c garage -- ./garage status 2>/dev/null | grep "NO ROLE ASSIGNED" | awk '{print $1}')
+                # Step 1: Get node IDs and IPs for all pods
+                echo "Discovering garage nodes..."
+                NODE_INFO=""
+                for i in $(seq 0 $((GARAGE_REPLICAS - 1))); do
+                  NODE_ID=$(kubectl exec -n garage garage-$i -c garage -- ./garage node id -q 2>/dev/null)
+                  POD_IP=$(kubectl get pod garage-$i -n garage -o jsonpath='{.status.podIP}')
+                  echo "garage-$i: $NODE_ID @ $POD_IP"
+                  NODE_INFO="$NODE_INFO $NODE_ID@$POD_IP:3901"
+                done
+
+                # Step 2: Connect all nodes to garage-0
+                echo "Connecting nodes..."
+                for NODE in $NODE_INFO; do
+                  echo "Connecting $NODE..."
+                  kubectl exec -n garage garage-0 -c garage -- ./garage node connect "$NODE" 2>/dev/null || true
+                done
+
+                # Wait for nodes to discover each other
+                echo "Waiting for node discovery..."
+                sleep 5
+
+                # Step 3: Verify all nodes are visible
+                echo "Checking node status..."
+                kubectl exec -n garage garage-0 -c garage -- ./garage status
+
+                # Step 4: Get all node IDs and assign roles
+                NODE_IDS=$(kubectl exec -n garage garage-0 -c garage -- ./garage status 2>/dev/null | grep -E "(NO ROLE ASSIGNED|pending)" | awk '{print $1}')
 
                 if [ -z "$NODE_IDS" ]; then
-                  echo "ERROR: No nodes found in garage status"
+                  echo "ERROR: No nodes found to assign"
+                  kubectl exec -n garage garage-0 -c garage -- ./garage status
                   exit 1
                 fi
 
                 # Assign each node to zone dc1 with 50G capacity
                 for NODE_ID in $NODE_IDS; do
                   echo "Assigning node $NODE_ID..."
-                  kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout assign "$NODE_ID" -z dc1 -c 50G
+                  kubectl exec -n garage garage-0 -c garage -- ./garage layout assign "$NODE_ID" -z dc1 -c 50G
                 done
 
                 # Apply the layout
                 echo "Applying layout..."
-                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage layout apply --version 1
+                kubectl exec -n garage garage-0 -c garage -- ./garage layout apply --version 1
 
                 echo "Layout configured successfully"
               fi
 
               # Create bucket if not exists
-              if ! kubectl exec -n garage $GARAGE_POD -c garage -- ./garage bucket list 2>/dev/null | grep -q "cnpg-backups"; then
+              if ! kubectl exec -n garage garage-0 -c garage -- ./garage bucket list 2>/dev/null | grep -q "cnpg-backups"; then
                 echo "Creating bucket cnpg-backups..."
-                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage bucket create cnpg-backups
+                kubectl exec -n garage garage-0 -c garage -- ./garage bucket create cnpg-backups
               else
                 echo "Bucket cnpg-backups already exists"
               fi
 
               # Create key if not exists
-              if ! kubectl exec -n garage $GARAGE_POD -c garage -- ./garage key list 2>/dev/null | grep -q "cnpg-backup-key"; then
+              if ! kubectl exec -n garage garage-0 -c garage -- ./garage key list 2>/dev/null | grep -q "cnpg-backup-key"; then
                 echo "Creating key cnpg-backup-key..."
-                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage key create cnpg-backup-key
-                kubectl exec -n garage $GARAGE_POD -c garage -- ./garage bucket allow cnpg-backups --read --write --key cnpg-backup-key
+                kubectl exec -n garage garage-0 -c garage -- ./garage key create cnpg-backup-key
+                kubectl exec -n garage garage-0 -c garage -- ./garage bucket allow cnpg-backups --read --write --key cnpg-backup-key
               else
                 echo "Key cnpg-backup-key already exists"
               fi
 
               # Get key credentials (with --show-secret to get the actual secret)
               echo "=== Extracting Key Credentials ==="
-              KEY_INFO=$(kubectl exec -n garage $GARAGE_POD -c garage -- ./garage key info cnpg-backup-key --show-secret)
+              KEY_INFO=$(kubectl exec -n garage garage-0 -c garage -- ./garage key info cnpg-backup-key --show-secret)
               # Don't echo full output to avoid leaking secret in logs
 
               ACCESS_KEY_ID=$(echo "$KEY_INFO" | grep "Key ID:" | awk '{print $3}')

@@ -29,31 +29,6 @@ roleRef:
   name: garage-init
   apiGroup: rbac.authorization.k8s.io
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: garage-init-secrets
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "create", "update", "patch"]
-  - apiGroups: [""]
-    resources: ["namespaces"]
-    verbs: ["get", "list", "create"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: garage-init-secrets
-subjects:
-  - kind: ServiceAccount
-    name: garage-init
-    namespace: garage
-roleRef:
-  kind: ClusterRole
-  name: garage-init-secrets
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -71,12 +46,19 @@ spec:
           type: RuntimeDefault
       containers:
         - name: garage-init
-          image: bitnami/kubectl:latest
+          image: docker.io/bitnami/kubectl:1.32
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           command:
             - /bin/sh
             - -c
@@ -153,11 +135,12 @@ spec:
               # Create/update secret in authentik namespace
               echo "=== Creating S3 credentials secret in authentik namespace ==="
 
-              # Check if namespace exists
-              if ! kubectl get namespace authentik >/dev/null 2>&1; then
-                echo "Namespace authentik does not exist yet, creating..."
-                kubectl create namespace authentik
-              fi
+              # Wait for authentik namespace (created by Flux before this job runs)
+              echo "Waiting for authentik namespace..."
+              until kubectl get namespace authentik >/dev/null 2>&1; do
+                echo "Namespace authentik not ready yet, waiting..."
+                sleep 5
+              done
 
               # Create or update the secret
               kubectl create secret generic cnpg-s3-credentials \

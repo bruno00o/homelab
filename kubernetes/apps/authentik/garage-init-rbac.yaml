@@ -1,0 +1,24 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: garage-init-secrets
+  namespace: authentik
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: garage-init-secrets
+  namespace: authentik
+subjects:
+  - kind: ServiceAccount
+    name: garage-init
+    namespace: garage
+roleRef:
+  kind: Role
+  name: garage-init-secrets
+  apiGroup: rbac.authorization.k8s.io

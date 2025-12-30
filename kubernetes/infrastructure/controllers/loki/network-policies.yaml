@@ -122,3 +122,5 @@ spec:
       ports:
         - protocol: TCP
           port: 3100
+        - protocol: TCP
+          port: 3101

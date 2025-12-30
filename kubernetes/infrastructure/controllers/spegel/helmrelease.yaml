@@ -46,7 +46,6 @@ spec:
         memory: 128Mi
 
     podSecurityContext:
-      runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
 

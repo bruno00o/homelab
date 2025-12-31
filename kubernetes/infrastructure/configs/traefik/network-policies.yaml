@@ -64,11 +64,14 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # Authentik (forward-auth and outpost)
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: authentik
       ports:
+        - protocol: TCP
+          port: 80
         - protocol: TCP
           port: 9000
         - protocol: TCP

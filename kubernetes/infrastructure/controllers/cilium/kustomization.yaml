@@ -4,3 +4,4 @@ resources:
   - helmrelease.yaml
   - l2-announcements.yaml
   - pdb.yaml
+  - network-policies.yaml

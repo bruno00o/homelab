@@ -23,6 +23,7 @@ spec:
                 - kube-system
                 - kyverno-system
                 - garage
+                - trivy-system
       validate:
         message: "Images must come from approved registries (ghcr.io, docker.io, quay.io, registry.k8s.io, gcr.io)"
         pattern:

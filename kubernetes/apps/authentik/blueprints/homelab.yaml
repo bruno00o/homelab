@@ -1,0 +1,271 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprints
+  namespace: authentik
+data:
+  homelab.yaml: |
+    version: 1
+    metadata:
+      name: Homelab Configuration
+    entries:
+      # =====================================================
+      # SECTION 1: GROUPS
+      # =====================================================
+      - model: authentik_core.group
+        id: group-homelab-admins
+        state: present
+        identifiers:
+          name: homelab-admins
+        attrs:
+          is_superuser: false
+
+      - model: authentik_core.group
+        id: group-homelab-users
+        state: present
+        identifiers:
+          name: homelab-users
+        attrs:
+          is_superuser: false
+
+      # =====================================================
+      # SECTION 2: PROVIDERS
+      # =====================================================
+
+      # Proxy Providers (forward_single)
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-hubble
+        state: present
+        identifiers:
+          name: Hubble Proxy
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          mode: forward_single
+          external_host: https://hubble.merry.home.arpa
+
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-longhorn
+        state: present
+        identifiers:
+          name: Longhorn Proxy
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          mode: forward_single
+          external_host: https://longhorn.merry.home.arpa
+
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-traefik
+        state: present
+        identifiers:
+          name: Traefik Proxy
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          mode: forward_single
+          external_host: https://traefik.merry.home.arpa
+
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-adguard
+        state: present
+        identifiers:
+          name: AdGuard Proxy
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          mode: forward_single
+          external_host: https://adguard.merry.home.arpa
+
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-homarr
+        state: present
+        identifiers:
+          name: Homarr Proxy
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          mode: forward_single
+          external_host: https://homarr.merry.home.arpa
+
+      # OAuth2 Provider (Grafana OIDC)
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-grafana-oidc
+        state: present
+        identifiers:
+          name: Grafana OIDC
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          client_type: confidential
+          client_id: grafana
+          client_secret: !Env AUTHENTIK_GRAFANA_CLIENT_SECRET
+          redirect_uris:
+            - matching_mode: strict
+              url: https://grafana.merry.home.arpa/login/generic_oauth
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+
+      # =====================================================
+      # SECTION 3: APPLICATIONS
+      # =====================================================
+
+      # Policy: require-homelab-admins
+      - model: authentik_policies_expression.expressionpolicy
+        id: policy-require-admins
+        state: present
+        identifiers:
+          name: require-homelab-admins
+        attrs:
+          expression: |
+            return ak_is_group_member(request.user, name="homelab-admins")
+
+      # Hubble (admins only)
+      - model: authentik_core.application
+        id: app-hubble
+        state: present
+        identifiers:
+          slug: hubble
+        attrs:
+          name: Hubble
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Hubble Proxy]]
+          meta_launch_url: https://hubble.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-hubble-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, hubble]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # Longhorn (admins only)
+      - model: authentik_core.application
+        id: app-longhorn
+        state: present
+        identifiers:
+          slug: longhorn
+        attrs:
+          name: Longhorn
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
+          meta_launch_url: https://longhorn.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-longhorn-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, longhorn]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # Traefik Dashboard (admins only)
+      - model: authentik_core.application
+        id: app-traefik
+        state: present
+        identifiers:
+          slug: traefik
+        attrs:
+          name: Traefik Dashboard
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
+          meta_launch_url: https://traefik.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-traefik-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, traefik]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # AdGuard (admins only)
+      - model: authentik_core.application
+        id: app-adguard
+        state: present
+        identifiers:
+          slug: adguard
+        attrs:
+          name: AdGuard Home
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
+          meta_launch_url: https://adguard.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-adguard-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, adguard]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # Homarr (open to all authenticated users)
+      - model: authentik_core.application
+        id: app-homarr
+        state: present
+        identifiers:
+          slug: homarr
+        attrs:
+          name: Homarr
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]
+          meta_launch_url: https://homarr.merry.home.arpa
+          policy_engine_mode: any
+
+      # Grafana (admins only, OIDC)
+      - model: authentik_core.application
+        id: app-grafana
+        state: present
+        identifiers:
+          slug: grafana
+        attrs:
+          name: Grafana
+          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Grafana OIDC]]
+          meta_launch_url: https://grafana.merry.home.arpa
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-grafana-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, grafana]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # =====================================================
+      # SECTION 4: OUTPOST
+      # =====================================================
+      - model: authentik_outposts.outpost
+        state: present
+        identifiers:
+          name: authentik Embedded Outpost
+        attrs:
+          type: proxy
+          providers:
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Hubble Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]

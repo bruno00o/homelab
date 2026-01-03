@@ -25,8 +25,8 @@ spec:
                 - garage
                 - trivy-system
       validate:
-        message: "Images must come from approved registries (ghcr.io, docker.io, quay.io, registry.k8s.io, gcr.io)"
+        message: "Images must come from approved registries (ghcr.io, docker.io, quay.io, registry.k8s.io, gcr.io, longhornio)"
         pattern:
           spec:
             containers:
-              - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/*"
+              - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/* | longhornio/*"

@@ -52,7 +52,6 @@ spec:
       freezeFilesystemForSnapshot: ignored
       restoreVolumeRecurringJob: ignored
       offlineReplicaRebuilding: ignored
-      backupTarget: ${NFS_BACKUP_TARGET}
       backupConcurrentLimit: 2
       backupstorePollInterval: 300
     persistence:

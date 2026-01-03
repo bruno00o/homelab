@@ -74,7 +74,7 @@ controlPlane:
           disabled: true
         etcd:
           extraArgs:
-            listen-metrics-urls: http://127.0.0.1:2381
+            listen-metrics-urls: http://0.0.0.0:2381
         apiServer:
           admissionControl:
             - name: PodSecurity

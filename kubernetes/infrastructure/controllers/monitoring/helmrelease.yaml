@@ -218,3 +218,6 @@ spec:
 
     kubeProxy:
       enabled: false
+
+    kubeEtcd:
+      enabled: false

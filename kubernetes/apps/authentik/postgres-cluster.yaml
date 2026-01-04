@@ -26,7 +26,6 @@ spec:
     barmanObjectStore:
       destinationPath: "s3://cnpg-backups/authentik"
       endpointURL: "http://garage.garage.svc.cluster.local:3900"
-      s3ForcePathStyle: true
       s3Credentials:
         accessKeyId:
           name: cnpg-s3-credentials

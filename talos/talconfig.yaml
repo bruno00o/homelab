@@ -7,6 +7,11 @@ cniConfig:
   name: none
 allowSchedulingOnControlPlanes: true
 
+# Use AdGuard as upstream DNS for host and kube-dns
+networkConfig:
+  nameservers:
+    - 192.168.1.5
+
 additionalApiServerCertSans:
   - 192.168.1.9
 additionalMachineCertSans:

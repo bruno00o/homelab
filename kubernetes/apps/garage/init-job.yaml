@@ -59,7 +59,6 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
-  ttlSecondsAfterFinished: 60
   template:
     spec:
       serviceAccountName: garage-init

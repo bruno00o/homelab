@@ -70,6 +70,9 @@ spec:
       replicationFactor: "2"
       consistencyMode: consistent
       dbEngine: lmdb
+      s3:
+        api:
+          rootDomain: ".s3.garage.local"
 
     persistence:
       enabled: true

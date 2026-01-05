@@ -57,6 +57,7 @@ metadata:
   name: garage-init
   namespace: garage
 spec:
+  ttlSecondsAfterFinished: 60
   template:
     spec:
       serviceAccountName: garage-init
@@ -198,6 +199,7 @@ spec:
                 --namespace=authentik \
                 --from-literal=ACCESS_KEY_ID="$ACCESS_KEY_ID" \
                 --from-literal=ACCESS_SECRET_KEY="$ACCESS_SECRET_KEY" \
+                --from-literal=AWS_DEFAULT_REGION="garage" \
                 --dry-run=client -o yaml | kubectl apply -f -
 
               echo "=== Secret cnpg-s3-credentials created/updated in authentik namespace ==="

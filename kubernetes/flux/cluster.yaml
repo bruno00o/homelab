@@ -120,6 +120,10 @@ spec:
       kind: Deployment
       name: kyverno-admission-controller
       namespace: kyverno-system
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: garage
+      namespace: garage
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

@@ -51,6 +51,31 @@ roleRef:
   name: garage-init-namespaces
   apiGroup: rbac.authorization.k8s.io
 ---
+# RBAC to create S3 credentials secret in authentik namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: garage-init-secrets
+  namespace: authentik
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: garage-init-secrets
+  namespace: authentik
+subjects:
+  - kind: ServiceAccount
+    name: garage-init
+    namespace: garage
+roleRef:
+  kind: Role
+  name: garage-init-secrets
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: batch/v1
 kind: Job
 metadata:

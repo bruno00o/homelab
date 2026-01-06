@@ -21,6 +21,8 @@ metadata:
     reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: adguard-home
@@ -35,6 +37,8 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: copy-config
           image: docker.io/busybox:1.37

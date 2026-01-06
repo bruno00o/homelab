@@ -49,10 +49,10 @@ data:
           answer: ${LB_TRAEFIK}
           enabled: true
         - domain: '*.s3.garage.local'
-          answer: 10.101.63.54
+          answer: ${LB_GARAGE}
           enabled: true
         - domain: 's3.garage.local'
-          answer: 10.101.63.54
+          answer: ${LB_GARAGE}
           enabled: true
       filtering_enabled: true
       rewrites_enabled: true

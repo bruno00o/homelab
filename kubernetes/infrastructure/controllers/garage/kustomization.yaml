@@ -6,3 +6,4 @@ resources:
   - secret.sops.yaml
   - pdb.yaml
   - network-policies.yaml
+  - service-lb.yaml

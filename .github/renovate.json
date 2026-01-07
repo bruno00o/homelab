@@ -73,6 +73,16 @@
         "#\\s*renovate:\\s*datasource=docker\\s+depName=(?<depName>[^\\s]+)\\n\\s*repository:\\s*[^\\s]+\\n\\s*tag:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Metrics Server in Talos extraManifests",
+      "fileMatch": ["talos/talconfig\\.ya?ml$"],
+      "matchStrings": [
+        "metrics-server/releases/download/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
+      ],
+      "depNameTemplate": "kubernetes-sigs/metrics-server",
+      "datasourceTemplate": "github-releases"
     }
   ],
 

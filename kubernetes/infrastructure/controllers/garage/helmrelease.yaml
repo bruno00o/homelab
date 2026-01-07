@@ -39,12 +39,14 @@ spec:
   values:
     image:
       registry: docker.io
+      # renovate: datasource=docker depName=dxflrs/amd64_garage
       repository: dxflrs/amd64_garage
       tag: v2.1.0
 
     initContainers:
       image:
         registry: docker.io
+        # renovate: datasource=docker depName=busybox
         repository: busybox
         tag: "1.37"
 

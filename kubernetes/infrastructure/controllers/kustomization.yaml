@@ -6,6 +6,7 @@ resources:
   - longhorn
   - monitoring
   - cloudnative-pg
+  - barman-cloud
   - dragonfly
   - reloader
   - spegel

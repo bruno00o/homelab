@@ -24,21 +24,11 @@ spec:
       secret:
         name: authentik-postgres-credentials
 
-  backup:
-    barmanObjectStore:
-      destinationPath: "s3://cnpg-backups/authentik"
-      endpointURL: "http://s3.garage.local:3900"
-      s3Credentials:
-        accessKeyId:
-          name: cnpg-s3-credentials
-          key: ACCESS_KEY_ID
-        secretAccessKey:
-          name: cnpg-s3-credentials
-          key: ACCESS_SECRET_KEY
-        region:
-          name: cnpg-s3-credentials
-          key: AWS_DEFAULT_REGION
-    retentionPolicy: "30d"
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: authentik-s3-store
 
   monitoring:
     enablePodMonitor: true

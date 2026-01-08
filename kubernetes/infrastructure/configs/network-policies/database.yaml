@@ -2,6 +2,44 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: allow-barman-cloud
+  namespace: cnpg-system
+spec:
+  podSelector:
+    matchLabels:
+      app: barman-cloud
+  policyTypes:
+    - Egress
+  egress:
+    # API Server for leader election
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # PostgreSQL pods in any namespace (CNPG managed clusters)
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              cnpg.io/podRole: instance
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000
+    # S3/Garage for backups
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: garage
+      ports:
+        - protocol: TCP
+          port: 3900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
   name: allow-apiserver-webhook
   namespace: cnpg-system
 spec:

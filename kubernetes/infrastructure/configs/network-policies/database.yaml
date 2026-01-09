@@ -9,7 +9,26 @@ spec:
     matchLabels:
       app: barman-cloud
   policyTypes:
+    - Ingress
     - Egress
+  ingress:
+    # Allow CNPG operator to connect
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudnative-pg
+      ports:
+        - protocol: TCP
+          port: 9090
+    # Allow PostgreSQL instances to connect (from any namespace)
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              cnpg.io/podRole: instance
+      ports:
+        - protocol: TCP
+          port: 9090
   egress:
     # API Server for leader election
     - ports:
@@ -65,15 +84,26 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # PostgreSQL clusters in any namespace
     - to:
-        - namespaceSelector:
+        - namespaceSelector: {}
+          podSelector:
             matchLabels:
-              kubernetes.io/metadata.name: authentik
+              cnpg.io/podRole: instance
       ports:
         - protocol: TCP
           port: 5432
         - protocol: TCP
           port: 8000
+    # Barman Cloud plugin
+    - to:
+        - podSelector:
+            matchLabels:
+              app: barman-cloud
+      ports:
+        - protocol: TCP
+          port: 9090
+    # API Server
     - ports:
         - protocol: TCP
           port: 443

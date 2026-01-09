@@ -37,6 +37,10 @@ spec:
     keepHistory: false
 
   values:
+    # Disable node-collector - incompatible with Talos (no systemd)
+    nodeCollector:
+      enabled: false
+
     operator:
       builtInTrivyServer: true
       vulnerabilityScannerScanOnlyCurrentRevisions: true

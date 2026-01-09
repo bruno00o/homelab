@@ -27,6 +27,7 @@ spec:
                 - trivy-system
                 - garage
                 - authentik
+                - monitoring
       validate:
         message: "Privilege escalation is not allowed."
         pattern:

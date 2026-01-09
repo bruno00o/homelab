@@ -447,6 +447,153 @@ tasks:
       - echo "All dependencies installed"
 
   # =============================================================================
+  # CNPG - CloudNativePG
+  # =============================================================================
+  cnpg:recover:
+    desc: Recover a CNPG cluster from S3 backup (e.g. task cnpg:recover NAMESPACE=authentik CLUSTER=authentik-postgres)
+    requires:
+      vars: [NAMESPACE, CLUSTER]
+    vars:
+      S3_PATH: "s3://cnpg-backups/{{.NAMESPACE}}"
+      S3_ENDPOINT: "http://s3.garage.local:3900"
+      S3_SECRET: "cnpg-s3-credentials"
+    prompt: "Recover {{.CLUSTER}} in {{.NAMESPACE}} from S3 backup? This will DELETE the current cluster."
+    cmds:
+      - echo "=== CNPG Recovery for {{.CLUSTER}} ==="
+      - echo ""
+      # Check CNPG operator is running
+      - echo "1. Checking CNPG operator..."
+      - kubectl get pods -n cnpg-system -l app.kubernetes.io/name=cloudnative-pg --field-selector=status.phase=Running | grep -q cloudnative-pg || { echo "❌ CNPG operator not running"; exit 1; }
+      - echo "   ✅ CNPG operator running"
+      - echo ""
+      # Check S3 credentials exist
+      - echo "2. Checking S3 credentials..."
+      - kubectl get secret {{.S3_SECRET}} -n {{.NAMESPACE}} >/dev/null 2>&1 || { echo "❌ Secret {{.S3_SECRET}} not found in {{.NAMESPACE}}"; exit 1; }
+      - echo "   ✅ S3 credentials found"
+      - echo ""
+      # Suspend Flux for this namespace
+      - echo "3. Suspending Flux for {{.NAMESPACE}}..."
+      - flux suspend kustomization apps -n flux-system || true
+      - echo "   ✅ Flux suspended"
+      - echo ""
+      # Delete existing cluster
+      - echo "4. Deleting existing cluster {{.CLUSTER}}..."
+      - kubectl delete cluster {{.CLUSTER}} -n {{.NAMESPACE}} --ignore-not-found --wait=true
+      - echo "   ✅ Old cluster deleted"
+      - echo ""
+      # Apply recovery cluster
+      - echo "5. Creating recovery cluster..."
+      - |
+        kubectl apply -f - <<EOF
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Cluster
+        metadata:
+          name: {{.CLUSTER}}
+          namespace: {{.NAMESPACE}}
+        spec:
+          instances: 3
+          imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
+          storage:
+            storageClass: longhorn
+            size: 20Gi
+          postgresql:
+            parameters:
+              max_connections: "100"
+              shared_buffers: "128MB"
+          bootstrap:
+            recovery:
+              source: s3-backup
+          externalClusters:
+            - name: s3-backup
+              barmanObjectStore:
+                destinationPath: "{{.S3_PATH}}"
+                endpointURL: "{{.S3_ENDPOINT}}"
+                s3Credentials:
+                  accessKeyId:
+                    name: {{.S3_SECRET}}
+                    key: ACCESS_KEY_ID
+                  secretAccessKey:
+                    name: {{.S3_SECRET}}
+                    key: ACCESS_SECRET_KEY
+                  region:
+                    name: {{.S3_SECRET}}
+                    key: AWS_DEFAULT_REGION
+          backup:
+            barmanObjectStore:
+              destinationPath: "{{.S3_PATH}}"
+              endpointURL: "{{.S3_ENDPOINT}}"
+              s3Credentials:
+                accessKeyId:
+                  name: {{.S3_SECRET}}
+                  key: ACCESS_KEY_ID
+                secretAccessKey:
+                  name: {{.S3_SECRET}}
+                  key: ACCESS_SECRET_KEY
+                region:
+                  name: {{.S3_SECRET}}
+                  key: AWS_DEFAULT_REGION
+            retentionPolicy: "30d"
+          monitoring:
+            enablePodMonitor: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+        EOF
+      - echo "   ✅ Recovery cluster created"
+      - echo ""
+      # Wait for recovery
+      - echo "6. Waiting for recovery to complete (this may take a few minutes)..."
+      - |
+        until kubectl get cluster {{.CLUSTER}} -n {{.NAMESPACE}} -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Cluster in healthy state"; do
+          STATUS=$(kubectl get cluster {{.CLUSTER}} -n {{.NAMESPACE}} -o jsonpath='{.status.phase}' 2>/dev/null || echo "Waiting...")
+          echo "   Status: $STATUS"
+          sleep 10
+        done
+      - echo "   ✅ Cluster healthy!"
+      - echo ""
+      # Resume Flux
+      - echo "7. Resuming Flux..."
+      - flux resume kustomization apps -n flux-system
+      - echo "   ✅ Flux resumed"
+      - echo ""
+      - echo "=== Recovery complete! ==="
+      - echo "Flux will now reconcile. The cluster config will switch back to initdb mode,"
+      - echo "but CNPG won't reinitialize an existing database."
+
+  cnpg:status:
+    desc: Show CNPG clusters status
+    cmds:
+      - echo "=== CNPG Clusters ==="
+      - kubectl get clusters.postgresql.cnpg.io -A
+      - echo ""
+      - echo "=== Recent CNPG Backups ==="
+      - kubectl get backups.postgresql.cnpg.io -A --sort-by='.metadata.creationTimestamp' | tail -10
+
+  cnpg:backup:
+    desc: Trigger immediate backup (e.g. task cnpg:backup NAMESPACE=authentik CLUSTER=authentik-postgres)
+    requires:
+      vars: [NAMESPACE, CLUSTER]
+    cmds:
+      - echo "Triggering backup for {{.CLUSTER}}..."
+      - |
+        kubectl apply -f - <<EOF
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Backup
+        metadata:
+          name: {{.CLUSTER}}-manual-$(date +%Y%m%d-%H%M%S)
+          namespace: {{.NAMESPACE}}
+        spec:
+          method: barmanObjectStore
+          cluster:
+            name: {{.CLUSTER}}
+        EOF
+      - echo "Backup initiated. Check status with 'task cnpg:status'"
+
+  # =============================================================================
   # Cleanup
   # =============================================================================
   clean:

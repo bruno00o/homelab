@@ -9,3 +9,4 @@ resources:
   - longhorn
   - coredns
   - garage
+  - barman-cloud

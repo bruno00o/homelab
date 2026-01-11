@@ -9,7 +9,6 @@ resources:
   - dragonfly
   - reloader
   - spegel
-  - garage
   - loki
   - trivy-operator
   - kyverno

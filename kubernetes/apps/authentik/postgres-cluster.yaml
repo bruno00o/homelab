@@ -24,12 +24,6 @@ spec:
       secret:
         name: authentik-postgres-credentials
 
-  plugins:
-    - name: barman-cloud.cloudnative-pg.io
-      isWALArchiver: true
-      parameters:
-        barmanObjectName: authentik-s3-store
-
   monitoring:
     enablePodMonitor: true
 

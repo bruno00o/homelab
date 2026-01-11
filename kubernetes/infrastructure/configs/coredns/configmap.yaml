@@ -6,11 +6,6 @@ metadata:
   namespace: kube-system
 data:
   Corefile: |
-    garage.local:53 {
-        errors
-        cache 30
-        forward . ${LB_ADGUARD}
-    }
     .:53 {
         errors
         health {

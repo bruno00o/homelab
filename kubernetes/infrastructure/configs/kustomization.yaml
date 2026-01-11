@@ -8,4 +8,3 @@ resources:
   - grafana-dashboards
   - longhorn
   - coredns
-  - garage

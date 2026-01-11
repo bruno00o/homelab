@@ -48,12 +48,6 @@ data:
         - domain: '*.merry.home.arpa'
           answer: ${LB_TRAEFIK}
           enabled: true
-        - domain: '*.s3.garage.local'
-          answer: ${LB_GARAGE}
-          enabled: true
-        - domain: 's3.garage.local'
-          answer: ${LB_GARAGE}
-          enabled: true
       filtering_enabled: true
       rewrites_enabled: true
       protection_enabled: true

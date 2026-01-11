@@ -25,7 +25,6 @@ spec:
                 - longhorn-system
                 - cilium
                 - trivy-system
-                - garage
                 - authentik
                 - monitoring
       validate:

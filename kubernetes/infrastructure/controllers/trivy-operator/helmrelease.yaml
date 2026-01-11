@@ -42,6 +42,8 @@ spec:
       enabled: false
 
     operator:
+      # Disable node scanning (incompatible with Talos)
+      scanNodeCollectorLimit: 0
       builtInTrivyServer: true
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true

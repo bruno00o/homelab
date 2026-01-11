@@ -24,19 +24,13 @@ spec:
       secret:
         name: authentik-postgres-credentials
 
-  plugins:
-    - name: barman-cloud.cloudnative-pg.io
-      isWALArchiver: true
-      parameters:
-        barmanObjectName: authentik-s3-store
-
   monitoring:
     enablePodMonitor: true
 
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 1000m
       memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 1Gi

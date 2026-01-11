@@ -169,14 +169,6 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
-    # Garage S3 for backups
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: garage
-      ports:
-        - protocol: TCP
-          port: 3900
     # Inter-replica replication
     - to:
         - podSelector:

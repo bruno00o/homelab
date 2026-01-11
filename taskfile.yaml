@@ -449,149 +449,161 @@ tasks:
   # =============================================================================
   # CNPG - CloudNativePG
   # =============================================================================
-  cnpg:recover:
-    desc: Recover a CNPG cluster from S3 backup (e.g. task cnpg:recover NAMESPACE=authentik CLUSTER=authentik-postgres)
-    requires:
-      vars: [NAMESPACE, CLUSTER]
-    vars:
-      S3_PATH: "s3://cnpg-backups/{{.NAMESPACE}}"
-      S3_ENDPOINT: "http://s3.garage.local:3900"
-      S3_SECRET: "cnpg-s3-credentials"
-    prompt: "Recover {{.CLUSTER}} in {{.NAMESPACE}} from S3 backup? This will DELETE the current cluster."
-    cmds:
-      - echo "=== CNPG Recovery for {{.CLUSTER}} ==="
-      - echo ""
-      # Check CNPG operator is running
-      - echo "1. Checking CNPG operator..."
-      - kubectl get pods -n cnpg-system -l app.kubernetes.io/name=cloudnative-pg --field-selector=status.phase=Running | grep -q cloudnative-pg || { echo "❌ CNPG operator not running"; exit 1; }
-      - echo "   ✅ CNPG operator running"
-      - echo ""
-      # Check S3 credentials exist
-      - echo "2. Checking S3 credentials..."
-      - kubectl get secret {{.S3_SECRET}} -n {{.NAMESPACE}} >/dev/null 2>&1 || { echo "❌ Secret {{.S3_SECRET}} not found in {{.NAMESPACE}}"; exit 1; }
-      - echo "   ✅ S3 credentials found"
-      - echo ""
-      # Suspend Flux for this namespace
-      - echo "3. Suspending Flux for {{.NAMESPACE}}..."
-      - flux suspend kustomization apps -n flux-system || true
-      - echo "   ✅ Flux suspended"
-      - echo ""
-      # Delete existing cluster
-      - echo "4. Deleting existing cluster {{.CLUSTER}}..."
-      - kubectl delete cluster {{.CLUSTER}} -n {{.NAMESPACE}} --ignore-not-found --wait=true
-      - echo "   ✅ Old cluster deleted"
-      - echo ""
-      # Apply recovery cluster
-      - echo "5. Creating recovery cluster..."
-      - |
-        kubectl apply -f - <<EOF
-        apiVersion: postgresql.cnpg.io/v1
-        kind: Cluster
-        metadata:
-          name: {{.CLUSTER}}
-          namespace: {{.NAMESPACE}}
-        spec:
-          instances: 3
-          imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
-          storage:
-            storageClass: longhorn
-            size: 20Gi
-          postgresql:
-            parameters:
-              max_connections: "100"
-              shared_buffers: "128MB"
-          bootstrap:
-            recovery:
-              source: s3-backup
-          externalClusters:
-            - name: s3-backup
-              barmanObjectStore:
-                destinationPath: "{{.S3_PATH}}"
-                endpointURL: "{{.S3_ENDPOINT}}"
-                s3Credentials:
-                  accessKeyId:
-                    name: {{.S3_SECRET}}
-                    key: ACCESS_KEY_ID
-                  secretAccessKey:
-                    name: {{.S3_SECRET}}
-                    key: ACCESS_SECRET_KEY
-                  region:
-                    name: {{.S3_SECRET}}
-                    key: AWS_DEFAULT_REGION
-          backup:
-            barmanObjectStore:
-              destinationPath: "{{.S3_PATH}}"
-              endpointURL: "{{.S3_ENDPOINT}}"
-              s3Credentials:
-                accessKeyId:
-                  name: {{.S3_SECRET}}
-                  key: ACCESS_KEY_ID
-                secretAccessKey:
-                  name: {{.S3_SECRET}}
-                  key: ACCESS_SECRET_KEY
-                region:
-                  name: {{.S3_SECRET}}
-                  key: AWS_DEFAULT_REGION
-            retentionPolicy: "30d"
-          monitoring:
-            enablePodMonitor: true
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 512Mi
-        EOF
-      - echo "   ✅ Recovery cluster created"
-      - echo ""
-      # Wait for recovery
-      - echo "6. Waiting for recovery to complete (this may take a few minutes)..."
-      - |
-        until kubectl get cluster {{.CLUSTER}} -n {{.NAMESPACE}} -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Cluster in healthy state"; do
-          STATUS=$(kubectl get cluster {{.CLUSTER}} -n {{.NAMESPACE}} -o jsonpath='{.status.phase}' 2>/dev/null || echo "Waiting...")
-          echo "   Status: $STATUS"
-          sleep 10
-        done
-      - echo "   ✅ Cluster healthy!"
-      - echo ""
-      # Resume Flux
-      - echo "7. Resuming Flux..."
-      - flux resume kustomization apps -n flux-system
-      - echo "   ✅ Flux resumed"
-      - echo ""
-      - echo "=== Recovery complete! ==="
-      - echo "Flux will now reconcile. The cluster config will switch back to initdb mode,"
-      - echo "but CNPG won't reinitialize an existing database."
-
   cnpg:status:
     desc: Show CNPG clusters status
     cmds:
       - echo "=== CNPG Clusters ==="
       - kubectl get clusters.postgresql.cnpg.io -A
-      - echo ""
       - echo "=== Recent CNPG Backups ==="
       - kubectl get backups.postgresql.cnpg.io -A --sort-by='.metadata.creationTimestamp' | tail -10
 
-  cnpg:backup:
-    desc: Trigger immediate backup (e.g. task cnpg:backup NAMESPACE=authentik CLUSTER=authentik-postgres)
-    requires:
-      vars: [NAMESPACE, CLUSTER]
+  # =============================================================================
+  # Disaster Recovery - Longhorn Restore
+  # =============================================================================
+  dr:list-backups:
+    desc: List available Longhorn backups from NAS
     cmds:
-      - echo "Triggering backup for {{.CLUSTER}}..."
       - |
+        echo "=== Longhorn Backups from NAS ==="
+        kubectl get backups.longhorn.io -n longhorn-system -o json | \
+          jq -r '.items[] | select(.status.state == "Completed") | (.status.labels.KubernetesStatus | fromjson) as $k | "\($k.namespace)/\($k.pvcName) | \(.status.volumeSize | tonumber / 1073741824 | floor)GB | \(.status.backupCreatedAt) | \(.metadata.name)"' | \
+          sort | uniq | column -t -s'|'
+        echo ""
+        echo "To restore a specific PVC, use:"
+        echo "  task dr:restore PVC=<namespace>/<pvc-name>"
+
+  dr:restore:
+    desc: Restore a PVC from Longhorn backup (e.g. task dr:restore PVC=authentik/data-authentik-postgres-1)
+    requires:
+      vars: [PVC]
+    vars:
+      NAMESPACE: '{{index (splitList "/" .PVC) 0}}'
+      PVC_NAME: '{{index (splitList "/" .PVC) 1}}'
+    prompt: "Restore {{.PVC}} from backup? This will create a new volume from the latest backup."
+    cmds:
+      - echo "=== Restoring {{.PVC}} ==="
+      - echo "1. Finding latest backup for {{.PVC}}..."
+      - |
+        # Find the backup URL for this PVC
+        BACKUP_URL=$(kubectl get backups.longhorn.io -n longhorn-system -o json | jq -r --arg ns "{{.NAMESPACE}}" --arg pvc "{{.PVC_NAME}}" '
+          .items[] |
+          select(.status.state == "Completed") |
+          select((.status.labels.KubernetesStatus | fromjson | .namespace) == $ns) |
+          select((.status.labels.KubernetesStatus | fromjson | .pvcName) == $pvc) |
+          .status.url
+        ' | tail -1)
+
+        if [ -z "$BACKUP_URL" ]; then
+          echo "❌ No backup found for {{.PVC}}"
+          exit 1
+        fi
+
+        echo "   Found backup: $BACKUP_URL"
+
+        # Extract volume size
+        VOLUME_SIZE=$(kubectl get backups.longhorn.io -n longhorn-system -o json | jq -r --arg ns "{{.NAMESPACE}}" --arg pvc "{{.PVC_NAME}}" '
+          .items[] |
+          select(.status.state == "Completed") |
+          select((.status.labels.KubernetesStatus | fromjson | .namespace) == $ns) |
+          select((.status.labels.KubernetesStatus | fromjson | .pvcName) == $pvc) |
+          .status.volumeSize
+        ' | tail -1)
+
+        SIZE_GI=$((VOLUME_SIZE / 1073741824))
+        echo "   Volume size: ${SIZE_GI}Gi"
+        echo ""
+
+        # Generate volume name
+        VOLUME_NAME="restored-{{.PVC_NAME}}-$(date +%s)"
+
+        echo "2. Creating Longhorn volume from backup..."
         kubectl apply -f - <<EOF
-        apiVersion: postgresql.cnpg.io/v1
-        kind: Backup
+        apiVersion: longhorn.io/v1beta2
+        kind: Volume
         metadata:
-          name: {{.CLUSTER}}-manual-$(date +%Y%m%d-%H%M%S)
+          name: $VOLUME_NAME
+          namespace: longhorn-system
+        spec:
+          numberOfReplicas: 3
+          dataEngine: v1
+          frontend: blockdev
+          fromBackup: "$BACKUP_URL"
+          size: "$VOLUME_SIZE"
+        EOF
+
+        echo "   ✅ Volume $VOLUME_NAME created"
+        echo ""
+
+        echo "3. Waiting for volume to be ready..."
+        until kubectl get volumes.longhorn.io -n longhorn-system $VOLUME_NAME -o jsonpath='{.status.state}' 2>/dev/null | grep -q "detached"; do
+          STATE=$(kubectl get volumes.longhorn.io -n longhorn-system $VOLUME_NAME -o jsonpath='{.status.state}' 2>/dev/null || echo "creating")
+          echo "   State: $STATE"
+          sleep 5
+        done
+        echo "   ✅ Volume ready"
+        echo ""
+
+        echo "4. Creating PV..."
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: $VOLUME_NAME
+        spec:
+          capacity:
+            storage: ${SIZE_GI}Gi
+          volumeMode: Filesystem
+          accessModes:
+            - ReadWriteOnce
+          persistentVolumeReclaimPolicy: Retain
+          storageClassName: longhorn
+          csi:
+            driver: driver.longhorn.io
+            volumeHandle: $VOLUME_NAME
+            fsType: ext4
+        EOF
+        echo "   ✅ PV created"
+        echo ""
+
+        echo "5. Creating PVC..."
+        kubectl create namespace {{.NAMESPACE}} --dry-run=client -o yaml | kubectl apply -f -
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.PVC_NAME}}
           namespace: {{.NAMESPACE}}
         spec:
-          method: barmanObjectStore
-          cluster:
-            name: {{.CLUSTER}}
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: longhorn
+          volumeName: $VOLUME_NAME
+          resources:
+            requests:
+              storage: ${SIZE_GI}Gi
         EOF
-      - echo "Backup initiated. Check status with 'task cnpg:status'"
+        echo "   ✅ PVC created"
+        echo ""
+
+        echo "=== Restore complete! ==="
+        echo ""
+        echo "Volume: $VOLUME_NAME"
+        echo "PVC: {{.NAMESPACE}}/{{.PVC_NAME}}"
+        echo ""
+        echo "The workload using this PVC will automatically attach to the restored data."
+
+  dr:restore-all:
+    desc: List all PVCs that can be restored (run after hard reset)
+    cmds:
+      - |
+        echo "=== Available PVC Restorations ==="
+        echo "Run these commands to restore your data:"
+        echo ""
+        kubectl get backups.longhorn.io -n longhorn-system -o json 2>/dev/null | \
+          jq -r '.items[] | select(.status.state == "Completed") | (.status.labels.KubernetesStatus | fromjson) as $k | "task dr:restore PVC=\($k.namespace)/\($k.pvcName)"' | \
+          sort | uniq || echo "No backups found - is Longhorn running and connected to NAS?"
+        echo ""
+        echo "Note: Restore PVCs BEFORE Flux creates the workloads, or suspend Flux first."
 
   # =============================================================================
   # Cleanup

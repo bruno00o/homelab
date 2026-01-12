@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: trivy-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: trivy
+      rules:
+        - alert: TrivyCriticalVulnerabilityFound
+          expr: sum by (image_repository, image_tag, namespace) (trivy_image_vulnerabilities{severity="Critical"}) > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Critical CVE detected"
+            description: "Image {{ $labels.image_repository }}:{{ $labels.image_tag }} in {{ $labels.namespace }} contains {{ $value }} CRITICAL vulnerability(ies)."
+
+        - alert: TrivyHighVulnerabilityFound
+          expr: sum by (image_repository, image_tag, namespace) (trivy_image_vulnerabilities{severity="High"}) > 5
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Multiple HIGH CVEs detected"
+            description: "Image {{ $labels.image_repository }}:{{ $labels.image_tag }} in {{ $labels.namespace }} contains {{ $value }} HIGH vulnerabilities."

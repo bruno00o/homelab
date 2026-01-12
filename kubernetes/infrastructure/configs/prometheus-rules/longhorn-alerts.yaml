@@ -1,0 +1,77 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: longhorn-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: longhorn
+      rules:
+        # Volume health alerts
+        - alert: LonghornVolumeDegraded
+          expr: longhorn_volume_robustness == 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn volume degraded"
+            description: "Volume {{ $labels.volume }} is degraded (insufficient replicas)."
+
+        - alert: LonghornVolumeFaulted
+          expr: longhorn_volume_robustness == 3
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume faulted"
+            description: "Volume {{ $labels.volume }} has faulted (no healthy replicas). Data loss risk!"
+
+        # Node health alerts
+        - alert: LonghornNodeDown
+          expr: longhorn_node_status{condition="ready"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn node unavailable"
+            description: "Node {{ $labels.node }} is no longer available for Longhorn storage."
+
+        # Storage alerts
+        - alert: LonghornNodeStorageFull
+          expr: (longhorn_node_storage_usage_bytes / longhorn_node_storage_capacity_bytes) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn storage almost full"
+            description: "Node {{ $labels.node }} is using {{ $value | printf \"%.1f\" }}% of its Longhorn storage capacity."
+
+        - alert: LonghornNodeStorageCritical
+          expr: (longhorn_node_storage_usage_bytes / longhorn_node_storage_capacity_bytes) * 100 > 95
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn storage critical"
+            description: "Node {{ $labels.node }} is using {{ $value | printf \"%.1f\" }}% of storage. Immediate action required!"
+
+        # Backup alerts - based on recurring job schedule (daily at 2am)
+        # Alert if no backup completed in the last 26 hours (gives 2h buffer after 2am schedule)
+        - alert: LonghornBackupMissing
+          expr: |
+            (
+              count(longhorn_volume_robustness) > 0
+            )
+            unless on()
+            (
+              count(longhorn_backup_state == 1) > 0
+            )
+          for: 26h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No recent Longhorn backup"
+            description: "No Longhorn backup has completed in the last 26 hours. Check NFS connectivity."

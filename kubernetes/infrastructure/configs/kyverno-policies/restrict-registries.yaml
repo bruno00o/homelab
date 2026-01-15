@@ -24,8 +24,8 @@ spec:
                 - kyverno-system
                 - trivy-system
       validate:
-        message: "Images must come from approved registries (ghcr.io, docker.io, quay.io, registry.k8s.io, gcr.io, longhornio)"
+        message: "Images must come from approved registries (ghcr.io, docker.io, quay.io, registry.k8s.io, gcr.io, lscr.io, longhornio, docker.dragonflydb.io)"
         pattern:
           spec:
             containers:
-              - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/* | longhornio/*"
+              - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/* | longhornio/* | docker.dragonflydb.io/*"

@@ -12,4 +12,5 @@ resources:
   - loki
   - trivy-operator
   - kyverno
+  - kyverno-policies
   - traefik

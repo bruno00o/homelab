@@ -4,7 +4,6 @@ resources:
   - issuers.yaml
   - traefik
   - network-policies
-  - kyverno-policies
   - grafana-dashboards
   - longhorn
   - coredns

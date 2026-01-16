@@ -60,6 +60,7 @@ spec:
 
         # Backup alerts - based on recurring job schedule (daily at 2am)
         # Alert if no backup completed in the last 26 hours (gives 2h buffer after 2am schedule)
+        # longhorn_backup_state: 0=Unknown, 1=InProgress, 2=Error, 3=Completed
         - alert: LonghornBackupMissing
           expr: |
             (
@@ -67,7 +68,7 @@ spec:
             )
             unless on()
             (
-              count(longhorn_backup_state == 1) > 0
+              count(longhorn_backup_state == 3) > 0
             )
           for: 26h
           labels:

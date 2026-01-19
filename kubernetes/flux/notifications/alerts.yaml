@@ -18,3 +18,6 @@ spec:
   exclusionList:
     - ".*upgrade.*checksum.*"
     - ".*no changes.*"
+    - "^Dependencies do not meet ready condition, retrying in.*"
+    - "^unable to clone '.*': dial tcp: .*: server misbehaving$"
+    - "^HelmChart '.*' is not ready$"

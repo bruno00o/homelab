@@ -49,10 +49,8 @@ spec:
       enabled: false
     ports:
       web:
-        redirections:
-          entryPoint:
-            to: websecure
-            scheme: https
+        redirectTo:
+          port: websecure
     ingressRoute:
       dashboard:
         enabled: true

@@ -42,6 +42,8 @@ nodes:
     networkInterfaces:
       - interface: enp1s0
         dhcp: true
+        vip:
+          ip: 192.168.1.9
     patches:
       - |-
         machine:
@@ -58,6 +60,8 @@ nodes:
     networkInterfaces:
       - interface: enp1s0
         dhcp: true
+        vip:
+          ip: 192.168.1.9
     patches:
       - |-
         machine:

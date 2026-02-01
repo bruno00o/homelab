@@ -12,7 +12,7 @@ spec:
       rules:
         - alert: TrivyCriticalVulnerabilityFound
           expr: sum by (image_repository, image_tag, namespace) (trivy_image_vulnerabilities{severity="Critical"}) > 0
-          for: 5m
+          for: 1h
           labels:
             severity: critical
           annotations:
@@ -21,7 +21,7 @@ spec:
 
         - alert: TrivyHighVulnerabilityFound
           expr: sum by (image_repository, image_tag, namespace) (trivy_image_vulnerabilities{severity="High"}) > 5
-          for: 15m
+          for: 6h
           labels:
             severity: warning
           annotations:

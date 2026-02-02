@@ -194,7 +194,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: prometheus-operator
+      app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
   policyTypes:
     - Egress
   egress:
@@ -212,15 +212,11 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: prometheus-operator
+      app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
   policyTypes:
     - Ingress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
+    - ports:
         - protocol: TCP
           port: 10250
 ---

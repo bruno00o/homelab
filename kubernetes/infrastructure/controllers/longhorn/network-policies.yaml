@@ -98,8 +98,6 @@ spec:
     - from:
         - ipBlock:
             cidr: 192.168.1.0/24
-        - ipBlock:
-            cidr: 10.244.0.0/16
       ports:
         - protocol: TCP
           port: 8000
@@ -139,3 +137,20 @@ spec:
           port: 9502
         - protocol: TCP
           port: 9503
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: longhorn-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app: longhorn-ui
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

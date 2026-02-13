@@ -68,8 +68,6 @@ spec:
     - from:
         - ipBlock:
             cidr: 192.168.1.0/24
-        - ipBlock:
-            cidr: 10.244.0.0/16
       ports:
         - protocol: TCP
           port: 80
@@ -273,3 +271,25 @@ spec:
       ports:
         - protocol: TCP
           port: 9187
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: authentik
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: authentik
+      app.kubernetes.io/component: server
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "9000"
+              protocol: TCP
+            - port: "9443"
+              protocol: TCP

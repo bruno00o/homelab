@@ -45,8 +45,6 @@ spec:
     - from:
         - ipBlock:
             cidr: 192.168.1.0/24
-        - ipBlock:
-            cidr: 10.244.0.0/16
       ports:
         - protocol: TCP
           port: 7575
@@ -88,3 +86,20 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: homarr
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homarr
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "7575"
+              protocol: TCP

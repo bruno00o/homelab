@@ -80,8 +80,6 @@ spec:
     - from:
         - ipBlock:
             cidr: 192.168.1.0/24
-        - ipBlock:
-            cidr: 10.244.0.0/16
       ports:
         - protocol: TCP
           port: 3000
@@ -249,3 +247,20 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP

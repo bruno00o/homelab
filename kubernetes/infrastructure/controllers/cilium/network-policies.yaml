@@ -14,8 +14,23 @@ spec:
     - from:
         - ipBlock:
             cidr: 192.168.1.0/24
-        - ipBlock:
-            cidr: 10.244.0.0/16
       ports:
         - protocol: TCP
           port: 8081
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: kube-system
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s-app: hubble-ui
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP

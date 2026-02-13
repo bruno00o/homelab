@@ -188,5 +188,6 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: adguard-web
-          port: 80
+        - name: authentik-server
+          namespace: authentik
+          port: 9000

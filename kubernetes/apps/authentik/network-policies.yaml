@@ -193,7 +193,7 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: dragonfly-system
+              kubernetes.io/metadata.name: valkey-system
       ports:
         - protocol: TCP
           port: 6379

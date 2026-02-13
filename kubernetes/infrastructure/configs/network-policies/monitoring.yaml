@@ -33,7 +33,9 @@ spec:
         - protocol: TCP
           port: 2381 # etcd metrics
         - protocol: TCP
-          port: 6379 # Dragonfly
+          port: 6379 # Valkey
+        - protocol: TCP
+          port: 9121 # Valkey metrics exporter
         - protocol: TCP
           port: 9943 # cert-manager
         - protocol: TCP

@@ -126,7 +126,7 @@ spec:
                   name: homarr-secrets
                   key: SECRET_ENCRYPTION_KEY
             - name: REDIS_HOST
-              value: dragonfly.dragonfly-system.svc.cluster.local
+              value: valkey.valkey-system.svc.cluster.local
             - name: REDIS_PORT
               value: "6379"
           volumeMounts:

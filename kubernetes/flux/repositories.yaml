@@ -56,12 +56,11 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: dragonfly
+  name: valkey
   namespace: flux-system
 spec:
-  type: oci
   interval: 1h
-  url: oci://ghcr.io/dragonflydb/dragonfly/helm
+  url: https://valkey.io/valkey-helm/
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

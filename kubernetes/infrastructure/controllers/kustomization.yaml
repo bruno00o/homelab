@@ -6,7 +6,7 @@ resources:
   - longhorn
   - monitoring
   - cloudnative-pg
-  - dragonfly
+  - valkey
   - reloader
   - spegel
   - loki

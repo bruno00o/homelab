@@ -69,11 +69,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-ingress-from-authentik
-  namespace: dragonfly-system
+  namespace: valkey-system
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/name: valkey
   policyTypes:
     - Ingress
   ingress:
@@ -88,12 +88,32 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-prometheus-scrape
-  namespace: dragonfly-system
+  name: allow-ingress-from-homarr
+  namespace: valkey-system
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/name: valkey
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: homarr
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: valkey-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: valkey
   policyTypes:
     - Ingress
   ingress:
@@ -104,3 +124,5 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+        - protocol: TCP
+          port: 9121

@@ -94,8 +94,8 @@ spec:
       namespace: cnpg-system
     - apiVersion: apps/v1
       kind: Deployment
-      name: dragonfly
-      namespace: dragonfly-system
+      name: valkey
+      namespace: valkey-system
     - apiVersion: apps/v1
       kind: Deployment
       name: kube-prometheus-stack-grafana

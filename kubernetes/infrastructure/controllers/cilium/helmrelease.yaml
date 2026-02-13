@@ -99,6 +99,9 @@ spec:
           cpu: 250m
           memory: 512Mi
 
+    gatewayAPI:
+      enabled: true
+
     hubble:
       enabled: true
       metrics:

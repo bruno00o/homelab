@@ -15,4 +15,3 @@ resources:
   - trivy-operator
   - kyverno
   - kyverno-policies
-  - traefik

@@ -4,4 +4,5 @@ resources:
   - namespace.yaml
   - homarr.yaml
   - homarr-secrets.sops.yaml
+  - reference-grant.yaml
   - network-policies.yaml

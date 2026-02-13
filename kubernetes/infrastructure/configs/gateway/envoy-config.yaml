@@ -1,0 +1,110 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumEnvoyConfig
+metadata:
+  name: gateway-global-filters
+  namespace: kube-system
+spec:
+  services:
+    - name: cilium-gateway-main-gateway
+      namespace: kube-system
+  resources:
+    - "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+      stat_prefix: gateway_global
+      http_filters:
+        - name: envoy.filters.http.local_ratelimit
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+            stat_prefix: http_local_rate_limiter
+            token_bucket:
+              max_tokens: 200
+              tokens_per_fill: 100
+              fill_interval: 1s
+            filter_enabled:
+              runtime_key: local_rate_limit_enabled
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+            filter_enforced:
+              runtime_key: local_rate_limit_enforced
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+        - name: envoy.filters.http.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            default_source_code:
+              inline_string: |
+                function envoy_on_response(response_handle)
+                  response_handle:headers():add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+                  response_handle:headers():add("X-Content-Type-Options", "nosniff")
+                  response_handle:headers():add("X-Frame-Options", "SAMEORIGIN")
+                  response_handle:headers():add("X-XSS-Protection", "1; mode=block")
+                end
+        - name: envoy.filters.http.router
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+---
+apiVersion: cilium.io/v2
+kind: CiliumEnvoyConfig
+metadata:
+  name: gateway-ext-authz
+  namespace: kube-system
+spec:
+  backendServices:
+    - name: hubble-ui
+      namespace: kube-system
+    - name: longhorn-frontend
+      namespace: longhorn-system
+    - name: adguard-web
+      namespace: adguard
+    - name: homarr
+      namespace: homarr
+  resources:
+    - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+      name: authentik-ext-authz
+      type: STRICT_DNS
+      connect_timeout: 5s
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: authentik-ext-authz
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: authentik-server.authentik.svc.cluster.local
+                      port_value: 80
+    - "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+      stat_prefix: gateway_ext_authz
+      http_filters:
+        - name: envoy.filters.http.ext_authz
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+            transport_api_version: V3
+            http_service:
+              server_uri:
+                uri: authentik-server.authentik.svc.cluster.local
+                cluster: authentik-ext-authz
+                timeout: 10s
+              path_prefix: /outpost.goauthentik.io/auth/traefik
+              authorization_request:
+                allowed_headers:
+                  patterns:
+                    - exact: cookie
+                    - exact: authorization
+                headers_to_add:
+                  - key: X-Forwarded-Proto
+                    value: https
+              authorization_response:
+                allowed_upstream_headers:
+                  patterns:
+                    - exact: x-authentik-username
+                    - exact: x-authentik-groups
+                    - exact: x-authentik-email
+                    - exact: x-authentik-name
+                    - exact: x-authentik-uid
+            failure_mode_allow: false
+        - name: envoy.filters.http.router
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router

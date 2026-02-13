@@ -56,17 +56,6 @@ data:
           external_host: https://longhorn.merry.home.arpa
 
       - model: authentik_providers_proxy.proxyprovider
-        id: provider-traefik
-        state: present
-        identifiers:
-          name: Traefik Proxy
-        attrs:
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          mode: forward_single
-          external_host: https://traefik.merry.home.arpa
-
-      - model: authentik_providers_proxy.proxyprovider
         id: provider-adguard
         state: present
         identifiers:
@@ -170,30 +159,6 @@ data:
           negate: false
           timeout: 30
 
-      # Traefik Dashboard (admins only)
-      - model: authentik_core.application
-        id: app-traefik
-        state: present
-        identifiers:
-          slug: traefik
-        attrs:
-          name: Traefik Dashboard
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
-          meta_launch_url: https://traefik.merry.home.arpa
-          policy_engine_mode: all
-
-      - model: authentik_policies.policybinding
-        id: binding-traefik-admin
-        state: present
-        identifiers:
-          order: 0
-          target: !Find [authentik_core.application, [slug, traefik]]
-          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
-        attrs:
-          enabled: true
-          negate: false
-          timeout: 30
-
       # AdGuard (admins only)
       - model: authentik_core.application
         id: app-adguard
@@ -266,6 +231,5 @@ data:
           providers:
             - !Find [authentik_providers_proxy.proxyprovider, [name, Hubble Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Longhorn Proxy]]
-            - !Find [authentik_providers_proxy.proxyprovider, [name, Traefik Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, AdGuard Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Homarr Proxy]]

@@ -18,8 +18,8 @@ spec:
       interval: 1h
 
   dependsOn:
-    - name: traefik
-      namespace: traefik
+    - name: cilium
+      namespace: kube-system
     - name: longhorn
       namespace: longhorn-system
     - name: cloudnative-pg

@@ -6,9 +6,8 @@ resources:
   - postgres-cluster.yaml
   - helmrelease.yaml
   - certificate.yaml
-  - ingressroute.yaml
-  - resources/middleware.yaml
-  - resources/outpost-route.yaml
+  - httproute.yaml
+  - reference-grant.yaml
   - blueprints/
   - pdb.yaml
   - network-policies.yaml

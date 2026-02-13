@@ -124,13 +124,6 @@
       "labels": ["infrastructure", "storage"]
     },
     {
-      "description": "Group Traefik",
-      "matchPackagePatterns": ["^traefik"],
-      "groupName": "Traefik",
-      "labels": ["infrastructure", "networking"]
-    },
-
-    {
       "description": "Group monitoring stack",
       "matchPackagePatterns": [
         "prometheus",

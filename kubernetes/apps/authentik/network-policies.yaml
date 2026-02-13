@@ -66,9 +66,8 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
+        - ipBlock:
+            cidr: 192.168.1.0/24
       ports:
         - protocol: TCP
           port: 80

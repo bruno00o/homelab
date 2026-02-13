@@ -113,6 +113,10 @@ spec:
       name: loki
       namespace: loki-system
     - apiVersion: apps/v1
+      kind: StatefulSet
+      name: tempo
+      namespace: tempo-system
+    - apiVersion: apps/v1
       kind: Deployment
       name: trivy-operator
       namespace: trivy-system

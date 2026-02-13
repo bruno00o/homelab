@@ -1,0 +1,75 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo
+  namespace: tempo-system
+spec:
+  interval: 30m
+  timeout: 15m
+
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
+    - name: longhorn
+      namespace: longhorn-system
+
+  chart:
+    spec:
+      chart: tempo
+      version: "1.24.4"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+      interval: 1h
+
+  install:
+    remediation:
+      retries: 3
+
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  uninstall:
+    keepHistory: false
+
+  values:
+    tempo:
+      storage:
+        trace:
+          backend: local
+          local:
+            path: /var/tempo/traces
+          wal:
+            path: /var/tempo/wal
+      retention: 168h  # 7 days
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "0.0.0.0:4317"
+            http:
+              endpoint: "0.0.0.0:4318"
+
+    persistence:
+      enabled: true
+      storageClassName: ${DEFAULT_STORAGE_CLASS}
+      size: 10Gi
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    gateway:
+      enabled: false
+
+    tempoQuery:
+      enabled: false

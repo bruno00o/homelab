@@ -123,6 +123,17 @@ spec:
           url: http://loki.loki-system.svc:3100
           access: proxy
           isDefault: false
+        - name: Tempo
+          type: tempo
+          url: http://tempo.tempo-system.svc:3100
+          access: proxy
+          isDefault: false
+          jsonData:
+            tracesToLogsV2:
+              datasourceUid: loki
+              tags: ["job", "namespace", "pod"]
+            nodeGraph:
+              enabled: true
 
     prometheus:
       prometheusSpec:

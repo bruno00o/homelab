@@ -125,7 +125,7 @@ spec:
           isDefault: false
         - name: Tempo
           type: tempo
-          url: http://tempo.tempo-system.svc:3100
+          url: http://tempo.tempo-system.svc:3200
           access: proxy
           isDefault: false
           jsonData:

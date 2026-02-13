@@ -54,19 +54,24 @@ spec:
               endpoint: "0.0.0.0:4317"
             http:
               endpoint: "0.0.0.0:4318"
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
 
     persistence:
       enabled: true
       storageClassName: ${DEFAULT_STORAGE_CLASS}
       size: 10Gi
-
-    resources:
-      requests:
-        cpu: 50m
-        memory: 256Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
 
     gateway:
       enabled: false

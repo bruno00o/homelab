@@ -54,6 +54,8 @@ spec:
           port: 10250 # Kubelet metrics
         - protocol: TCP
           port: 3101 # Promtail metrics
+        - protocol: TCP
+          port: 3200 # Tempo
     # Kubernetes API for service discovery
     - ports:
         - protocol: TCP
@@ -134,7 +136,7 @@ spec:
               kubernetes.io/metadata.name: tempo-system
       ports:
         - protocol: TCP
-          port: 3100
+          port: 3200
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

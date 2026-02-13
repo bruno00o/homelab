@@ -31,6 +31,13 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
     dataStorage:
       enabled: true
       requestedSize: 2Gi

@@ -99,6 +99,9 @@ spec:
           cpu: 250m
           memory: 512Mi
 
+    envoyConfig:
+      enabled: true
+
     gatewayAPI:
       enabled: true
 

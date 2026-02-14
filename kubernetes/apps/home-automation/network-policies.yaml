@@ -47,7 +47,7 @@ spec:
             cidr: 192.168.1.0/24
       ports:
         - protocol: TCP
-          port: 8971
+          port: 5000
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

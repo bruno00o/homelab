@@ -17,4 +17,4 @@ spec:
             value: /
       backendRefs:
         - name: frigate
-          port: 8971
+          port: 5000

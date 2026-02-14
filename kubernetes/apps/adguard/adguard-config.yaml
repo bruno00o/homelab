@@ -48,6 +48,9 @@ data:
         - domain: '*.merry.home.arpa'
           answer: ${LB_GATEWAY}
           enabled: true
+        - domain: unifi.merry.home.arpa
+          answer: ${LB_UNIFI}
+          enabled: true
       filtering_enabled: true
       rewrites_enabled: true
       protection_enabled: true

@@ -156,6 +156,31 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       initContainers:
+        - name: clean-stale-config
+          image: docker.io/busybox:1.37
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          command:
+            - sh
+            - -c
+            - |
+              if grep -q '~MONGO_' /config/data/system.properties 2>/dev/null; then
+                echo "Removing stale system.properties with unsubstituted placeholders..."
+                rm -f /config/data/system.properties
+              fi
+          volumeMounts:
+            - name: config
+              mountPath: /config
         - name: wait-for-mongodb
           image: docker.io/busybox:1.37
           securityContext:
@@ -188,7 +213,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-              add: ["CHOWN", "SETUID", "SETGID"]
+              add: ["CHOWN", "DAC_OVERRIDE", "FOWNER", "SETUID", "SETGID"]
           env:
             - name: PUID
               value: "1000"

@@ -208,7 +208,7 @@ spec:
       containers:
         - name: unifi
           # renovate: datasource=docker depName=linuxserver/unifi-network-application
-          image: lscr.io/linuxserver/unifi-network-application:10.1.84
+          image: lscr.io/linuxserver/unifi-network-application:10.1.85
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

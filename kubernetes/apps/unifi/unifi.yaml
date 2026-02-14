@@ -1,0 +1,287 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-data
+  namespace: unifi
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ${DEFAULT_STORAGE_CLASS}
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: unifi
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb
+        app.kubernetes.io/instance: unifi
+    spec:
+      securityContext:
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mongodb
+          # renovate: datasource=docker depName=mongo
+          image: docker.io/mongo:7.0
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: root
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-secrets
+                  key: MONGO_INITDB_ROOT_PASSWORD
+            - name: MONGO_USER
+              value: unifi
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-secrets
+                  key: MONGO_PASS
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d/
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mongodb-data
+        - name: init-script
+          configMap:
+            name: mongodb-init-script
+            defaultMode: 0755
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: unifi
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mongodb
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: 27017
+      protocol: TCP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: unifi-config
+  namespace: unifi
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ${DEFAULT_STORAGE_CLASS}
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi
+  namespace: unifi
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: unifi
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: unifi
+        app.kubernetes.io/instance: unifi
+    spec:
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-mongodb
+          image: docker.io/busybox:1.37
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MongoDB to be ready..."
+              until nc -zv mongodb 27017; do
+                echo "MongoDB not ready, retrying in 5s..."
+                sleep 5
+              done
+              echo "MongoDB is ready."
+      containers:
+        - name: unifi
+          # renovate: datasource=docker depName=linuxserver/unifi-network-application
+          image: lscr.io/linuxserver/unifi-network-application:10.1.84
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["CHOWN", "SETUID", "SETGID"]
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: ${TIMEZONE}
+            - name: MONGO_USER
+              value: unifi
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-secrets
+                  key: MONGO_PASS
+            - name: MONGO_HOST
+              value: mongodb.unifi.svc.cluster.local
+            - name: MONGO_PORT
+              value: "27017"
+            - name: MONGO_DBNAME
+              value: unifi
+            - name: MONGO_AUTHSOURCE
+              value: admin
+            - name: MEM_LIMIT
+              value: "1024"
+            - name: MEM_STARTUP
+              value: "1024"
+          ports:
+            - name: web-ui
+              containerPort: 8443
+              protocol: TCP
+            - name: device-inform
+              containerPort: 8080
+              protocol: TCP
+            - name: stun
+              containerPort: 3478
+              protocol: UDP
+            - name: discovery
+              containerPort: 10001
+              protocol: UDP
+          livenessProbe:
+            tcpSocket:
+              port: 8443
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8443
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: unifi-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unifi
+  namespace: unifi
+  annotations:
+    io.cilium/lb-ipam-ips: ${LB_UNIFI}
+spec:
+  type: LoadBalancer
+  loadBalancerIP: ${LB_UNIFI}
+  selector:
+    app.kubernetes.io/name: unifi
+  ports:
+    - name: web-ui
+      port: 8443
+      targetPort: 8443
+      protocol: TCP
+    - name: device-inform
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: stun
+      port: 3478
+      targetPort: 3478
+      protocol: UDP
+    - name: discovery
+      port: 10001
+      targetPort: 10001
+      protocol: UDP

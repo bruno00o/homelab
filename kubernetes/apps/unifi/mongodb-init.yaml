@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-init-script
+  namespace: unifi
+data:
+  init-unifi.sh: |
+    #!/bin/bash
+    if [ -f /data/db/.mongodb_initialized ]; then
+      echo "MongoDB already initialized, skipping."
+      exit 0
+    fi
+
+    echo "Initializing UniFi MongoDB user..."
+    mongosh --host localhost -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin <<EOJS
+    use unifi;
+    db.createUser({
+      user: "$MONGO_USER",
+      pwd: "$MONGO_PASS",
+      roles: [
+        { role: "dbOwner", db: "unifi" },
+        { role: "dbOwner", db: "unifi_stat" },
+        { role: "dbOwner", db: "unifi_audit" }
+      ]
+    });
+    EOJS
+
+    touch /data/db/.mongodb_initialized
+    echo "MongoDB initialization complete."

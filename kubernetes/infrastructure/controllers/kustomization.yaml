@@ -15,3 +15,4 @@ resources:
   - trivy-operator
   - kyverno
   - kyverno-policies
+  - intel-gpu-plugin

@@ -124,6 +124,10 @@ spec:
       kind: Deployment
       name: kyverno-admission-controller
       namespace: kyverno-system
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: intel-gpu-plugin
+      namespace: kube-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -202,3 +206,11 @@ spec:
       kind: Deployment
       name: authentik-worker
       namespace: authentik
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: mosquitto
+      namespace: home-automation
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: frigate
+      namespace: home-automation

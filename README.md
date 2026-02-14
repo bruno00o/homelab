@@ -35,7 +35,7 @@ A GitOps-managed Kubernetes homelab running on Talos Linux, themed after One Pie
 | [Flux](https://fluxcd.io) | GitOps operator |
 | [Cilium](https://cilium.io) | CNI with L2 LoadBalancer |
 | [Longhorn](https://longhorn.io) | Distributed storage |
-| [Traefik](https://traefik.io) | Reverse proxy & ingress |
+| [Cilium Gateway API](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/) | Ingress gateway |
 | [cert-manager](https://cert-manager.io) | Certificate management |
 | [SOPS](https://github.com/mozilla/sops) | Secret encryption |
 
@@ -45,8 +45,9 @@ A GitOps-managed Kubernetes homelab running on Talos Linux, themed after One Pie
 |---------|-----|
 | Grafana | `https://grafana.internal` |
 | Longhorn | `https://longhorn.internal` |
-| Traefik | `https://traefik.internal` |
 | AdGuard | `https://adguard.internal` |
+| Homarr | `https://homarr.internal` |
+| Hubble | `https://hubble.internal` |
 
 ## 📁 Repository Structure
 

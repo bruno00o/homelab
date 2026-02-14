@@ -312,14 +312,14 @@ spec:
               kubernetes.io/metadata.name: kube-system
       ports:
         - protocol: TCP
-          port: 80
+          port: 8081
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: longhorn-system
       ports:
         - protocol: TCP
-          port: 80
+          port: 8000
     - to:
         - namespaceSelector:
             matchLabels:

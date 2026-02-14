@@ -51,6 +51,9 @@ data:
         - domain: unifi.merry.home.arpa
           answer: ${LB_UNIFI}
           enabled: true
+        - domain: unifi
+          answer: ${LB_UNIFI}
+          enabled: true
       filtering_enabled: true
       rewrites_enabled: true
       protection_enabled: true

@@ -109,12 +109,11 @@ spec:
         hwaccel_args: preset-vaapi
 
       cameras:
-        # TODO: Replace with actual RTSP URLs
         camera_1:
           enabled: true
           ffmpeg:
             inputs:
-              - path: rtsp://USER:PASS@CAMERA_1_IP:554/stream1
+              - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@192.168.1.38:554/H264/ch1/main/av_stream
                 roles:
                   - detect
                   - record
@@ -126,7 +125,7 @@ spec:
           enabled: true
           ffmpeg:
             inputs:
-              - path: rtsp://USER:PASS@CAMERA_2_IP:554/stream1
+              - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@192.168.1.249:554/H264/ch1/main/av_stream
                 roles:
                   - detect
                   - record

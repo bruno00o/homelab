@@ -150,6 +150,7 @@ spec:
         app.kubernetes.io/name: unifi
         app.kubernetes.io/instance: unifi
     spec:
+      enableServiceLinks: false
       securityContext:
         fsGroup: 1000
         seccompProfile:

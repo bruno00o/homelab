@@ -111,15 +111,6 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: intel
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://intel.github.io/helm-charts/
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
   name: blakeshome
   namespace: flux-system
 spec:

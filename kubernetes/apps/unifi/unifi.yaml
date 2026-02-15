@@ -45,6 +45,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+              add: ["CHOWN", "DAC_OVERRIDE", "FOWNER", "SETUID", "SETGID"]
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               value: root

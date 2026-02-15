@@ -6,3 +6,4 @@ resources:
   - homarr-secrets.sops.yaml
   - reference-grant.yaml
   - network-policies.yaml
+  - pdb.yaml

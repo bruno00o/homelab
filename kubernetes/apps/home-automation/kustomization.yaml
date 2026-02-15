@@ -11,3 +11,6 @@ resources:
   - home-assistant-httproute.yaml
   - reference-grant.yaml
   - network-policies.yaml
+  - mosquitto-pdb.yaml
+  - frigate-pdb.yaml
+  - home-assistant-pdb.yaml

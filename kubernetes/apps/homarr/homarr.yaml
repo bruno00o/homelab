@@ -95,8 +95,6 @@ spec:
           image: ghcr.io/homarr-labs/homarr:v1.53.0
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
           ports:
             - name: http
               containerPort: 7575

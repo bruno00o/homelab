@@ -54,7 +54,7 @@ spec:
     env:
       - name: TZ
         value: ${TIMEZONE}
-      - name: REQUESTS_CA_BUNDLE
+      - name: SSL_CERT_FILE
         value: /etc/ssl/combined/ca-certificates.crt
 
     additionalVolumes:

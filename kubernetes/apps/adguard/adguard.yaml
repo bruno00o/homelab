@@ -68,6 +68,7 @@ spec:
               mountPath: /opt/adguardhome/conf
       containers:
         - name: adguard-home
+          # renovate: datasource=docker depName=adguard/adguardhome
           image: docker.io/adguard/adguardhome:v0.107.71
           securityContext:
             allowPrivilegeEscalation: false

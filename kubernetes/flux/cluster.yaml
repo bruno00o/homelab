@@ -214,3 +214,15 @@ spec:
       kind: Deployment
       name: frigate
       namespace: home-automation
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: homarr
+      namespace: homarr
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: home-assistant
+      namespace: home-automation
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: unifi
+      namespace: unifi

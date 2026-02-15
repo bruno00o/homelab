@@ -144,11 +144,16 @@ spec:
                   key: AUTH_OIDC_CLIENT_SECRET
             - name: AUTH_OIDC_AUTO_LOGIN
               value: "true"
+            - name: NODE_EXTRA_CA_CERTS
+              value: /etc/ssl/custom/ca.crt
           volumeMounts:
             - name: config
               mountPath: /app/data/configs
             - name: data
               mountPath: /data
+            - name: ca-cert
+              mountPath: /etc/ssl/custom
+              readOnly: true
           resources:
             requests:
               cpu: 100m
@@ -163,6 +168,12 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: homarr-data
+        - name: ca-cert
+          secret:
+            secretName: homarr-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
 ---
 apiVersion: v1
 kind: Service

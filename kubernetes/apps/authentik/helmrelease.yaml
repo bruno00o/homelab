@@ -73,6 +73,11 @@ spec:
             secretKeyRef:
               name: authentik-secrets
               key: grafana_client_secret
+        - name: AUTHENTIK_HA_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secrets
+              key: ha_client_secret
 
     authentik:
       error_reporting:

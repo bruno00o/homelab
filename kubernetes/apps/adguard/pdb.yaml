@@ -7,4 +7,4 @@ spec:
   maxUnavailable: 0
   selector:
     matchLabels:
-      app: adguard-home
+      app.kubernetes.io/name: adguard-home

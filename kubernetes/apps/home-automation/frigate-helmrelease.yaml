@@ -124,6 +124,16 @@ spec:
             width: 1280
             height: 720
             fps: 5
+          onvif:
+            host: 192.168.1.38
+            port: 80
+            user: admin
+            password: ${FRIGATE_CAM1_PASSWORD}
+          ptz:
+            autotracker:
+              enabled: true
+              track:
+                - person
         camera_2:
           enabled: true
           ffmpeg:
@@ -139,6 +149,16 @@ spec:
             width: 1280
             height: 720
             fps: 5
+          onvif:
+            host: 192.168.1.249
+            port: 80
+            user: admin
+            password: ${FRIGATE_CAM2_PASSWORD}
+          ptz:
+            autotracker:
+              enabled: true
+              track:
+                - person
 
       record:
         enabled: true

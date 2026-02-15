@@ -90,6 +90,15 @@ spec:
       periodSeconds: 10
       failureThreshold: 30
 
+    livenessProbe:
+      httpGet:
+        path: /
+        port: http
+      initialDelaySeconds: 0
+      periodSeconds: 30
+      failureThreshold: 5
+      timeoutSeconds: 10
+
     configuration:
       enabled: true
       forceInit: false

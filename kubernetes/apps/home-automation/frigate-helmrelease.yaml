@@ -84,6 +84,16 @@ spec:
         enabled: true
         failureThreshold: 30
         periodSeconds: 10
+      liveness:
+        enabled: true
+        initialDelaySeconds: 30
+        periodSeconds: 15
+        failureThreshold: 5
+      readiness:
+        enabled: true
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        failureThreshold: 3
 
     config: |
       mqtt:

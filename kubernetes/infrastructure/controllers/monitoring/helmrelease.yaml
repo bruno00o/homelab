@@ -178,11 +178,6 @@ spec:
             - receiver: "null"
               matchers:
                 - alertname =~ "InfoInhibitor|Watchdog"
-            - receiver: "discord"
-              matchers:
-                - alertname =~ "TrivyCritical.*|TrivyHigh.*"
-              group_by: ["alertname"]
-              repeat_interval: 7d
         receivers:
           - name: "null"
           - name: "discord"

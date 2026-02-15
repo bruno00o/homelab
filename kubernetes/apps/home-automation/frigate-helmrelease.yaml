@@ -117,6 +117,9 @@ spec:
                 roles:
                   - detect
                   - record
+              - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@192.168.1.38:8862/H264/ch1/main/av_stream
+                roles:
+                  - audio
           detect:
             width: 1280
             height: 720
@@ -129,6 +132,9 @@ spec:
                 roles:
                   - detect
                   - record
+              - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@192.168.1.249:8862/H264/ch1/main/av_stream
+                roles:
+                  - audio
           detect:
             width: 1280
             height: 720
@@ -148,6 +154,9 @@ spec:
         enabled: true
         retain:
           default: 14
+
+      audio:
+        enabled: true
 
       objects:
         track:

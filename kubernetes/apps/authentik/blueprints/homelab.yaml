@@ -91,7 +91,6 @@ data:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
 
       - model: authentik_providers_proxy.proxyprovider
         id: provider-unifi

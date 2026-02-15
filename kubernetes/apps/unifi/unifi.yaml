@@ -41,10 +41,6 @@ spec:
         - name: mongodb
           # renovate: datasource=docker depName=mongo
           image: docker.io/mongo:8.2
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               value: root

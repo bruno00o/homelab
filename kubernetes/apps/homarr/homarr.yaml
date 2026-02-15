@@ -129,6 +129,21 @@ spec:
               value: valkey.valkey-system.svc.cluster.local
             - name: REDIS_PORT
               value: "6379"
+            - name: AUTH_PROVIDERS
+              value: "oidc"
+            - name: AUTH_OIDC_CLIENT_NAME
+              value: "Authentik"
+            - name: AUTH_OIDC_ISSUER
+              value: "https://auth.${CLUSTER_DOMAIN}/application/o/homarr/"
+            - name: AUTH_OIDC_CLIENT_ID
+              value: "homarr"
+            - name: AUTH_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: homarr-secrets
+                  key: AUTH_OIDC_CLIENT_SECRET
+            - name: AUTH_OIDC_AUTO_LOGIN
+              value: "true"
           volumeMounts:
             - name: config
               mountPath: /app/data/configs
@@ -194,6 +209,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: authentik-server
-          namespace: authentik
-          port: 80
+        - name: homarr
+          port: 7575

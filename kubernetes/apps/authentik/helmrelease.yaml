@@ -78,6 +78,11 @@ spec:
             secretKeyRef:
               name: authentik-secrets
               key: ha_client_secret
+        - name: AUTHENTIK_HOMARR_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secrets
+              key: homarr_client_secret
 
     authentik:
       error_reporting:

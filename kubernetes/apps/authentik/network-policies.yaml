@@ -330,13 +330,6 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: homarr
-      ports:
-        - protocol: TCP
-          port: 7575
-    - to:
-        - namespaceSelector:
-            matchLabels:
               kubernetes.io/metadata.name: unifi
       ports:
         - protocol: TCP

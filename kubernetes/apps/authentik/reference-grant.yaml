@@ -31,9 +31,6 @@ spec:
       namespace: adguard
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: homarr
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
       namespace: unifi
   to:
     - group: ""

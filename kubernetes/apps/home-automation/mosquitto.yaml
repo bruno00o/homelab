@@ -50,7 +50,7 @@ spec:
       containers:
         - name: mosquitto
           # renovate: datasource=docker depName=docker.io/eclipse-mosquitto
-          image: docker.io/eclipse-mosquitto:2.0.21
+          image: docker.io/eclipse-mosquitto:2.0.22
           securityContext:
             runAsUser: 1883
             runAsGroup: 1883

@@ -55,6 +55,19 @@ spec:
       - name: TZ
         value: ${TIMEZONE}
 
+    additionalVolumes:
+      - name: ca-cert
+        secret:
+          secretName: home-assistant-tls
+          items:
+            - key: ca.crt
+              path: mugiwara-ca.crt
+
+    additionalMounts:
+      - name: ca-cert
+        mountPath: /etc/ssl/custom
+        readOnly: true
+
     resources:
       requests:
         cpu: 200m

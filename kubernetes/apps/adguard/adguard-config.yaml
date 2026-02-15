@@ -45,11 +45,8 @@ data:
         id: 1
     filtering:
       rewrites:
-        - domain: '*.merry.home.arpa'
+        - domain: '*.${CLUSTER_DOMAIN}'
           answer: ${LB_GATEWAY}
-          enabled: true
-        - domain: unifi.merry.home.arpa
-          answer: ${LB_UNIFI}
           enabled: true
         - domain: unifi
           answer: ${LB_UNIFI}

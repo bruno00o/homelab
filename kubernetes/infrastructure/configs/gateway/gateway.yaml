@@ -106,6 +106,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-unifi
+      protocol: HTTPS
+      port: 443
+      hostname: unifi.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: unifi-tls
+            namespace: unifi
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: https-home-assistant
       protocol: HTTPS
       port: 443

@@ -6,3 +6,7 @@ resources:
   - mongodb-init.yaml
   - unifi.yaml
   - network-policies.yaml
+  - certificate.yaml
+  - httproute.yaml
+  - reference-grant.yaml
+  - pdb.yaml

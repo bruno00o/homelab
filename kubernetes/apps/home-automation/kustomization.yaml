@@ -4,7 +4,10 @@ resources:
   - namespace.yaml
   - mosquitto.yaml
   - frigate-helmrelease.yaml
+  - home-assistant-helmrelease.yaml
   - certificate.yaml
+  - home-assistant-certificate.yaml
   - httproute.yaml
+  - home-assistant-httproute.yaml
   - reference-grant.yaml
   - network-policies.yaml

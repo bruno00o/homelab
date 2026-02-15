@@ -116,3 +116,12 @@ metadata:
 spec:
   interval: 1h
   url: https://blakeblackshear.github.io/blakeshome-charts/
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: pajikos
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: http://pajikos.github.io/home-assistant-helm-chart/

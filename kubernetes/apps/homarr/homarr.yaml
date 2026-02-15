@@ -142,10 +142,14 @@ spec:
                 secretKeyRef:
                   name: homarr-secrets
                   key: AUTH_OIDC_CLIENT_SECRET
+            - name: AUTH_OIDC_SCOPE_OVERWRITE
+              value: "openid email profile groups"
             - name: AUTH_OIDC_AUTO_LOGIN
               value: "true"
             - name: NODE_EXTRA_CA_CERTS
               value: /etc/ssl/custom/ca.crt
+            - name: NODE_OPTIONS
+              value: "--use-system-ca"
           volumeMounts:
             - name: config
               mountPath: /app/data/configs

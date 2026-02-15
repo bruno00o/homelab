@@ -129,10 +129,10 @@ spec:
             port: 80
             user: admin
             password: ${FRIGATE_CAM1_PASSWORD}
-          autotracking:
-            enabled: true
-            track:
-              - person
+            autotracking:
+              enabled: true
+              track:
+                - person
         camera_2:
           enabled: true
           ffmpeg:
@@ -153,10 +153,10 @@ spec:
             port: 80
             user: admin
             password: ${FRIGATE_CAM2_PASSWORD}
-          autotracking:
-            enabled: true
-            track:
-              - person
+            autotracking:
+              enabled: true
+              track:
+                - person
 
       record:
         enabled: true

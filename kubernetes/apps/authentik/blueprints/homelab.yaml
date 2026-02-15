@@ -96,6 +96,7 @@ data:
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
           client_type: public
           client_id: home-assistant
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           redirect_uris:
             - matching_mode: strict
               url: https://home-assistant.merry.home.arpa/auth/oidc/callback

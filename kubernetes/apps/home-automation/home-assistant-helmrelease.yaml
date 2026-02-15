@@ -54,23 +54,6 @@ spec:
     env:
       - name: TZ
         value: ${TIMEZONE}
-      - name: SSL_CERT_FILE
-        value: /etc/ssl/combined/ca-certificates.crt
-
-    additionalVolumes:
-      - name: ca-cert
-        secret:
-          secretName: home-assistant-tls
-          items:
-            - key: ca.crt
-              path: ca.crt
-      - name: ssl-combined
-        emptyDir: {}
-
-    additionalMounts:
-      - name: ssl-combined
-        mountPath: /etc/ssl/combined
-        readOnly: true
 
     resources:
       requests:
@@ -115,29 +98,7 @@ spec:
         automation: !include automations.yaml
         script: !include scripts.yaml
         scene: !include scenes.yaml
-      initScript: |-
-        #!/bin/bash
-        set -e
-        # Combine system CAs with internal CA
-        cat /etc/ssl/certs/ca-certificates.crt /mnt/custom-ca/ca.crt > /mnt/ssl-combined/ca-certificates.crt
-        # Original config setup
-        CONFIG_DIR="/config"
-        TEMPLATE_DIR="/config-templates"
-        if [ ! -f "$CONFIG_DIR/configuration.yaml" ]; then
-          cp "$TEMPLATE_DIR/configuration.yaml" "$CONFIG_DIR/configuration.yaml"
-        fi
       initContainer:
         securityContext:
           runAsUser: 0
           allowPrivilegeEscalation: false
-        volumeMounts:
-          - name: init-volume
-            mountPath: /mnt/init/init.sh
-            subPath: init.sh
-          - name: config-volume
-            mountPath: /config-templates
-          - name: ca-cert
-            mountPath: /mnt/custom-ca
-            readOnly: true
-          - name: ssl-combined
-            mountPath: /mnt/ssl-combined

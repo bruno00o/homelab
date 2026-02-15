@@ -40,7 +40,7 @@ spec:
       containers:
         - name: mongodb
           # renovate: datasource=docker depName=mongo
-          image: docker.io/mongo:8.0
+          image: docker.io/mongo:8.2
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               value: root

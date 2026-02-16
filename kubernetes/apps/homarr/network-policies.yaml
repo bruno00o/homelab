@@ -122,4 +122,4 @@ spec:
               kubernetes.io/metadata.name: authentik
       ports:
         - protocol: TCP
-          port: 80
+          port: 9000

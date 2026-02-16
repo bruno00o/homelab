@@ -145,7 +145,7 @@ spec:
             - name: AUTH_OIDC_AUTO_LOGIN
               value: "true"
             - name: NODE_EXTRA_CA_CERTS
-              value: /etc/ssl/custom/ca.crt
+              value: /appdata/trusted-certificates/ca.crt
             - name: NODE_OPTIONS
               value: "--use-system-ca"
           volumeMounts:
@@ -154,7 +154,7 @@ spec:
             - name: data
               mountPath: /data
             - name: ca-cert
-              mountPath: /etc/ssl/custom
+              mountPath: /appdata/trusted-certificates
               readOnly: true
           resources:
             requests:

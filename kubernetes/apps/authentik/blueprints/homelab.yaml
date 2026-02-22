@@ -19,6 +19,7 @@ data:
           name: homelab-admins
         attrs:
           is_superuser: false
+          parent: !Find [authentik_core.group, [name, homelab-users]]
 
       - model: authentik_core.group
         id: group-homelab-users
@@ -172,6 +173,16 @@ data:
           expression: |
             return ak_is_group_member(request.user, name="homelab-admins")
 
+      # Policy: require-homelab-users
+      - model: authentik_policies_expression.expressionpolicy
+        id: policy-require-users
+        state: present
+        identifiers:
+          name: require-homelab-users
+        attrs:
+          expression: |
+            return ak_is_group_member(request.user, name="homelab-users")
+
       # Hubble (admins only)
       - model: authentik_core.application
         id: app-hubble
@@ -244,7 +255,7 @@ data:
           negate: false
           timeout: 30
 
-      # Homarr (admins only, OIDC)
+      # Homarr (all users, OIDC)
       - model: authentik_core.application
         id: app-homarr
         state: present
@@ -257,18 +268,18 @@ data:
           policy_engine_mode: all
 
       - model: authentik_policies.policybinding
-        id: binding-homarr-admin
+        id: binding-homarr-users
         state: present
         identifiers:
           order: 0
           target: !Find [authentik_core.application, [slug, homarr]]
-          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-users]]
         attrs:
           enabled: true
           negate: false
           timeout: 30
 
-      # Home Assistant (admins only, OIDC)
+      # Home Assistant (all users, OIDC)
       - model: authentik_core.application
         id: app-home-assistant
         state: present
@@ -281,12 +292,12 @@ data:
           policy_engine_mode: all
 
       - model: authentik_policies.policybinding
-        id: binding-home-assistant-admin
+        id: binding-home-assistant-users
         state: present
         identifiers:
           order: 0
           target: !Find [authentik_core.application, [slug, home-assistant]]
-          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-users]]
         attrs:
           enabled: true
           negate: false

@@ -19,7 +19,6 @@ data:
           name: homelab-admins
         attrs:
           is_superuser: false
-          parent: !Find [authentik_core.group, [name, homelab-users]]
 
       - model: authentik_core.group
         id: group-homelab-users
@@ -181,7 +180,7 @@ data:
           name: require-homelab-users
         attrs:
           expression: |
-            return ak_is_group_member(request.user, name="homelab-users")
+            return ak_is_group_member(request.user, name="homelab-admins") or ak_is_group_member(request.user, name="homelab-users")
 
       # Hubble (admins only)
       - model: authentik_core.application
@@ -374,6 +373,23 @@ data:
           enabled: true
           negate: false
           timeout: 30
+
+      # Cleanup: remove old orphaned bindings
+      - model: authentik_policies.policybinding
+        id: binding-homarr-admin
+        state: absent
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, homarr]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+
+      - model: authentik_policies.policybinding
+        id: binding-home-assistant-admin
+        state: absent
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, home-assistant]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
 
       # =====================================================
       # SECTION 4: OUTPOST

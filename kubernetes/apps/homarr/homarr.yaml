@@ -92,7 +92,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:v1.53.1
+          image: ghcr.io/homarr-labs/homarr:v1.53.2
           securityContext:
             allowPrivilegeEscalation: false
           ports:

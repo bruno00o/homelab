@@ -14,4 +14,3 @@ resources:
   - mosquitto-pdb.yaml
   - frigate-pdb.yaml
   - home-assistant-pdb.yaml
-  - home-assistant-homekit-svc.yaml

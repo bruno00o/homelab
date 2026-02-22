@@ -42,6 +42,9 @@ spec:
       # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
       tag: "2026.2.2"
 
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+
     service:
       port: 8123
 

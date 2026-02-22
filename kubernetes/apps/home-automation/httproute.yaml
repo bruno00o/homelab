@@ -16,5 +16,6 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: frigate
-          port: 5000
+        - name: authentik-server
+          namespace: authentik
+          port: 80

@@ -96,6 +96,13 @@ spec:
         failureThreshold: 3
 
     config: |
+      auth:
+        enabled: false
+      proxy:
+        header_map:
+          user: X-authentik-username
+        default_role: admin
+
       mqtt:
         host: mosquitto.home-automation.svc.cluster.local
         port: 1883

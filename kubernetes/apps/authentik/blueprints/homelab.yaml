@@ -287,7 +287,7 @@ data:
         attrs:
           name: Home Assistant
           provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Home Assistant OIDC]]
-          meta_launch_url: https://home-assistant.${CLUSTER_DOMAIN}
+          meta_launch_url: https://home-assistant.${CLUSTER_DOMAIN}/auth/oidc/redirect
           policy_engine_mode: all
 
       - model: authentik_policies.policybinding

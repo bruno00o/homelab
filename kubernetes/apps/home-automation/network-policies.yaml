@@ -259,6 +259,7 @@ spec:
   ingress:
     - fromEntities:
         - host
+        - remote-node
       toPorts:
         - ports:
             - port: "1883"
@@ -302,6 +303,7 @@ spec:
   ingress:
     - fromEntities:
         - host
+        - remote-node
       toPorts:
         - ports:
             - port: "5000"

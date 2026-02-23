@@ -196,6 +196,7 @@ spec:
   ingress:
     - fromEntities:
         - host
+        - remote-node
       toPorts:
         - ports:
             - port: "8443"

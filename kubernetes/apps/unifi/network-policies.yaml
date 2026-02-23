@@ -176,12 +176,8 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: home-automation
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: home-assistant
+        - ipBlock:
+            cidr: 192.168.1.0/24
       ports:
         - protocol: TCP
           port: 8443

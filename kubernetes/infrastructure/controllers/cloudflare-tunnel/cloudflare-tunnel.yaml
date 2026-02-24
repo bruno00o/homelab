@@ -26,11 +26,11 @@ spec:
           image: docker.io/cloudflare/cloudflared:2025.2.1
           args:
             - tunnel
+            - --metrics
+            - 0.0.0.0:2000
             - run
             - --token
             - $(TUNNEL_TOKEN)
-            - --metrics
-            - 0.0.0.0:2000
           env:
             - name: TUNNEL_TOKEN
               valueFrom:

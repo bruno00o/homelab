@@ -74,6 +74,17 @@ spec:
       ports:
         - protocol: TCP
           port: 5000
+        - protocol: TCP
+          port: 5001
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: spegel
+      ports:
+        - protocol: TCP
+          port: 5000
+        - protocol: TCP
+          port: 5001
   egress:
     - to:
         - ipBlock:
@@ -81,6 +92,17 @@ spec:
       ports:
         - protocol: TCP
           port: 5000
+        - protocol: TCP
+          port: 5001
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: spegel
+      ports:
+        - protocol: TCP
+          port: 5000
+        - protocol: TCP
+          port: 5001
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -98,6 +120,8 @@ spec:
       toPorts:
         - ports:
             - port: "5000"
+              protocol: TCP
+            - port: "5001"
               protocol: TCP
 ---
 apiVersion: networking.k8s.io/v1
@@ -118,4 +142,4 @@ spec:
               kubernetes.io/metadata.name: monitoring
       ports:
         - protocol: TCP
-          port: 9808
+          port: 9090

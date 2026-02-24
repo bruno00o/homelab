@@ -45,3 +45,59 @@ spec:
           annotations:
             summary: "Persistent volume almost full"
             description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full."
+
+        - alert: EtcdHasMissingLeader
+          expr: etcd_server_has_leader == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Etcd member has no leader"
+            description: "Etcd member {{ $labels.instance }} has no leader. The cluster may be unavailable."
+
+        - alert: KubeAPIServerLatency
+          expr: |
+            histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{verb!~"WATCH|CONNECT"}[5m])) by (le, verb, resource)) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Kubernetes API server high latency"
+            description: "99th percentile latency for {{ $labels.verb }} {{ $labels.resource }} is {{ $value }}s."
+
+        - alert: ContainerOOMKilled
+          expr: increase(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[1h]) > 0
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Container was OOM killed"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} was OOM killed."
+
+        - alert: NodeDiskRunningOutOfInodes
+          expr: |
+            node_filesystem_files_free{fstype!="tmpfs",mountpoint!~".*readonly.*"} / node_filesystem_files{fstype!="tmpfs",mountpoint!~".*readonly.*"} < 0.05
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node running out of inodes"
+            description: "Node {{ $labels.instance }} filesystem {{ $labels.mountpoint }} has only {{ $value | humanizePercentage }} inodes free."
+
+        - alert: PersistentVolumeBindingFailed
+          expr: kube_persistentvolumeclaim_status_phase{phase="Pending"} == 1
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC stuck in Pending state"
+            description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} has been in Pending state for more than 15 minutes."
+
+        - alert: CiliumDroppedPackets
+          expr: sum(rate(hubble_drop_total[5m])) by (reason) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium dropping packets"
+            description: "Cilium is dropping packets for reason {{ $labels.reason }} at {{ $value }} packets/sec."

@@ -211,7 +211,10 @@ metadata:
   namespace: homarr
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-homarr
+    - name: external-gateway
       namespace: kube-system
       sectionName: https-homarr
   hostnames:

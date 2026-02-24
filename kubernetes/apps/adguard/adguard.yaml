@@ -178,7 +178,7 @@ metadata:
   namespace: adguard
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: kube-system
       sectionName: https-adguard
   hostnames:

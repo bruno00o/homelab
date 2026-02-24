@@ -5,7 +5,10 @@ metadata:
   namespace: home-automation
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-home-assistant
+    - name: external-gateway
       namespace: kube-system
       sectionName: https-home-assistant
   hostnames:

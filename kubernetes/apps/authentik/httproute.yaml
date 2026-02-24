@@ -5,7 +5,10 @@ metadata:
   namespace: authentik
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-auth
+    - name: external-gateway
       namespace: kube-system
       sectionName: https-auth
   hostnames:

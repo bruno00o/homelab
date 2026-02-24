@@ -5,7 +5,7 @@ metadata:
   namespace: home-automation
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: kube-system
       sectionName: https-frigate
   hostnames:

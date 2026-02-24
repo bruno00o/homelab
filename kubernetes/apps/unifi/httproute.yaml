@@ -5,7 +5,7 @@ metadata:
   namespace: unifi
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: kube-system
       sectionName: https-unifi
   hostnames:

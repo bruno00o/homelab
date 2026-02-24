@@ -22,7 +22,7 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: kube-system
       sectionName: https-grafana
   hostnames:
@@ -59,7 +59,7 @@ metadata:
   namespace: kube-system
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: kube-system
       sectionName: https-hubble
   hostnames:
@@ -97,7 +97,7 @@ metadata:
   namespace: longhorn-system
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: kube-system
       sectionName: https-longhorn
   hostnames:

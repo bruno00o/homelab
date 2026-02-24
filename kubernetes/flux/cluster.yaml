@@ -161,7 +161,11 @@ spec:
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
-      name: cilium-gateway-main-gateway
+      name: cilium-gateway-internal-gateway
+      namespace: kube-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cilium-gateway-external-gateway
       namespace: kube-system
 
 ---

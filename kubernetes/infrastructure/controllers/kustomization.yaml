@@ -16,3 +16,4 @@ resources:
   - kyverno
   - kyverno-policies
   - intel-gpu-plugin
+  - cloudflare-tunnel

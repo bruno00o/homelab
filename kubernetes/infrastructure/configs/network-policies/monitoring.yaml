@@ -60,6 +60,8 @@ spec:
           port: 3101 # Promtail metrics
         - protocol: TCP
           port: 3200 # Tempo
+        - protocol: TCP
+          port: 2000 # cloudflared metrics
     # Kubernetes API for service discovery
     - ports:
         - protocol: TCP

@@ -128,6 +128,10 @@ spec:
       kind: DaemonSet
       name: intel-gpu-plugin
       namespace: kube-system
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cloudflare-tunnel
+      namespace: cloudflare-tunnel
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

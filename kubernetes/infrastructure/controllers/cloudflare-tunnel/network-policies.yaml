@@ -53,7 +53,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-gateway-egress
+  name: allow-backends-egress
   namespace: cloudflare-tunnel
 spec:
   podSelector:
@@ -63,11 +63,26 @@ spec:
     - Egress
   egress:
     - to:
-        - ipBlock:
-            cidr: 192.168.1.7/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
       ports:
         - protocol: TCP
-          port: 443
+          port: 9000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: home-automation
+      ports:
+        - protocol: TCP
+          port: 8123
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: homarr
+      ports:
+        - protocol: TCP
+          port: 7575
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

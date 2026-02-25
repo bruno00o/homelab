@@ -84,6 +84,24 @@ spec:
         - protocol: TCP
           port: 7575
 ---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-ha-egress
+  namespace: cloudflare-tunnel
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflare-tunnel
+  egress:
+    - toEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

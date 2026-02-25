@@ -52,6 +52,26 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: allow-ingress-from-cloudflare-tunnel
+  namespace: homarr
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: homarr
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - protocol: TCP
+          port: 7575
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
   name: allow-api-egress
   namespace: homarr
 spec:

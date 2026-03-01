@@ -84,6 +84,7 @@ spec:
           root_url: https://grafana.${CLUSTER_DOMAIN}
         auth:
           disable_login_form: true
+          oauth_allow_insecure_email_lookup: true
         auth.generic_oauth:
           enabled: true
           name: Authentik
@@ -93,6 +94,9 @@ spec:
           auth_url: https://auth.${CLUSTER_DOMAIN}/application/o/authorize/
           token_url: http://authentik-server.authentik.svc/application/o/token/
           api_url: http://authentik-server.authentik.svc/application/o/userinfo/
+          email_attribute_path: email
+          login_attribute_path: preferred_username
+          name_attribute_path: name
           role_attribute_path: contains(groups[*], 'homelab-admins') && 'Admin' || 'Viewer'
 
       sidecar:

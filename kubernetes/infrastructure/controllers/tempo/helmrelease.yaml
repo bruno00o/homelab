@@ -39,6 +39,8 @@ spec:
 
   values:
     tempo:
+      usage_reporting:
+        reporting_enabled: false
       storage:
         trace:
           backend: local

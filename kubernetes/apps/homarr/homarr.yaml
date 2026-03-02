@@ -134,7 +134,7 @@ spec:
             - name: AUTH_OIDC_CLIENT_NAME
               value: "Authentik"
             - name: AUTH_OIDC_ISSUER
-              value: "https://auth.${CLUSTER_DOMAIN}/application/o/homarr/"
+              value: "https://auth-merry.seilliebert.dev/application/o/homarr/"
             - name: AUTH_OIDC_CLIENT_ID
               value: "homarr"
             - name: AUTH_OIDC_CLIENT_SECRET

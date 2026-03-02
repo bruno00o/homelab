@@ -54,6 +54,8 @@ spec:
           port: 3478
         - protocol: UDP
           port: 10001
+        - protocol: UDP
+          port: 5514
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -76,6 +78,8 @@ spec:
             - port: "3478"
               protocol: UDP
             - port: "10001"
+              protocol: UDP
+            - port: "5514"
               protocol: UDP
 ---
 apiVersion: networking.k8s.io/v1

@@ -253,6 +253,9 @@ spec:
             - name: discovery
               containerPort: 10001
               protocol: UDP
+            - name: syslog
+              containerPort: 5514
+              protocol: UDP
           livenessProbe:
             tcpSocket:
               port: 8443
@@ -310,4 +313,8 @@ spec:
     - name: discovery
       port: 10001
       targetPort: 10001
+      protocol: UDP
+    - name: syslog
+      port: 5514
+      targetPort: 5514
       protocol: UDP

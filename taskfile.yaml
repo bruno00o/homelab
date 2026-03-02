@@ -358,10 +358,9 @@ tasks:
   # SOPS
   # =============================================================================
   sops:encrypt:
-    desc: Encrypt a secret file (e.g. task sops:encrypt FILE=secret.sops.yaml)
+    desc: Encrypt a secret file (e.g. task sops:encrypt FILE=kubernetes/apps/myapp/secret.sops.yaml)
     requires:
       vars: [FILE]
-    dir: kubernetes
     cmds:
       - sops --encrypt --in-place {{.FILE}}
 
@@ -369,7 +368,6 @@ tasks:
     desc: Decrypt a file for reading
     requires:
       vars: [FILE]
-    dir: kubernetes
     cmds:
       - sops --decrypt {{.FILE}}
 
@@ -377,7 +375,6 @@ tasks:
     desc: Edit an encrypted file
     requires:
       vars: [FILE]
-    dir: kubernetes
     cmds:
       - sops {{.FILE}}
 

@@ -75,9 +75,7 @@ spec:
         skipuninstall: true
       media:
         enabled: true
-        storageClass: ${DEFAULT_STORAGE_CLASS}
-        size: 100Gi
-        skipuninstall: true
+        existingClaim: frigate-media-nfs
 
     probes:
       startup:
@@ -122,6 +120,15 @@ spec:
         path: /openvino-model/ssdlite_mobilenet_v2.xml
         labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
+      go2rtc:
+        rtsp:
+          listen: ":8554"
+        streams:
+          camera_1:
+            - "ffmpeg:rtsp://admin:${FRIGATE_CAM1_PASSWORD}@192.168.1.38:554/H264/ch1/main/av_stream#video=copy#audio=copy"
+          camera_2:
+            - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@192.168.1.249:554/H264/ch1/main/av_stream#video=copy#audio=copy"
+
       ffmpeg:
         hwaccel_args: preset-vaapi
 
@@ -134,8 +141,6 @@ spec:
                 roles:
                   - detect
                   - record
-              - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@192.168.1.38:8862/H264/ch1/main/av_stream
-                roles:
                   - audio
           detect:
             width: 1280
@@ -160,8 +165,6 @@ spec:
                 roles:
                   - detect
                   - record
-              - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@192.168.1.249:8862/H264/ch1/main/av_stream
-                roles:
                   - audio
           detect:
             width: 1280

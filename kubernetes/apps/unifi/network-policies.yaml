@@ -205,6 +205,12 @@ spec:
         - ports:
             - port: "8443"
               protocol: TCP
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "5514"
+              protocol: UDP
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

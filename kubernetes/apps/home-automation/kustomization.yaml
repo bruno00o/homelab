@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - mosquitto.yaml
+  - frigate-nfs-pvc.yaml
   - frigate-helmrelease.yaml
   - home-assistant-helmrelease.yaml
   - certificate.yaml

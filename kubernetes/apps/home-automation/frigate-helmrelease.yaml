@@ -155,8 +155,13 @@ spec:
               enabled: true
               track:
                 - person
+              required_zones:
+                - full_frame
               return_preset: "préréglage 1"
               timeout: 10
+          zones:
+            full_frame:
+              coordinates: 0,0,1280,0,1280,720,0,720
         camera_2:
           enabled: true
           ffmpeg:

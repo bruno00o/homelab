@@ -98,6 +98,10 @@ controlPlane:
           nameservers:
             - 1.1.1.1
             - 9.9.9.9
+        features:
+          hostDNS:
+            enabled: true
+            forwardKubeDNSToHost: false
     - |-
       machine:
         kubelet:

@@ -63,10 +63,10 @@ spec:
     longhornManager:
       resources:
         requests:
-          cpu: 25m
+          cpu: 50m
           memory: 128Mi
         limits:
-          cpu: 250m
+          cpu: 500m
           memory: 512Mi
 
     longhornDriver:

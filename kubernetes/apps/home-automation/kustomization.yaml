@@ -11,6 +11,9 @@ resources:
   - httproute.yaml
   - home-assistant-httproute.yaml
   - reference-grant.yaml
+  - zigbee2mqtt.yaml
+  - zigbee2mqtt-certificate.yaml
+  - zigbee2mqtt-httproute.yaml
   - network-policies.yaml
   - mosquitto-pdb.yaml
   - frigate-pdb.yaml

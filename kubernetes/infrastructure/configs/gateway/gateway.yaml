@@ -132,6 +132,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-zigbee2mqtt
+      protocol: HTTPS
+      port: 443
+      hostname: zigbee2mqtt.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: zigbee2mqtt-tls
+            namespace: home-automation
+      allowedRoutes:
+        namespaces:
+          from: All
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway

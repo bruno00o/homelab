@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: zigbee2mqtt-tls
+  namespace: home-automation
+spec:
+  secretName: zigbee2mqtt-tls
+  issuerRef:
+    name: ${CLUSTER_ISSUER}
+    kind: ClusterIssuer
+  dnsNames:
+    - zigbee2mqtt.${CLUSTER_DOMAIN}

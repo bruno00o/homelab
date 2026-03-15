@@ -210,8 +210,9 @@ spec:
         enabled: true
         model_size: small
 
-      bird:
-        enabled: true
+      classification:
+        bird:
+          enabled: true
 
       audio:
         enabled: true

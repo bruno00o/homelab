@@ -17,12 +17,12 @@ l2announcements:
 
 l2podAnnouncements:
   enabled: true
-  interface: enp1s0
+  interfacePattern: enp.*
 
 externalIPs:
   enabled: true
 
-devices: enp1s0
+devices: enp+
 
 hubble:
   enabled: true

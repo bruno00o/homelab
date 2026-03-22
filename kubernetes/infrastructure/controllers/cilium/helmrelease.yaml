@@ -50,10 +50,10 @@ spec:
       enabled: true
     l2podAnnouncements:
       enabled: true
-      interfacePattern: enp1s0
+      interfacePattern: enp.*
     externalIPs:
       enabled: true
-    devices: enp1s0
+    devices: enp+
     securityContext:
       capabilities:
         ciliumAgent:

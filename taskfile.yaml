@@ -5,10 +5,15 @@ vars:
   TALOS_DIR: talos
   TALOS_CONFIG: "{{.TALOS_DIR}}/clusterconfig/talosconfig"
   CLUSTER_NAME: going-merry
-  NODES: "192.168.1.10,192.168.1.11,192.168.1.12"
-  NODE_LUFFY: "192.168.1.10"
-  NODE_ZORO: "192.168.1.11"
-  NODE_NAMI: "192.168.1.12"
+  NODES: "10.0.20.11,10.0.20.12,10.0.20.13,10.0.20.14,10.0.20.15,10.0.20.16"
+  CP_NODES: "10.0.20.11,10.0.20.12,10.0.20.13"
+  WORKER_NODES: "10.0.20.14,10.0.20.15,10.0.20.16"
+  NODE_LUFFY: "10.0.20.11"
+  NODE_ZORO: "10.0.20.12"
+  NODE_NAMI: "10.0.20.13"
+  NODE_USOPP: "10.0.20.14"
+  NODE_SANJI: "10.0.20.15"
+  NODE_CHOPPER: "10.0.20.16"
   CILIUM_VERSION: "1.19.1"
 
 env:
@@ -48,17 +53,23 @@ tasks:
       NODE_IP:
         sh: |
           case "{{.NODE}}" in
-            luffy) echo "192.168.1.10" ;;
-            zoro) echo "192.168.1.11" ;;
-            nami) echo "192.168.1.12" ;;
+            luffy) echo "10.0.20.11" ;;
+            zoro) echo "10.0.20.12" ;;
+            nami) echo "10.0.20.13" ;;
+            usopp) echo "10.0.20.14" ;;
+            sanji) echo "10.0.20.15" ;;
+            chopper) echo "10.0.20.16" ;;
             *) echo "{{.NODE}}" ;;
           esac
       NODE_NAME:
         sh: |
           case "{{.NODE}}" in
-            192.168.1.10) echo "luffy" ;;
-            192.168.1.11) echo "zoro" ;;
-            192.168.1.12) echo "nami" ;;
+            10.0.20.11) echo "luffy" ;;
+            10.0.20.12) echo "zoro" ;;
+            10.0.20.13) echo "nami" ;;
+            10.0.20.14) echo "usopp" ;;
+            10.0.20.15) echo "sanji" ;;
+            10.0.20.16) echo "chopper" ;;
             *) echo "{{.NODE}}" ;;
           esac
     cmds:
@@ -74,6 +85,12 @@ tasks:
         vars: { NODE: zoro }
       - task: talos:apply-insecure
         vars: { NODE: nami }
+      - task: talos:apply-insecure
+        vars: { NODE: usopp }
+      - task: talos:apply-insecure
+        vars: { NODE: sanji }
+      - task: talos:apply-insecure
+        vars: { NODE: chopper }
       - echo "Config applied to all nodes. Wait for them to reboot and install."
 
   # =============================================================================
@@ -87,17 +104,23 @@ tasks:
       NODE_IP:
         sh: |
           case "{{.NODE}}" in
-            luffy) echo "192.168.1.10" ;;
-            zoro) echo "192.168.1.11" ;;
-            nami) echo "192.168.1.12" ;;
+            luffy) echo "10.0.20.11" ;;
+            zoro) echo "10.0.20.12" ;;
+            nami) echo "10.0.20.13" ;;
+            usopp) echo "10.0.20.14" ;;
+            sanji) echo "10.0.20.15" ;;
+            chopper) echo "10.0.20.16" ;;
             *) echo "{{.NODE}}" ;;
           esac
       NODE_NAME:
         sh: |
           case "{{.NODE}}" in
-            192.168.1.10) echo "luffy" ;;
-            192.168.1.11) echo "zoro" ;;
-            192.168.1.12) echo "nami" ;;
+            10.0.20.11) echo "luffy" ;;
+            10.0.20.12) echo "zoro" ;;
+            10.0.20.13) echo "nami" ;;
+            10.0.20.14) echo "usopp" ;;
+            10.0.20.15) echo "sanji" ;;
+            10.0.20.16) echo "chopper" ;;
             *) echo "{{.NODE}}" ;;
           esac
     cmds:
@@ -112,6 +135,12 @@ tasks:
         vars: { NODE: zoro }
       - task: talos:apply
         vars: { NODE: nami }
+      - task: talos:apply
+        vars: { NODE: usopp }
+      - task: talos:apply
+        vars: { NODE: sanji }
+      - task: talos:apply
+        vars: { NODE: chopper }
 
   # =============================================================================
   # Talos - Bootstrap
@@ -164,9 +193,12 @@ tasks:
       NODE_IP:
         sh: |
           case "{{.NODE}}" in
-            luffy) echo "192.168.1.10" ;;
-            zoro) echo "192.168.1.11" ;;
-            nami) echo "192.168.1.12" ;;
+            luffy) echo "10.0.20.11" ;;
+            zoro) echo "10.0.20.12" ;;
+            nami) echo "10.0.20.13" ;;
+            usopp) echo "10.0.20.14" ;;
+            sanji) echo "10.0.20.15" ;;
+            chopper) echo "10.0.20.16" ;;
             *) echo "{{.NODE}}" ;;
           esac
       TALOS_VERSION:
@@ -193,6 +225,12 @@ tasks:
         vars: { NODE: zoro }
       - task: talos:upgrade
         vars: { NODE: nami }
+      - task: talos:upgrade
+        vars: { NODE: usopp }
+      - task: talos:upgrade
+        vars: { NODE: sanji }
+      - task: talos:upgrade
+        vars: { NODE: chopper }
 
   talos:upgrade-k8s:
     desc: Upgrade Kubernetes version

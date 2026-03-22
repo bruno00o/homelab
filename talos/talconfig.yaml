@@ -1,23 +1,27 @@
 ---
 clusterName: going-merry
-endpoint: https://192.168.1.9:6443
-talosVersion: v1.12.5
-kubernetesVersion: v1.35.2
+endpoint: https://10.0.20.10:6443
+talosVersion: v1.12.6
+kubernetesVersion: v1.35.3
 cniConfig:
   name: none
-allowSchedulingOnControlPlanes: true
+allowSchedulingOnControlPlanes: false
 
 additionalApiServerCertSans:
-  - 192.168.1.9
+  - 10.0.20.10
 additionalMachineCertSans:
-  - 192.168.1.9
-  - 192.168.1.10
-  - 192.168.1.11
-  - 192.168.1.12
+  - 10.0.20.10
+  - 10.0.20.11
+  - 10.0.20.12
+  - 10.0.20.13
+  - 10.0.20.14
+  - 10.0.20.15
+  - 10.0.20.16
 
 nodes:
+  # --- Control Plane (Beelink, 500GB NVMe OS only) ---
   - hostname: luffy
-    ipAddress: 192.168.1.10
+    ipAddress: 10.0.20.11
     controlPlane: true
     installDiskSelector:
       model: CT500P310SSD8
@@ -25,17 +29,10 @@ nodes:
       - interface: enp1s0
         dhcp: true
         vip:
-          ip: 192.168.1.9
-    patches:
-      - |-
-        machine:
-          disks:
-            - device: /dev/disk/by-id/nvme-CT2000T500SSD8_25104E9DE40A
-              partitions:
-                - mountpoint: /var/mnt/longhorn
+          ip: 10.0.20.10
 
   - hostname: zoro
-    ipAddress: 192.168.1.11
+    ipAddress: 10.0.20.12
     controlPlane: true
     installDiskSelector:
       model: CT500P310SSD8
@@ -43,17 +40,10 @@ nodes:
       - interface: enp1s0
         dhcp: true
         vip:
-          ip: 192.168.1.9
-    patches:
-      - |-
-        machine:
-          disks:
-            - device: /dev/disk/by-id/nvme-CT2000T500SSD8_252050D38FC7
-              partitions:
-                - mountpoint: /var/mnt/longhorn
+          ip: 10.0.20.10
 
   - hostname: nami
-    ipAddress: 192.168.1.12
+    ipAddress: 10.0.20.13
     controlPlane: true
     installDiskSelector:
       model: CT500P310SSD8
@@ -61,15 +51,69 @@ nodes:
       - interface: enp1s0
         dhcp: true
         vip:
-          ip: 192.168.1.9
-    patches:
-      - |-
-        machine:
-          disks:
-            - device: /dev/disk/by-id/nvme-CT2000T500SSD8_25104E9DE271
-              partitions:
-                - mountpoint: /var/mnt/longhorn
+          ip: 10.0.20.10
 
+  # --- Workers (ASUS NUC 14 N355, 2TB NVMe OS + Longhorn) ---
+  - hostname: usopp
+    ipAddress: 10.0.20.14
+    controlPlane: false
+    installDiskSelector:
+      model: CT2000T500SSD8
+    networkInterfaces:
+      - interface: enp1s0  # TODO: verify on NUC
+        dhcp: true
+
+  - hostname: sanji
+    ipAddress: 10.0.20.15
+    controlPlane: false
+    installDiskSelector:
+      model: CT2000T500SSD8
+    networkInterfaces:
+      - interface: enp1s0  # TODO: verify on NUC
+        dhcp: true
+
+  - hostname: chopper
+    ipAddress: 10.0.20.16
+    controlPlane: false
+    installDiskSelector:
+      model: CT2000T500SSD8
+    networkInterfaces:
+      - interface: enp1s0  # TODO: verify on NUC
+        dhcp: true
+
+# =============================================================================
+# Global patches (all nodes)
+# =============================================================================
+patches:
+  - |-
+    machine:
+      network:
+        nameservers:
+          - 1.1.1.1
+          - 9.9.9.9
+      features:
+        hostDNS:
+          enabled: true
+          forwardKubeDNSToHost: false
+  - |-
+    machine:
+      kubelet:
+        extraArgs:
+          rotate-server-certificates: true
+        extraConfig:
+          serializeImagePulls: false
+  - |-
+    machine:
+      files:
+        - path: /etc/cri/conf.d/20-customization.part
+          op: create
+          content: |
+            [plugins."io.containerd.cri.v1.images"]
+              discard_unpacked_layers = false
+
+# =============================================================================
+# Control Plane patches
+# =============================================================================
 controlPlane:
   patches:
     - |-
@@ -94,21 +138,47 @@ controlPlane:
           - https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.8.1/components.yaml
     - |-
       machine:
-        network:
-          nameservers:
-            - 1.1.1.1
-            - 9.9.9.9
-        features:
-          hostDNS:
-            enabled: true
-            forwardKubeDNSToHost: false
+        kubelet:
+          extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/intel-ucode
+          - siderolabs/i915
+          - siderolabs/iscsi-tools
+          - siderolabs/util-linux-tools
+
+# =============================================================================
+# Worker patches
+# =============================================================================
+worker:
+  patches:
+    - |-
+      apiVersion: v1alpha1
+      kind: VolumeConfig
+      name: EPHEMERAL
+      provisioning:
+        maxSize: 100GiB
+    - |-
+      apiVersion: v1alpha1
+      kind: UserVolumeConfig
+      name: longhorn
+      provisioning:
+        diskSelector:
+          match: system_disk
+        minSize: 200GiB
+        grow: true
     - |-
       machine:
         kubelet:
-          extraArgs:
-            rotate-server-certificates: true
-          extraConfig:
-            serializeImagePulls: false
           extraMounts:
             - destination: /var/lib/longhorn
               type: bind
@@ -124,15 +194,6 @@ controlPlane:
                 - bind
                 - rshared
                 - rw
-    - |-
-      machine:
-        files:
-          - path: /etc/cri/conf.d/20-customization.part
-            op: create
-            content: |
-              [plugins."io.containerd.cri.v1.images"]
-                discard_unpacked_layers = false
-
   schematic:
     customization:
       systemExtensions:

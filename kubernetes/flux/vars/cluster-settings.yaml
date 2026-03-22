@@ -18,7 +18,7 @@ data:
   NODE_CHOPPER: "10.0.20.16"
   LB_GATEWAY: "10.0.20.20"
   LB_ADGUARD: "10.0.20.21"
-  LB_UNIFI: "10.0.20.22"
+
   LB_POOL_START: "10.0.20.20"
   LB_POOL_END: "10.0.20.39"
   CLUSTER_ISSUER: "mugiwara-ca-issuer"

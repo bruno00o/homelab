@@ -60,7 +60,7 @@ nodes:
     installDiskSelector:
       model: CT2000T500SSD8
     networkInterfaces:
-      - interface: enp1s0  # TODO: verify on NUC
+      - interface: enp1s0
         dhcp: true
 
   - hostname: sanji
@@ -69,7 +69,7 @@ nodes:
     installDiskSelector:
       model: CT2000T500SSD8
     networkInterfaces:
-      - interface: enp1s0  # TODO: verify on NUC
+      - interface: enp1s0
         dhcp: true
 
   - hostname: chopper
@@ -78,7 +78,7 @@ nodes:
     installDiskSelector:
       model: CT2000T500SSD8
     networkInterfaces:
-      - interface: enp1s0  # TODO: verify on NUC
+      - interface: enp1s0
         dhcp: true
 
 # =============================================================================

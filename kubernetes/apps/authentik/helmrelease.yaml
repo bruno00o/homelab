@@ -106,7 +106,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
-      securityContext:
+      containerSecurityContext:
         allowPrivilegeEscalation: false
         readOnlyRootFilesystem: false
         capabilities:
@@ -128,7 +128,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
-      securityContext:
+      containerSecurityContext:
         allowPrivilegeEscalation: false
         readOnlyRootFilesystem: false
         capabilities:

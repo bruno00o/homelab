@@ -88,6 +88,10 @@ spec:
             secretKeyRef:
               name: authentik-secrets
               key: cloudflare_access_client_secret
+        - name: AUTHENTIK_HOST_BROWSER
+          value: "https://auth.${CLUSTER_DOMAIN}"
+        - name: AUTHENTIK_HOST
+          value: "https://auth.${CLUSTER_DOMAIN}"
 
     authentik:
       error_reporting:

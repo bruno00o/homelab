@@ -48,6 +48,7 @@ spec:
       replicaSoftAntiAffinity: ignored
       replicaZoneSoftAntiAffinity: ignored
       replicaDiskSoftAntiAffinity: ignored
+      backupTarget: ${NFS_BACKUP_TARGET}
       backupCompressionMethod: lz4
       snapshotDataIntegrity: ignored
       freezeFilesystemForSnapshot: ignored

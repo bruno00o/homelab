@@ -230,7 +230,3 @@ spec:
       kind: Deployment
       name: home-assistant
       namespace: home-automation
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: unifi
-      namespace: unifi

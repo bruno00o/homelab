@@ -42,7 +42,8 @@ spec:
     preUpgradeChecker:
       jobEnabled: false
     defaultSettings:
-      defaultDataPath: /var/lib/longhorn
+      defaultDataPath: /var/mnt/longhorn
+      createDefaultDiskLabeledNodes: true
       replicaAutoBalance: ignored
       replicaSoftAntiAffinity: ignored
       replicaZoneSoftAntiAffinity: ignored

@@ -351,13 +351,6 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: unifi
-      ports:
-        - protocol: TCP
-          port: 8443
-    - to:
-        - namespaceSelector:
-            matchLabels:
               kubernetes.io/metadata.name: home-automation
       ports:
         - protocol: TCP

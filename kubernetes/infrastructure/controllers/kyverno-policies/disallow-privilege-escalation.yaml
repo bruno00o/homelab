@@ -27,7 +27,6 @@ spec:
                 - trivy-system
                 - authentik
                 - monitoring
-                - unifi
       validate:
         message: "Privilege escalation is not allowed."
         pattern:

@@ -31,9 +31,6 @@ spec:
       namespace: adguard
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: unifi
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
       namespace: home-automation
   to:
     - group: ""

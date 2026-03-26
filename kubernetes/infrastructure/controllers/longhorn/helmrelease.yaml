@@ -58,7 +58,7 @@ spec:
       backupstorePollInterval: 300
     persistence:
       defaultClass: true
-      defaultClassReplicaCount: 3
+      defaultClassReplicaCount: 2
       defaultFsType: ext4
       reclaimPolicy: Delete
 

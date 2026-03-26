@@ -19,7 +19,7 @@ additionalMachineCertSans:
   - 10.0.20.16
 
 nodes:
-  # --- Control Plane (Beelink, 500GB NVMe OS only) ---
+  # --- Control Plane ---
   - hostname: luffy
     ipAddress: 10.0.20.11
     controlPlane: true
@@ -53,7 +53,7 @@ nodes:
         vip:
           ip: 10.0.20.10
 
-  # --- Workers (ASUS NUC 14 N355, 2TB NVMe OS + Longhorn) ---
+  # --- Workers ---
   - hostname: usopp
     ipAddress: 10.0.20.14
     controlPlane: false

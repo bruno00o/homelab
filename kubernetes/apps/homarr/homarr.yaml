@@ -45,6 +45,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: homarr-config
   namespace: homarr
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+    kustomize.toolkit.fluxcd.io/prune: Disabled
 spec:
   accessModes:
     - ReadWriteOnce
@@ -58,6 +61,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: homarr-data
   namespace: homarr
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+    kustomize.toolkit.fluxcd.io/prune: Disabled
 spec:
   accessModes:
     - ReadWriteOnce

@@ -27,6 +27,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: zigbee2mqtt-data
   namespace: home-automation
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+    kustomize.toolkit.fluxcd.io/prune: Disabled
 spec:
   accessModes:
     - ReadWriteOnce

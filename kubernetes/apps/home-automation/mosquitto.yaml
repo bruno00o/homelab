@@ -17,6 +17,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: mosquitto-data
   namespace: home-automation
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+    kustomize.toolkit.fluxcd.io/prune: Disabled
 spec:
   accessModes:
     - ReadWriteOnce

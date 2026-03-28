@@ -162,6 +162,10 @@ controlPlane:
 worker:
   patches:
     - |-
+      machine:
+        nodeLabels:
+          node.longhorn.io/create-default-disk: "true"
+    - |-
       apiVersion: v1alpha1
       kind: VolumeConfig
       name: EPHEMERAL

@@ -163,6 +163,10 @@ worker:
   patches:
     - |-
       machine:
+        sysctls:
+          net.ipv6.conf.enp1s0.accept_ra_rt_info_max_plen: "64"
+    - |-
+      machine:
         nodeLabels:
           node.longhorn.io/create-default-disk: "true"
     - |-

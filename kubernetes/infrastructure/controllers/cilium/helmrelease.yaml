@@ -54,6 +54,9 @@ spec:
     externalIPs:
       enabled: true
     devices: enp+
+    bpf:
+      vlanBypass:
+        - 0
     securityContext:
       capabilities:
         ciliumAgent:

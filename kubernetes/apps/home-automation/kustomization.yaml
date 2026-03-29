@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
+  - matter-server.yaml
   - mosquitto.yaml
   - frigate-nfs-pvc.yaml
   - frigate-helmrelease.yaml

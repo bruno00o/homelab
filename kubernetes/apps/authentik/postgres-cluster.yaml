@@ -10,7 +10,7 @@ spec:
 
   storage:
     storageClass: ${DEFAULT_STORAGE_CLASS}
-    size: 20Gi
+    size: 40Gi
 
   postgresql:
     parameters:

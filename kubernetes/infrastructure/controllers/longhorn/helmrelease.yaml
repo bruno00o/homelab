@@ -42,6 +42,7 @@ spec:
     preUpgradeChecker:
       jobEnabled: false
     defaultSettings:
+      defaultReplicaCount: 2
       defaultDataPath: /var/mnt/longhorn
       createDefaultDiskLabeledNodes: true
       replicaAutoBalance: ignored

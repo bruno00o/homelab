@@ -16,6 +16,7 @@ spec:
     parameters:
       max_connections: "100"
       shared_buffers: "128MB"
+      max_slot_wal_keep_size: "2GB"
 
   bootstrap:
     initdb:

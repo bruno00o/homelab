@@ -22,9 +22,14 @@ data:
       refuse_any: true
       upstream_dns:
         - https://dns10.quad9.net/dns-query
+        - https://dns.cloudflare.com/dns-query
+      fallback_dns:
+        - 9.9.9.10
+        - 1.1.1.1
       bootstrap_dns:
         - 9.9.9.10
         - 149.112.112.10
+        - 1.1.1.1
       cache_enabled: true
       cache_size: 4194304
       enable_dnssec: false

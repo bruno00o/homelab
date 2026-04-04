@@ -44,6 +44,8 @@ spec:
             - /data
             - --paa-root-cert-dir
             - /data/credentials
+            - --primary-interface
+            - enp1s0
           securityContext:
             runAsUser: 0
             runAsNonRoot: false

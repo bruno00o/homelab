@@ -123,6 +123,8 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
             - name: TZ
               value: ${TIMEZONE}
             - name: BASE_URL

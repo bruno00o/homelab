@@ -300,12 +300,6 @@ tasks:
       - kubectl wait --for=condition=ready node --all --timeout=300s
       - echo "Bootstrap complete - Cilium CNI + Prometheus CRDs installed"
 
-  bootstrap:cilium:
-    desc: "[DEPRECATED] Use bootstrap:helmfile instead"
-    cmds:
-      - echo "This task is deprecated. Use 'task bootstrap:helmfile' instead."
-      - task: bootstrap:helmfile
-
   bootstrap:sops-secret:
     desc: Create SOPS Age secret for Flux
     cmds:

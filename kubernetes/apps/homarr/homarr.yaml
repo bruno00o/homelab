@@ -101,6 +101,7 @@ spec:
           image: ghcr.io/homarr-labs/homarr:v1.57.1
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
           ports:
             - name: http
               containerPort: 7575
@@ -162,6 +163,8 @@ spec:
             - name: ca-cert
               mountPath: /appdata/trusted-certificates
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               cpu: 100m
@@ -176,6 +179,8 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: homarr-data
+        - name: tmp
+          emptyDir: {}
         - name: ca-cert
           secret:
             secretName: homarr-tls

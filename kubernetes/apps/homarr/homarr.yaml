@@ -104,7 +104,7 @@ spec:
             readOnlyRootFilesystem: true
           ports:
             - name: http
-              containerPort: 7575
+              containerPort: 3000
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -200,7 +200,7 @@ spec:
   ports:
     - name: http
       port: 7575
-      targetPort: 7575
+      targetPort: 3000
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

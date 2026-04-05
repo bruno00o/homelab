@@ -132,5 +132,5 @@ spec:
             user: "homelab-users"
       initContainer:
         securityContext:
-          runAsUser: 0
+          runAsUser: 65534
           allowPrivilegeEscalation: false

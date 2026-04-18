@@ -108,27 +108,29 @@ jobs:
             --skip-files '**/*.sops.yaml' \
             --ignorefile .trivyignore.yaml
 
-      - name: Scan container images from manifests
+      # Image scan is warn-only: upstream images are already pinned to latest
+      # via Renovate, so blocking merges on CVEs we can't fix ourselves would
+      # also block the very PRs bringing the fixes. Runtime coverage is
+      # provided by trivy-operator; this step surfaces findings pre-deploy.
+      - name: Scan container images from manifests (warn-only)
         run: |
           grep -rhE '^\s+image:\s+\S+' kubernetes/ \
             --include='*.yaml' --exclude='*.sops.yaml' \
             | awk '{print $2}' | tr -d '"' | sort -u > /tmp/images.txt
           echo "Images to scan:"
           cat /tmp/images.txt
-          exit_code=0
           while IFS= read -r image; do
             [ -z "$image" ] && continue
             echo "::group::Scanning $image"
             trivy image "$image" \
               --severity HIGH,CRITICAL \
-              --exit-code 1 \
+              --exit-code 0 \
               --ignore-unfixed \
               --no-progress \
               --ignorefile .trivyignore.yaml \
-              || exit_code=$?
+              || true
             echo "::endgroup::"
           done < /tmp/images.txt
-          exit $exit_code
 
   status-check:
     name: Status Check

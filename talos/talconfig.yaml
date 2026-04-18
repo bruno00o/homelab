@@ -2,7 +2,7 @@
 clusterName: going-merry
 endpoint: https://10.0.20.10:6443
 talosVersion: v1.12.6
-kubernetesVersion: v1.35.3
+kubernetesVersion: v1.35.4
 cniConfig:
   name: none
 allowSchedulingOnControlPlanes: false

@@ -463,17 +463,13 @@ tasks:
         echo "All dependencies installed"
 
   deps:install:
-    desc: Install all dependencies via Homebrew
+    desc: Install all dependencies via mise (reads .mise.toml)
+    preconditions:
+      - sh: command -v mise
+        msg: "mise is not installed. See https://mise.jdx.dev/getting-started.html"
     cmds:
-      - brew install siderolabs/tap/talosctl
-      - brew install talhelper
-      - brew install kubectl
-      - brew install fluxcd/tap/flux
-      - brew install helm
-      - brew install helmfile
-      - brew install sops age
-      - brew install yq jq
-      - echo "All dependencies installed"
+      - mise install
+      - echo "All dependencies installed at the versions pinned in .mise.toml"
 
   # =============================================================================
   # CNPG - CloudNativePG

@@ -106,6 +106,8 @@ spec:
         port: 1883
         topic_prefix: frigate
         client_id: frigate
+        user: frigate
+        password: ${FRIGATE_MQTT_PASSWORD}
 
       detectors:
         ov:

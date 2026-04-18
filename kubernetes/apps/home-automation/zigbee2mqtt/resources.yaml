@@ -11,6 +11,8 @@ data:
     mqtt:
       base_topic: zigbee2mqtt
       server: mqtt://mosquitto.home-automation.svc.cluster.local:1883
+      user: zigbee2mqtt
+      password: ${ZIGBEE2MQTT_MQTT_PASSWORD}
     serial:
       port: tcp://10.0.20.17:20108
       adapter: ember

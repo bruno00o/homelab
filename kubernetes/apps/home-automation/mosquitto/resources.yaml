@@ -7,7 +7,11 @@ metadata:
 data:
   mosquitto.conf: |
     listener 1883
+    # Phase 1: authenticated users are available (ha, frigate, zigbee2mqtt) but
+    # anonymous access is still allowed so Home Assistant (UI-managed MQTT
+    # integration) keeps working. Flip to false after updating HA via UI.
     allow_anonymous true
+    password_file /mosquitto/config/passwd
     persistence true
     persistence_location /mosquitto/data/
     log_dest stdout
@@ -90,12 +94,20 @@ spec:
               mountPath: /mosquitto/config/mosquitto.conf
               subPath: mosquitto.conf
               readOnly: true
+            - name: passwd
+              mountPath: /mosquitto/config/passwd
+              subPath: passwd
+              readOnly: true
             - name: data
               mountPath: /mosquitto/data
       volumes:
         - name: config
           configMap:
             name: mosquitto-config
+        - name: passwd
+          secret:
+            secretName: mosquitto-passwd
+            defaultMode: 0640
         - name: data
           persistentVolumeClaim:
             claimName: mosquitto-data

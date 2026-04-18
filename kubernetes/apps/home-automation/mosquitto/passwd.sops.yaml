@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mosquitto-passwd
+  namespace: home-automation
+type: Opaque
+data:
+  passwd: ENC[AES256_GCM,data:J4Pwu/5TXGfWkWSX8KR4yk24nRVIbpqaImCWncVOkJ/AJhg7wX1N4uQYwpEahqp04PSu40GokmQm6NWAdCn9G7/P6gng4uNAd7le3Ro+qrbfFj48k+L6oIkQz74Qhi0kaV+WazPZEFnJFhvmizyXN8mOxn4ZEBl7wt4tlEiBUG7/tGe1j55TvdzILzwc9Cw0cpA7XP7MGc9Uzt3f73XOECbg4yUuJzYyn5lutQ3ds6nSe5UnNMU2D7RtiM6KCPoBIDI+ZKy1duYFNYYbTXeWZa9fd4aT99dcUeojwTF21zyZ8pEnjdw7yd7VW/EV9x/UrA8+Daw2ef3GDDMchVRRNC3I1x/A29TdWjvS25XbzvmU02fprmaagTaa8cajYNj5LGjGFx7XfUP7Ib5k9kYEvXuNeDP+aI7IxRrcQAvPhALfJfmuIlzpYlpMClbkJdg/j1YgO9N2TmNVryLWUzqhQzcb0e9dE6tYHWNy8KodQHB0DzU3tgc1k/sZgCDHpzvKfWjOoY4amsAKnlDgjdyzX5yk0t+5VXTyCLZWAy2G5GnmUZmQ2dz2xHat+94EiRFLL47OTeK34BRbBcgq5ANqPihspA+IW2aOiv09ibuYz/Ih9P9sImXmUDJP7S3cUA2AETgwzw==,iv:dI51wBqmGHzqV8Pet04oJahh+d9vO5tcuUr5xkvPz4U=,tag:bd0vGKtkTvb/fTet8h/bOQ==,type:str]
+sops:
+  age:
+    - recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBEdmkralo2c2ZJUUU3VFhU
+        WUpUWmo1Nk1uZENvb2JlNlZqd2VML052T2hJClRXUGVMSVBKRklxeVBScDA1Z0lY
+        enFTVnEyRTBtejRsYklBZFJ3bExoUlEKLS0tIG9HcTY3RlpNeVFJVE5VNjEwS3My
+        VFIxZUY4Z0p3U05MdFRmSmlqR2pyTk0KbuUio8BunJ+XtMcYF4qqHNXpQjdj+fKO
+        r2fbs3yNL+EqtYxq+5Aqr8oVjIpuN9DB87DEGiSx5pgBcgwltFcFBw==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2026-04-18T18:38:05Z"
+  mac: ENC[AES256_GCM,data:8H0qX93GnKrxb197heJHsHnm/cYZpD/pFAT39JgdnDK6cAAkvwv22Xejz2AGjkl4mIFtrl9ToPbgEEN7DvigyCurlP9nWoIed3eHlH4KAu7sToiuYNJ4HGbTV1/mZgxJj2D7HlAeteret2Z7AsNmvTyXmwquedMX0EteZMqeKnI=,iv:yQcWlph6p+8JITferTugKyek/ztzK9dNDS+XT4S3R5g=,tag:FgAe89d5MlTsarbl8D2H5A==,type:str]
+  encrypted_regex: ^(data|stringData)$
+  version: 3.12.2

@@ -132,5 +132,9 @@ spec:
             user: "homelab-users"
       initContainer:
         securityContext:
+          # /config PVC is owned by root because the main HA container runs as
+          # image-default (root). A non-root init container cannot merge
+          # configuration templates into /config. Tried 65534 in c8e7e1e,
+          # reverted in 21baa62 for this reason.
           runAsUser: 0
           allowPrivilegeEscalation: false

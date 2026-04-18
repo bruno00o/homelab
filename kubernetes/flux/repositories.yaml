@@ -1,21 +1,25 @@
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+kind: OCIRepository
 metadata:
   name: cilium
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://helm.cilium.io/
+  url: oci://quay.io/cilium/charts/cilium
+  ref:
+    tag: "1.19.3"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+kind: OCIRepository
 metadata:
-  name: jetstack
+  name: cert-manager
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://charts.jetstack.io
+  url: oci://quay.io/jetstack/charts/cert-manager
+  ref:
+    tag: "v1.20.2"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
@@ -100,13 +104,15 @@ spec:
   url: https://aquasecurity.github.io/helm-charts/
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+kind: OCIRepository
 metadata:
   name: kyverno
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://kyverno.github.io/kyverno/
+  url: oci://ghcr.io/kyverno/charts/kyverno
+  ref:
+    tag: "3.7.1"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

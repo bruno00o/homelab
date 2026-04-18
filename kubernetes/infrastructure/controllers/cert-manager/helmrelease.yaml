@@ -7,15 +7,10 @@ spec:
   interval: 30m
   timeout: 10m
 
-  chart:
-    spec:
-      chart: cert-manager
-      version: "v1.20.2"
-      sourceRef:
-        kind: HelmRepository
-        name: jetstack
-        namespace: flux-system
-      interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: cert-manager
+    namespace: flux-system
 
   dependsOn:
     - name: cilium

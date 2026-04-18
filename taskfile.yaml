@@ -327,7 +327,7 @@ tasks:
     desc: Bootstrap Flux GitOps (after Cilium)
     preconditions:
       - sh: kubectl get nodes -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep -q True
-        msg: "Nodes are not Ready. Run 'task bootstrap:cilium' first."
+        msg: "Nodes are not Ready. Run 'task bootstrap:helmfile' first."
     cmds:
       - task: bootstrap:sops-secret
       - |

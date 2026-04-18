@@ -23,6 +23,10 @@ misconfigurations:
   - id: KSV-0109
     paths:
       - "apps/authentik/blueprints/homelab.yaml"
+      # zigbee2mqtt ConfigMap uses ${ZIGBEE2MQTT_MQTT_PASSWORD} which Flux
+      # resolves via postBuild.substituteFrom from cluster-secrets (SOPS) — not
+      # a hardcoded credential.
+      - "apps/home-automation/zigbee2mqtt/resources.yaml"
 
   # TODO(roadmap 1.18): AdGuard Home runs with readOnlyRootFilesystem: false
   # because the container writes to a few rootfs paths at runtime. Proper fix

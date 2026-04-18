@@ -1,0 +1,194 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.0.20.0/24
+      ports:
+        - protocol: TCP
+          port: 5000
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: home-automation
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frigate-to-mosquitto
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mosquitto
+      ports:
+        - protocol: TCP
+          port: 1883
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frigate-camera-egress
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.30.0/24
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 554
+        - protocol: TCP
+          port: 8862
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frigate-from-authentik
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
+      ports:
+        - protocol: TCP
+          port: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frigate-nfs-egress
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.10.113/32
+      ports:
+        - protocol: TCP
+          port: 2049
+        - protocol: UDP
+          port: 2049
+        - protocol: TCP
+          port: 111
+        - protocol: UDP
+          port: 111
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frigate-from-ha
+  namespace: home-automation
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: home-assistant
+      ports:
+        - protocol: TCP
+          port: 5000
+        - protocol: TCP
+          port: 8554
+        - protocol: TCP
+          port: 8555
+        - protocol: UDP
+          port: 8555
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-frigate-from-host
+  namespace: home-automation
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  ingress:
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+            - port: "8554"
+              protocol: TCP
+            - port: "8555"
+              protocol: TCP
+            - port: "8555"
+              protocol: UDP

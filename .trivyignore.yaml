@@ -1,0 +1,32 @@
+misconfigurations:
+  # Flux's bundled RBAC grants broad cluster access by design — it needs to
+  # reconcile any resource across the cluster. This file is vendored from
+  # upstream `gotk-components.yaml` and not a manifest we author.
+  - id: KSV-0041
+    paths:
+      - "flux/flux-system/gotk-components.yaml"
+  - id: KSV-0046
+    paths:
+      - "flux/flux-system/gotk-components.yaml"
+
+  # Intel GPU plugin container has a full securityContext (readOnlyRootFilesystem,
+  # allowPrivilegeEscalation: false, capabilities drop ALL, seccompProfile).
+  # Trivy flags KSV-0118 because there is no pod-level securityContext, which
+  # is a false positive here since all containers are properly restricted.
+  - id: KSV-0118
+    paths:
+      - "infrastructure/controllers/intel-gpu-plugin/intel-gpu-plugin.yaml"
+
+  # Authentik blueprints use `!Env AUTHENTIK_*_CLIENT_SECRET` syntax to inject
+  # values from the authentik deployment's environment at load time — these are
+  # not hardcoded secret values.
+  - id: KSV-0109
+    paths:
+      - "apps/authentik/blueprints/homelab.yaml"
+
+  # TODO(roadmap 1.18): AdGuard Home runs with readOnlyRootFilesystem: false
+  # because the container writes to a few rootfs paths at runtime. Proper fix
+  # requires identifying those paths and mounting an emptyDir for each.
+  - id: KSV-0014
+    paths:
+      - "apps/adguard/adguard.yaml"

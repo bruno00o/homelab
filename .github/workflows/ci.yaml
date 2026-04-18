@@ -96,7 +96,8 @@ jobs:
           trivy config kubernetes/ \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
-            --skip-files '**/*.sops.yaml'
+            --skip-files '**/*.sops.yaml' \
+            --ignorefile .trivyignore.yaml
 
       - name: Scan repo for leaked secrets
         run: |
@@ -104,7 +105,8 @@ jobs:
             --scanners secret \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
-            --skip-files '**/*.sops.yaml'
+            --skip-files '**/*.sops.yaml' \
+            --ignorefile .trivyignore.yaml
 
       - name: Scan container images from manifests
         run: |
@@ -122,6 +124,7 @@ jobs:
               --exit-code 1 \
               --ignore-unfixed \
               --no-progress \
+              --ignorefile .trivyignore.yaml \
               || exit_code=$?
             echo "::endgroup::"
           done < /tmp/images.txt

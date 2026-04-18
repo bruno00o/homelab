@@ -88,12 +88,16 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
+        # Tells the chart the Prometheus Operator CRDs are present at runtime.
+        # Required for flux-local (CI rendering without a real cluster).
+        trustCRDsExist: true
 
     operator:
       prometheus:
         enabled: true
         serviceMonitor:
           enabled: true
+          trustCRDsExist: true
       resources:
         requests:
           cpu: 25m
@@ -120,6 +124,7 @@ spec:
           - http
         serviceMonitor:
           enabled: true
+          trustCRDsExist: true
       relay:
         enabled: true
         resources:

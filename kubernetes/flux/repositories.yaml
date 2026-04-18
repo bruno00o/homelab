@@ -20,6 +20,12 @@ spec:
   url: oci://quay.io/jetstack/charts/cert-manager
   ref:
     tag: "v1.20.2"
+  # cert-manager's OCI artifact has a signed provenance file as layer[0] and
+  # the chart tarball as layer[1]. Flux extracts layer[0] by default; this
+  # selector picks the actual chart.
+  layerSelector:
+    mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
+    operation: extract
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

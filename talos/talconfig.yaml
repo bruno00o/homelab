@@ -168,7 +168,12 @@ worker:
     - |-
       machine:
         nodeLabels:
-          node.longhorn.io/create-default-disk: "true"
+          # "config" tells Longhorn to read the default-disks-config annotation
+          # below instead of auto-creating a default disk at /var/lib/longhorn.
+          node.longhorn.io/create-default-disk: "config"
+        nodeAnnotations:
+          node.longhorn.io/default-disks-config: |
+            [{"name":"longhorn-data","path":"/var/mnt/longhorn","allowScheduling":true,"storageReserved":0,"tags":[]}]
     - |-
       apiVersion: v1alpha1
       kind: VolumeConfig

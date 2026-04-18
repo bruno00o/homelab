@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - homarr.yaml
   - homarr-secrets.sops.yaml
+  - valkey-auth.sops.yaml
   - reference-grant.yaml
   - network-policies.yaml
   - pdb.yaml

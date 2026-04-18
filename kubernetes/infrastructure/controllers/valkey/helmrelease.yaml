@@ -31,6 +31,13 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    auth:
+      enabled: true
+      usersExistingSecret: valkey-auth
+      aclUsers:
+        default:
+          permissions: "~* &* +@all"
+          passwordKey: default
     deploymentStrategy: Recreate
     podSecurityContext:
       fsGroup: 1000

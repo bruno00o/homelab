@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - secrets.sops.yaml
+  - valkey-auth.sops.yaml
   - postgres-cluster.yaml
   - helmrelease.yaml
   - certificate.yaml

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: valkey-auth
+  namespace: authentik
+type: Opaque
+stringData:
+  default: ENC[AES256_GCM,data:ldcxPTLRfnlZ1fP1SF46o1vgok8cXGb9vSA/V0AwR8Ljw/HKQmIE635K,iv:IPZqAU2x4tWsNph5huPAJCsBKswK//9uI20nYNltcn0=,tag:f24gYtkk1e7mMQHLO3IZlQ==,type:str]
+  password: ENC[AES256_GCM,data:1AyFJ1ZBIrh82XpXHKwKa337LoRX+utAlf4O84o1zxjWDJLj3BsbcjDm,iv:Yw18qyuUceLzQp9bQWooANSa4vToRqnymCPwFOTFMoE=,tag:1iDYhBhJHKBM86d8hPxSsQ==,type:str]
+sops:
+  age:
+    - recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBmbHdMRXh3eVBWeUJXRDlY
+        S3VtTnZ6MEF6Skl5M0RGS0NXYXMxYlkrUzJRClZDay9EV29qZFNBY2YydVJ3ZEda
+        c1MwKzRSc1M4cUVzamtXY0E3cExtQjgKLS0tIFlpMVNhS3Bkdkw4ZlNyV2hHNEdH
+        SjBvTjhsMkg0NVNMa1dKSXBJa3dOdzgK4VFBDCIUI2RQHIji/xxE3Szl6QeucxS1
+        EMHjtKNfNluMHR9T+kLNeTchgaSoiVlT49pAsm/FbXe9FKgNbPFoNA==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2026-04-18T18:10:28Z"
+  mac: ENC[AES256_GCM,data:myA0kaY+hid6Nn1gxwVloK749ui7XU/NYQPOOBNmsGxeVHkbRLwBlVuwmNwYarpqFaTx2x5CZtmEvD7JC2O2DJ//iifIr5VLto89iO4eJI6Zcw7FFjOaVaRXaP8oa1i9SdAvjcGWaiqUquRkkBDTM7pN2Tcp7XroXU0nUT3qOIs=,iv:r9R79swaejPqDMku3lGB0wZliBEk58alY7NEESBd39A=,tag:31gDkzW5qVPH8+6lprl+zw==,type:str]
+  encrypted_regex: ^(data|stringData)$
+  version: 3.12.2

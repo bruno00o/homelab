@@ -138,6 +138,11 @@ spec:
               value: valkey.valkey-system.svc.cluster.local
             - name: REDIS_PORT
               value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: valkey-auth
+                  key: password
             - name: AUTH_PROVIDERS
               value: "oidc"
             - name: AUTH_OIDC_CLIENT_NAME

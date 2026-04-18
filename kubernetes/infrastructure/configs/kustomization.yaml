@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - issuers.yaml
   - gateway
+  - ingress-routes
   - network-policies
   - grafana-dashboards
   - longhorn

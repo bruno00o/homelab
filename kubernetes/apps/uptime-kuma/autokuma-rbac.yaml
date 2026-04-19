@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autokuma
+  namespace: uptime-kuma
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: autokuma
+rules:
+  - apiGroups: [autokuma.bigboot.dev]
+    resources: [kumaentities]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [autokuma.bigboot.dev]
+    resources: [kumaentities/status]
+    verbs: [get, update, patch]
+  - apiGroups: [autokuma.bigboot.dev]
+    resources: [kumaentities/finalizers]
+    verbs: [update]
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: autokuma
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: autokuma
+subjects:
+  - kind: ServiceAccount
+    name: autokuma
+    namespace: uptime-kuma

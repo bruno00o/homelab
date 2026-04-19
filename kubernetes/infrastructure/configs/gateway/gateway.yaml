@@ -132,6 +132,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-random-gif
+      protocol: HTTPS
+      port: 443
+      hostname: random-gif.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: random-gif-tls
+            namespace: random-gif
+      allowedRoutes:
+        namespaces:
+          from: All
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway

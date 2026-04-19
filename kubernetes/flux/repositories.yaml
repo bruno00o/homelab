@@ -121,6 +121,17 @@ spec:
     tag: "3.7.1"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: app-template
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: oci://ghcr.io/bjw-s-labs/helm/app-template
+  ref:
+    tag: "4.2.0"
+---
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: blakeshome

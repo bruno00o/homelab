@@ -1,0 +1,51 @@
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  config:
+    type: http
+    name: Grafana
+    url: https://grafana.${CLUSTER_DOMAIN}
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+      - "400-499"
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: hubble
+  namespace: kube-system
+spec:
+  config:
+    type: http
+    name: Hubble UI
+    url: https://hubble.${CLUSTER_DOMAIN}
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+      - "400-499"
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  config:
+    type: http
+    name: Longhorn
+    url: https://longhorn.${CLUSTER_DOMAIN}
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+      - "400-499"

@@ -12,3 +12,4 @@ resources:
   - blueprints/
   - pdb.yaml
   - network-policies.yaml
+  - kuma-monitor.yaml

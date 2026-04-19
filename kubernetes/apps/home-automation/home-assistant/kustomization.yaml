@@ -6,3 +6,4 @@ resources:
   - httproute.yaml
   - network-policies.yaml
   - pdb.yaml
+  - kuma-monitor.yaml

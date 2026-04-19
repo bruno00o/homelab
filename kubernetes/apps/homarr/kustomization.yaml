@@ -8,3 +8,4 @@ resources:
   - reference-grant.yaml
   - network-policies.yaml
   - pdb.yaml
+  - kuma-monitor.yaml

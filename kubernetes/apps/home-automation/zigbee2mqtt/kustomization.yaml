@@ -5,3 +5,4 @@ resources:
   - certificate.yaml
   - httproute.yaml
   - network-policies.yaml
+  - kuma-monitor.yaml

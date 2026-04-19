@@ -1,0 +1,16 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  config:
+    type: http
+    name: Authentik
+    url: https://auth.${CLUSTER_DOMAIN}
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+      - "400-499"

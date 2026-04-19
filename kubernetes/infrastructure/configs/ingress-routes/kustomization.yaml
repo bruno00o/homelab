@@ -4,3 +4,4 @@ resources:
   - httproutes.yaml
   - reference-grant-monitoring.yaml
   - reference-grant-longhorn.yaml
+  - kuma-monitors.yaml

@@ -69,6 +69,12 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      data:
+        storageClass: ${DEFAULT_STORAGE_CLASS}
+        accessMode: ReadWriteOnce
+        size: 512Mi
+        globalMounts:
+          - path: /data
 
     defaultPodOptions:
       securityContext:

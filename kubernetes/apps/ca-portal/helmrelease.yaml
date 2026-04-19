@@ -32,7 +32,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/bruno00o/ca-portal
             image:
               repository: ghcr.io/bruno00o/ca-portal
-              tag: "1.1.0"
+              tag: "v1.2.0"
             env:
               TZ: ${TIMEZONE}
               CA_PORTAL_LISTEN_ADDR: :8080

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ca-portal-tls
+  namespace: ca-portal
+spec:
+  secretName: ca-portal-tls
+  issuerRef:
+    name: ${CLUSTER_ISSUER}
+    kind: ClusterIssuer
+  dnsNames:
+    - ca.${CLUSTER_DOMAIN}

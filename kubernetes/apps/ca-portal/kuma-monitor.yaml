@@ -1,0 +1,18 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: ca-portal
+  namespace: ca-portal
+spec:
+  config:
+    type: http
+    name: CA Portal
+    url: https://ca.${CLUSTER_DOMAIN}
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+      - "400-499"
+    notification_name_list:
+      - discord

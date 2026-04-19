@@ -158,6 +158,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-ca-portal
+      protocol: HTTPS
+      port: 443
+      hostname: ca.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: ca-portal-tls
+            namespace: ca-portal
+      allowedRoutes:
+        namespaces:
+          from: All
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway

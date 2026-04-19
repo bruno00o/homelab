@@ -1,0 +1,81 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ca-portal
+  namespace: ca-portal
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  values:
+    controllers:
+      ca-portal:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        serviceAccount:
+          name: ca-portal
+        containers:
+          app:
+            # renovate: datasource=docker depName=ghcr.io/bruno00o/ca-portal
+            image:
+              repository: ghcr.io/bruno00o/ca-portal
+              tag: "1.1.0"
+            env:
+              TZ: ${TIMEZONE}
+              CA_PORTAL_LISTEN_ADDR: :8080
+              CA_PORTAL_NAMESPACE: cert-manager
+              CA_PORTAL_SECRET_NAME: mugiwara-ca-secret
+              CA_PORTAL_SECRET_KEY: tls.crt
+              CA_PORTAL_PROFILE_IDENTIFIER: arpa.home.merry.ca
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /
+                port: 8080
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /
+                port: 8080
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                cpu: 200m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: ca-portal
+        ports:
+          http:
+            port: 8080

@@ -6,6 +6,13 @@ metadata:
   namespace: kube-system
 data:
   Corefile: |
+    ${CLUSTER_DOMAIN}:53 {
+        errors
+        cache 30
+        forward . ${LB_ADGUARD}
+        reload
+    }
+
     .:53 {
         errors
         health {

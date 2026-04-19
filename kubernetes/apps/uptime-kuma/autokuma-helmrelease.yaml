@@ -25,8 +25,8 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         strategy: Recreate
-        pod:
-          serviceAccountName: autokuma
+        serviceAccount:
+          name: autokuma
         containers:
           app:
             # renovate: datasource=docker depName=ghcr.io/bigboot/autokuma

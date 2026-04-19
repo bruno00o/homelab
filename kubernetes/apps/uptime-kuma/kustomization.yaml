@@ -11,3 +11,4 @@ resources:
   - autokuma-rbac.yaml
   - autokuma-helmrelease.yaml
   - autokuma-secrets.sops.yaml
+  - notification.yaml

@@ -1,0 +1,13 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: discord
+  namespace: uptime-kuma
+spec:
+  config:
+    type: notification
+    name: Discord
+    active: true
+    config:
+      type: discord
+      webhookUrl: "${DISCORD_WEBHOOK_URL}"

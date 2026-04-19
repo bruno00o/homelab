@@ -14,3 +14,5 @@ spec:
       - "200-299"
       - "300-399"
       - "400-499"
+    notification_name_list:
+      - discord

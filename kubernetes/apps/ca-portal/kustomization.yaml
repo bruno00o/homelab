@@ -4,8 +4,6 @@ resources:
   - namespace.yaml
   - rbac.yaml
   - helmrelease.yaml
-  - certificate.yaml
   - httproute.yaml
-  - reference-grant.yaml
   - network-policies.yaml
   - kuma-monitor.yaml

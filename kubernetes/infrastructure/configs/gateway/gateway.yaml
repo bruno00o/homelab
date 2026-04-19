@@ -158,16 +158,10 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https-ca-portal
-      protocol: HTTPS
-      port: 443
+    - name: http-ca-portal
+      protocol: HTTP
+      port: 80
       hostname: ca.${CLUSTER_DOMAIN}
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: ca-portal-tls
-            namespace: ca-portal
       allowedRoutes:
         namespaces:
           from: All

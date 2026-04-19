@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-ca-portal
+      sectionName: http-ca-portal
   hostnames:
     - ca.${CLUSTER_DOMAIN}
   rules:

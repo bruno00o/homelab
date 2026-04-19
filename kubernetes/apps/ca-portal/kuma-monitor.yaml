@@ -7,9 +7,8 @@ spec:
   config:
     type: http
     name: CA Portal
-    url: https://ca.${CLUSTER_DOMAIN}
+    url: http://ca.${CLUSTER_DOMAIN}
     interval: 60
-    ignore_tls: true
     accepted_statuscodes:
       - "200-299"
       - "300-399"

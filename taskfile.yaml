@@ -271,7 +271,7 @@ tasks:
       NODE_IP: "{{.NODE_IP | default .NODE_LUFFY}}"
     cmds:
       - echo "Waiting for node {{.NODE_IP}} to be healthy..."
-      - until talosctl health --nodes {{.NODE_IP}} 2>/dev/null; do sleep 5; done
+      - until talosctl health --nodes {{.NODE_LUFFY}} --control-plane-nodes {{.NODE_LUFFY}},{{.NODE_ZORO}},{{.NODE_NAMI}} --worker-nodes {{.NODE_USOPP}},{{.NODE_SANJI}},{{.NODE_CHOPPER}} 2>/dev/null; do sleep 5; done
       - echo "Node {{.NODE_IP}} is healthy"
 
   talos:wait-ready:

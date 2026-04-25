@@ -38,6 +38,10 @@ spec:
         default:
           permissions: "~* &* +@all"
           passwordKey: default
+    service:
+      type: LoadBalancer
+      annotations:
+        lbipam.cilium.io/ips: ${LB_VALKEY}
     deploymentStrategy: Recreate
     podSecurityContext:
       fsGroup: 1000

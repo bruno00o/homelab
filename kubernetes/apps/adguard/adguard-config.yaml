@@ -56,6 +56,9 @@ data:
         - domain: 'dozerdb.${CLUSTER_DOMAIN}'
           answer: ${LB_DOZERDB}
           enabled: true
+        - domain: 'valkey.${CLUSTER_DOMAIN}'
+          answer: ${LB_VALKEY}
+          enabled: true
         - domain: '*.${CLUSTER_DOMAIN}'
           answer: ${LB_GATEWAY}
           enabled: true

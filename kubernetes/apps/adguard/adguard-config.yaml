@@ -50,6 +50,12 @@ data:
         id: 1
     filtering:
       rewrites:
+        - domain: 'qdrant.${CLUSTER_DOMAIN}'
+          answer: ${LB_QDRANT}
+          enabled: true
+        - domain: 'dozerdb.${CLUSTER_DOMAIN}'
+          answer: ${LB_DOZERDB}
+          enabled: true
         - domain: '*.${CLUSTER_DOMAIN}'
           answer: ${LB_GATEWAY}
           enabled: true

@@ -1,0 +1,91 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: qdrant
+  namespace: qdrant
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: qdrant
+      version: "1.17.1"
+      sourceRef:
+        kind: HelmRepository
+        name: qdrant
+        namespace: flux-system
+      interval: 1h
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+  uninstall:
+    keepHistory: false
+  values:
+    replicaCount: 1
+
+    apiKey:
+      valueFrom:
+        secretKeyRef:
+          name: qdrant-secrets
+          key: api-key
+
+    readOnlyApiKey:
+      valueFrom:
+        secretKeyRef:
+          name: qdrant-secrets
+          key: read-only-api-key
+
+    service:
+      type: LoadBalancer
+      loadBalancerIP: ${LB_QDRANT}
+      ports:
+        - name: http
+          port: 6333
+          targetPort: 6333
+          protocol: TCP
+          checksEnabled: true
+        - name: grpc
+          port: 6334
+          targetPort: 6334
+          protocol: TCP
+          checksEnabled: false
+
+    persistence:
+      accessModes: ["ReadWriteOnce"]
+      size: 20Gi
+      storageClassName: ${DEFAULT_STORAGE_CLASS}
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 3000
+      fsGroup: 3000
+      seccompProfile:
+        type: RuntimeDefault
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 1000
+      capabilities:
+        drop: ["ALL"]
+
+    metrics:
+      serviceMonitor:
+        enabled: true

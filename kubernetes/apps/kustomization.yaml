@@ -3,8 +3,10 @@ kind: Kustomization
 resources:
   - adguard
   - authentik
+  - dozerdb
   - homarr
   - home-automation
+  - qdrant
   - random-gif
   - uptime-kuma
   - ca-portal

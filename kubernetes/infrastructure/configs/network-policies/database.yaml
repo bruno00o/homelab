@@ -145,3 +145,22 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-lb-ingress
+  namespace: valkey-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: valkey
+  ingress:
+    - fromEntities:
+        - world
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP

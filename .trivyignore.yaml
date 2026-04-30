@@ -27,6 +27,10 @@ misconfigurations:
       # resolves via postBuild.substituteFrom from cluster-secrets (SOPS) — not
       # a hardcoded credential.
       - "apps/home-automation/zigbee2mqtt/resources.yaml"
+      # gaspard lightrag-config has MAX_TOKENS (LLM context size, not a secret).
+      # LLM_BINDING_API_KEY is a placeholder string — keyword-only mode skips
+      # the LLM call entirely.
+      - "apps/gaspard/lightrag-config.yaml"
 
   # TODO(roadmap 1.18): AdGuard Home runs with readOnlyRootFilesystem: false
   # because the container writes to a few rootfs paths at runtime. Proper fix

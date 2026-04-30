@@ -112,6 +112,11 @@ patches:
               discard_unpacked_layers = false
   - |-
     machine:
+      network:
+        extraHostEntries:
+          - ip: 10.0.20.20
+            aliases:
+              - zot.merry.home.arpa
       registries:
         config:
           "zot.merry.home.arpa":

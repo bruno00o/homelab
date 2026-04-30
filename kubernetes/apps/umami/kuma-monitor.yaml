@@ -1,0 +1,16 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: umami
+  namespace: umami
+spec:
+  config:
+    type: http
+    name: Umami
+    url: https://umami.${CLUSTER_DOMAIN}/api/heartbeat
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

@@ -1,0 +1,36 @@
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: aroma
+  namespace: aroma
+spec:
+  config:
+    type: http
+    name: Aroma
+    url: https://aroma.${CLUSTER_DOMAIN}
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+      - "400-499"
+    notification_name_list:
+      - discord
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: pb-aroma
+  namespace: aroma
+spec:
+  config:
+    type: http
+    name: Aroma PocketBase
+    url: https://pb-aroma.${CLUSTER_DOMAIN}/api/health
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

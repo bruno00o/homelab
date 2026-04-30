@@ -158,6 +158,45 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-aroma
+      protocol: HTTPS
+      port: 443
+      hostname: aroma.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: aroma-tls
+            namespace: aroma
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-pb-aroma
+      protocol: HTTPS
+      port: 443
+      hostname: pb-aroma.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: pb-aroma-tls
+            namespace: aroma
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-umami
+      protocol: HTTPS
+      port: 443
+      hostname: umami.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: umami-tls
+            namespace: umami
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: http-ca-portal
       protocol: HTTP
       port: 80

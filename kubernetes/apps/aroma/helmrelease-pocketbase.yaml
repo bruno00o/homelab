@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aroma-pocketbase
+  namespace: aroma
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  values:
+    controllers:
+      aroma-pocketbase:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            # renovate: datasource=docker depName=ghcr.io/bruno00o/aroma-pocketbase
+            image:
+              repository: ghcr.io/bruno00o/aroma-pocketbase
+              tag: prod@sha256:21a893e549dd57fd4ff1adf40a9d9a0174e66f94a51852b9a5ab342777e18723
+            env:
+              TZ: ${TIMEZONE}
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /api/health
+                port: 8090
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /api/health
+                port: 8090
+            resources:
+              requests:
+                cpu: 20m
+                memory: 64Mi
+              limits:
+                cpu: 500m
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: aroma-pocketbase
+        ports:
+          http:
+            port: 8090
+
+    persistence:
+      data:
+        storageClass: ${DEFAULT_STORAGE_CLASS}
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        globalMounts:
+          - path: /pb/pb_data

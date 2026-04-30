@@ -90,6 +90,20 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: aroma
+      ports:
+        - protocol: TCP
+          port: 3000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: umami
+      ports:
+        - protocol: TCP
+          port: 3000
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

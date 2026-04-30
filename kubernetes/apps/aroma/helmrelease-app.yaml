@@ -1,0 +1,77 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aroma-app
+  namespace: aroma
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  values:
+    controllers:
+      aroma-app:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: RollingUpdate
+        containers:
+          app:
+            # renovate: datasource=docker depName=ghcr.io/bruno00o/aroma-app
+            image:
+              repository: ghcr.io/bruno00o/aroma-app
+              tag: prod@sha256:32ffc0c91bf44bb15c5120eb73c594180168829bf8316e32cfdb29a7b8823a11
+            env:
+              TZ: ${TIMEZONE}
+              PORT: "3000"
+              HOSTNAME: "0.0.0.0"
+              POCKETBASE_URL: http://aroma-pocketbase:8090
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /
+                port: 3000
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /
+                port: 3000
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: 1000m
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: aroma-app
+        ports:
+          http:
+            port: 3000

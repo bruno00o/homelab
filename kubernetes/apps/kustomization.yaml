@@ -2,11 +2,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - adguard
+  - aroma
   - authentik
   - dozerdb
   - homarr
   - home-automation
   - qdrant
   - random-gif
+  - umami
   - uptime-kuma
   - ca-portal

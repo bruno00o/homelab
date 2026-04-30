@@ -1,0 +1,26 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: aroma-tls
+  namespace: aroma
+spec:
+  secretName: aroma-tls
+  issuerRef:
+    name: ${CLUSTER_ISSUER}
+    kind: ClusterIssuer
+  dnsNames:
+    - aroma.${CLUSTER_DOMAIN}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pb-aroma-tls
+  namespace: aroma
+spec:
+  secretName: pb-aroma-tls
+  issuerRef:
+    name: ${CLUSTER_ISSUER}
+    kind: ClusterIssuer
+  dnsNames:
+    - pb-aroma.${CLUSTER_DOMAIN}

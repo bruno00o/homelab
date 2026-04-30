@@ -108,7 +108,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-pocketbase-https-egress
+  name: allow-pocketbase-internet-egress
   namespace: aroma
 spec:
   podSelector:
@@ -124,8 +124,10 @@ spec:
               - 172.16.0.0/12
               - 192.168.0.0/16
       ports:
-        - { protocol: TCP, port: 443 }
         - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 465 }
+        - { protocol: TCP, port: 587 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

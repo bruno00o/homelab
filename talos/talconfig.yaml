@@ -110,6 +110,13 @@ patches:
           content: |
             [plugins."io.containerd.cri.v1.images"]
               discard_unpacked_layers = false
+  - |-
+    machine:
+      registries:
+        config:
+          "zot.merry.home.arpa":
+            tls:
+              insecureSkipVerify: true
 
 # =============================================================================
 # Control Plane patches

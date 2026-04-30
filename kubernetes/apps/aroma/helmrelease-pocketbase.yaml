@@ -30,7 +30,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/bruno00o/aroma-pocketbase
             image:
               repository: ghcr.io/bruno00o/aroma-pocketbase
-              tag: prod@sha256:21a893e549dd57fd4ff1adf40a9d9a0174e66f94a51852b9a5ab342777e18723
+              tag: prod@sha256:450d0dc5ac089720a9abd4688e7d9bfadf3d91a5743e19e872776514fe7e282f
             env:
               TZ: ${TIMEZONE}
             probes:

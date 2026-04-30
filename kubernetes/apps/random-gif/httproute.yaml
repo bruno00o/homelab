@@ -8,6 +8,9 @@ spec:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-random-gif
+    - name: external-gateway
+      namespace: kube-system
+      sectionName: https-random-gif
   hostnames:
     - random-gif.${CLUSTER_DOMAIN}
   rules:

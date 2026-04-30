@@ -44,6 +44,14 @@ spec:
                 type: HTTP
                 path: /api/health
                 port: 8090
+              startup:
+                enabled: true
+                type: HTTP
+                path: /api/health
+                port: 8090
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 5
             resources:
               requests:
                 cpu: 20m

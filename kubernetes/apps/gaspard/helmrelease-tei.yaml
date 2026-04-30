@@ -34,6 +34,8 @@ spec:
             args:
               - "--model-id=Qwen/Qwen3-Embedding-0.6B"
               - "--port=80"
+              - "--max-batch-tokens=4096"
+              - "--max-concurrent-requests=64"
             env:
               TZ: ${TIMEZONE}
             probes:
@@ -58,10 +60,10 @@ spec:
             resources:
               requests:
                 cpu: "1"
-                memory: 2Gi
+                memory: 3Gi
               limits:
                 cpu: "4"
-                memory: 4Gi
+                memory: 8Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

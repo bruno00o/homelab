@@ -83,6 +83,13 @@ spec:
       ports:
         - protocol: TCP
           port: 7575
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: random-gif
+      ports:
+        - protocol: TCP
+          port: 8080
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

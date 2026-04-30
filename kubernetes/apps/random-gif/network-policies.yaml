@@ -59,6 +59,24 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: allow-ingress-from-cloudflare-tunnel
+  namespace: random-gif
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: random-gif
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
   name: allow-discord-egress
   namespace: random-gif
 spec:

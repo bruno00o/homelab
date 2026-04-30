@@ -12,3 +12,4 @@ resources:
   - umami
   - uptime-kuma
   - ca-portal
+  - zot

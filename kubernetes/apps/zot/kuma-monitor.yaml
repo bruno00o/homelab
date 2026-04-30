@@ -1,0 +1,18 @@
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: zot
+  namespace: zot
+spec:
+  config:
+    type: http
+    name: Zot Registry
+    url: https://zot.${CLUSTER_DOMAIN}/v2/
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+      - "401"
+    notification_name_list:
+      - discord

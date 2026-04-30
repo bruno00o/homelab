@@ -197,6 +197,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-zot
+      protocol: HTTPS
+      port: 443
+      hostname: zot.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: zot-tls
+            namespace: zot
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: http-ca-portal
       protocol: HTTP
       port: 80

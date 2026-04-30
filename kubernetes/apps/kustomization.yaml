@@ -5,6 +5,7 @@ resources:
   - aroma
   - authentik
   - dozerdb
+  - gaspard
   - homarr
   - home-automation
   - qdrant

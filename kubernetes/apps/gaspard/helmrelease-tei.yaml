@@ -1,0 +1,93 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tei
+  namespace: gaspard
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  values:
+    controllers:
+      tei:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            # renovate: datasource=docker depName=ghcr.io/huggingface/text-embeddings-inference
+            image:
+              repository: ghcr.io/huggingface/text-embeddings-inference
+              tag: cpu-1.9.3
+            args:
+              - "--model-id=Qwen/Qwen3-Embedding-0.6B"
+              - "--port=80"
+            env:
+              TZ: ${TIMEZONE}
+              HF_HOME: /tmp/hf
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 80
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 80
+              startup:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 80
+                spec:
+                  failureThreshold: 120
+                  periodSeconds: 10
+            resources:
+              requests:
+                cpu: "1"
+                memory: 1.5Gi
+              limits:
+                cpu: "4"
+                memory: 3Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: tei
+        ports:
+          http:
+            port: 80
+
+    persistence:
+      tmp:
+        type: emptyDir
+        sizeLimit: 4Gi
+        globalMounts:
+          - path: /tmp

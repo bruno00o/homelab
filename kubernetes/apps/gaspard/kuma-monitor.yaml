@@ -1,0 +1,16 @@
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: gaspard-mcp
+  namespace: gaspard
+spec:
+  config:
+    type: http
+    name: Gaspard MCP
+    url: https://gaspard-mcp.seilliebert.dev/health
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

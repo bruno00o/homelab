@@ -106,6 +106,13 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gaspard
+      ports:
+        - protocol: TCP
+          port: 8000
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

@@ -1,0 +1,95 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: lightrag
+  namespace: gaspard
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  values:
+    controllers:
+      lightrag:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            # renovate: datasource=docker depName=ghcr.io/hkuds/lightrag
+            image:
+              repository: ghcr.io/hkuds/lightrag
+              tag: v1.4.15
+            env:
+              TZ: ${TIMEZONE}
+            envFrom:
+              - configMapRef:
+                  name: lightrag-config
+              - secretRef:
+                  name: gaspard-secrets
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 9621
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 9621
+              startup:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 9621
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: "2"
+                memory: 2Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: lightrag
+        ports:
+          http:
+            port: 9621
+
+    persistence:
+      data:
+        storageClass: ${DEFAULT_STORAGE_CLASS}
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        globalMounts:
+          - path: /app/data

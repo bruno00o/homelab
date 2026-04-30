@@ -30,7 +30,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/bruno00o/aroma-app
             image:
               repository: ghcr.io/bruno00o/aroma-app
-              tag: prod@sha256:d0afa2ab5594a023649fbac1eff3e5b5bb46e181a6e926cbc57118a2ba0e5552
+              tag: prod@sha256:08334f0b49fa69807c1b481904c95c5f96161ae0a978af89255671eb7dece3b3
             env:
               TZ: ${TIMEZONE}
               PORT: "3000"

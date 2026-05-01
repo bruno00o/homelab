@@ -19,7 +19,7 @@ data:
   NEO4J_USERNAME: "neo4j"
   NEO4J_DATABASE: "gaspard"
   EMBEDDING_BINDING: "openai"
-  EMBEDDING_BINDING_HOST: "http://llamacpp.gaspard.svc.cluster.local:1234"
+  EMBEDDING_BINDING_HOST: "http://llamacpp.gaspard.svc.cluster.local:1234/v1"
   EMBEDDING_MODEL: "text-embedding-qwen3-embedding-0.6b"
   EMBEDDING_DIM: "1024"
   LLM_BINDING: "openai"

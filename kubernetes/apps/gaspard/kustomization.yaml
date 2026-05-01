@@ -8,5 +8,8 @@ resources:
   - helmrelease-llamacpp.yaml
   - helmrelease-lightrag.yaml
   - helmrelease-mcp.yaml
+  - certificate.yaml
+  - httproute.yaml
+  - reference-grant.yaml
   - network-policies.yaml
   - kuma-monitor.yaml

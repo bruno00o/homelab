@@ -131,6 +131,37 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: allow-ingress-from-gateway-lightrag
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: lightrag
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 9621 }
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress-lightrag
+  namespace: gaspard
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lightrag
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "9621", protocol: TCP }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
   name: allow-mcp-egress-lightrag
   namespace: gaspard
 spec:

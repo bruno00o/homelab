@@ -210,6 +210,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-lightrag
+      protocol: HTTPS
+      port: 443
+      hostname: lightrag.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: lightrag-tls
+            namespace: gaspard
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: http-ca-portal
       protocol: HTTP
       port: 80

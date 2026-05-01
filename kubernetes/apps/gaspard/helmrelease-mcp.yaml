@@ -37,11 +37,6 @@ spec:
               MCP_TRANSPORT: "streamable-http"
               MCP_HOST: "0.0.0.0"
               MCP_PORT: "8000"
-              MCP_AUTH_TOKEN:
-                valueFrom:
-                  secretKeyRef:
-                    name: gaspard-secrets
-                    key: MCP_AUTH_TOKEN
             probes:
               liveness:
                 enabled: true

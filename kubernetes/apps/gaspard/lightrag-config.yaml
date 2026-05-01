@@ -25,6 +25,7 @@ data:
   LLM_BINDING: "openai"
   LLM_MODEL: "gpt-4o-mini"
   LLM_BINDING_API_KEY: "unused-keyword-only-mode"
+  OPENAI_API_KEY: "unused-keyword-only-mode"
   TIMEOUT: "240"
   TEMPERATURE: "0"
   MAX_ASYNC: "4"

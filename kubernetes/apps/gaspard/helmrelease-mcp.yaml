@@ -30,7 +30,7 @@ spec:
             # renovate: datasource=docker depName=zot.merry.home.arpa/gaspard/mcp
             image:
               repository: zot.merry.home.arpa/gaspard/mcp
-              tag: "0.1.0"
+              tag: "0.1.2"
             env:
               TZ: ${TIMEZONE}
               LIGHTRAG_URL: "http://lightrag.gaspard.svc.cluster.local:9621"

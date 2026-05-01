@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: tei
+  name: llamacpp
   namespace: gaspard
 spec:
   interval: 30m
@@ -22,49 +22,67 @@ spec:
 
   values:
     controllers:
-      tei:
+      llamacpp:
         annotations:
           reloader.stakater.com/auto: "true"
         strategy: Recreate
         containers:
           app:
-            # renovate: datasource=docker depName=ghcr.io/huggingface/text-embeddings-inference
+            # renovate: datasource=docker depName=ghcr.io/ggml-org/llama.cpp
             image:
-              repository: ghcr.io/huggingface/text-embeddings-inference
-              tag: cpu-1.9.3
+              repository: ghcr.io/ggml-org/llama.cpp
+              tag: server-vulkan
             args:
-              - "--model-id=Qwen/Qwen3-Embedding-0.6B"
-              - "--port=80"
-              - "--max-batch-tokens=4096"
-              - "--max-concurrent-requests=64"
+              - --hf-repo
+              - Qwen/Qwen3-Embedding-0.6B-GGUF
+              - --hf-file
+              - Qwen3-Embedding-0.6B-Q8_0.gguf
+              - --embeddings
+              - --pooling
+              - last
+              - --ctx-size
+              - "4096"
+              - --batch-size
+              - "512"
+              - --ubatch-size
+              - "512"
+              - --n-gpu-layers
+              - "28"
+              - --port
+              - "1234"
+              - --host
+              - 0.0.0.0
             env:
               TZ: ${TIMEZONE}
+              LLAMA_CACHE: /models
             probes:
               liveness:
                 enabled: true
                 type: HTTP
                 path: /health
-                port: 80
+                port: 1234
               readiness:
                 enabled: true
                 type: HTTP
                 path: /health
-                port: 80
+                port: 1234
               startup:
                 enabled: true
                 type: HTTP
                 path: /health
-                port: 80
+                port: 1234
                 spec:
-                  failureThreshold: 120
-                  periodSeconds: 10
+                  failureThreshold: 60
+                  periodSeconds: 5
             resources:
               requests:
-                cpu: "1"
-                memory: 3Gi
+                cpu: 200m
+                memory: 1Gi
+                gpu.intel.com/i915: 1
               limits:
-                cpu: "4"
-                memory: 8Gi
+                cpu: "2"
+                memory: 2Gi
+                gpu.intel.com/i915: 1
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -77,24 +95,28 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        supplementalGroups:
+          - 44     # video
+          - 109    # render
         seccompProfile:
           type: RuntimeDefault
 
     service:
       app:
-        controller: tei
+        controller: llamacpp
         ports:
           http:
-            port: 80
+            port: 1234
 
     persistence:
+      models:
+        storageClass: ${DEFAULT_STORAGE_CLASS}
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        globalMounts:
+          - path: /models
       tmp:
         type: emptyDir
-        sizeLimit: 1Gi
+        sizeLimit: 256Mi
         globalMounts:
           - path: /tmp
-      data:
-        type: emptyDir
-        sizeLimit: 4Gi
-        globalMounts:
-          - path: /data

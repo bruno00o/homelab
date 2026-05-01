@@ -28,12 +28,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-tei-internet-egress
+  name: allow-llamacpp-internet-egress
   namespace: gaspard
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: tei
+      app.kubernetes.io/name: llamacpp
   policyTypes: [Egress]
   egress:
     - to:
@@ -49,12 +49,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-tei-from-lightrag
+  name: allow-llamacpp-from-lightrag
   namespace: gaspard
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: tei
+      app.kubernetes.io/name: llamacpp
   policyTypes: [Ingress]
   ingress:
     - from:
@@ -62,7 +62,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: lightrag
       ports:
-        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 1234 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -78,9 +78,9 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: tei
+              app.kubernetes.io/name: llamacpp
       ports:
-        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 1234 }
     - to:
         - namespaceSelector:
             matchLabels:

@@ -5,7 +5,7 @@ resources:
   - zot-pull-secret.sops.yaml
   - gaspard-secrets.sops.yaml
   - lightrag-config.yaml
-  - helmrelease-tei.yaml
+  - helmrelease-llamacpp.yaml
   - helmrelease-lightrag.yaml
   - helmrelease-mcp.yaml
   - network-policies.yaml

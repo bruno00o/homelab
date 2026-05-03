@@ -166,6 +166,12 @@ spec:
       app.kubernetes.io/instance: immich
   policyTypes: [Egress]
   egress:
-    - ports:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.244.0.0/16
+              - 10.96.0.0/12
+      ports:
         - { protocol: TCP, port: 443 }
         - { protocol: TCP, port: 80 }

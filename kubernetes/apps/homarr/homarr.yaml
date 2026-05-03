@@ -98,7 +98,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:v1.59.3
+          image: ghcr.io/homarr-labs/homarr:v1.60.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

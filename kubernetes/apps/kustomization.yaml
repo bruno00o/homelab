@@ -8,6 +8,7 @@ resources:
   - gaspard
   - homarr
   - home-automation
+  - portfolio
   - qdrant
   - random-gif
   - umami

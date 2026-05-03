@@ -223,6 +223,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-immich
+      protocol: HTTPS
+      port: 443
+      hostname: immich.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: immich-tls
+            namespace: immich
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: http-ca-portal
       protocol: HTTP
       port: 80

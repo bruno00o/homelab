@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: valkey-auth
+  namespace: immich
+type: Opaque
+stringData:
+  default: ENC[AES256_GCM,data:2w1oj0D+8ZEk8HrYGuKLkfCbMHV8zS8aTC5VPzmGBh2JWgFHMxfH9rjJ,iv:RmmEr5kCh+A9Wsen6DAt/NJNQwisg4rnovEd27IRDCw=,tag:qbv5MGCiAbHchgBJcBNtiA==,type:str]
+  password: ENC[AES256_GCM,data:C7EELnerzso2HWg0bK8IGzF5NSgDbsjZN5yWLd4PY+Eptknbn722p6D1,iv:G9lVDSbNrkRU9QqjShyK9QasBCt2BUPJzk94oBITroE=,tag:SAvZEksEYXyo6lagb1marA==,type:str]
+sops:
+  age:
+    - recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAvQUdFL2JlZEkvMkZLYmVm
+        bC9JeEZ4Q3lwMy84WEgzK3JJc3gzTDVoOVE0Ci9JUHV4MEJBQzRabFRaSDNCTjJl
+        eTBzKzJPUHRiWERuK3lUSXNLY0FWMFEKLS0tIE5kM0xlejVxL2tUK2ZtOHlEa0p5
+        SU5jQUM5ZmVHczh4SWFsanZaakxQMVUKw3D/OMRDZc6fFyMmLeglKZd+1BpguIHm
+        z37XSnvNEubStpvaLtGYUNmHHI/rbsiCkN0sJmyjNonLL8B2AgJFrg==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2026-05-03T17:22:42Z"
+  mac: ENC[AES256_GCM,data:GRTziQ2mRvCxi00E7bRsLxGfWaGMOiCYaZAxHPMZlDJdPnF0tcC1EEMPb+K7ESmpViUYp26gk8K/AbETIqnGe7RsYhAdDmYf345h/61WzrLUZiVbijCUv2Zf1f52Q6oGthZl9QwzbhysRS/L4/mTthoCGWkov1BhSIvFw2mpOKk=,iv:g150ElQms8+NhTUQOevDqY7ATEZW84swIx0uH3GUrws=,tag:AvKYsHHnpqAtUOyi6dGezg==,type:str]
+  encrypted_regex: ^(data|stringData)$
+  version: 3.12.2

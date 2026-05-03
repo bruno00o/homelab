@@ -81,6 +81,7 @@ spec:
             main:
               env:
                 LIBVA_DRIVER_NAME: iHD
+                NODE_EXTRA_CA_CERTS: /certs/ca.crt
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: false
@@ -135,6 +136,14 @@ spec:
           fsGroup: 1000
           seccompProfile:
             type: RuntimeDefault
+      persistence:
+        ca-cert:
+          type: secret
+          name: immich-tls
+          globalMounts:
+            - path: /certs/ca.crt
+              subPath: ca.crt
+              readOnly: true
       service:
         main:
           ports:

@@ -32,12 +32,14 @@ misconfigurations:
       # the LLM call entirely.
       - "apps/gaspard/lightrag-config.yaml"
 
-  # TODO(roadmap 1.18): AdGuard Home runs with readOnlyRootFilesystem: false
-  # because the container writes to a few rootfs paths at runtime. Proper fix
-  # requires identifying those paths and mounting an emptyDir for each.
-  # DozerDB (Neo4j fork) writes to /logs, /conf, /plugins and other rootfs
-  # paths at runtime — same situation as AdGuard.
+  # Containers that write to rootfs paths at runtime and need
+  # readOnlyRootFilesystem: false until each writable path is identified and
+  # backed by an emptyDir mount.
+  #   - AdGuard Home: writes a few rootfs paths
+  #   - DozerDB (Neo4j fork): writes /logs, /conf, /plugins and others
+  #   - immich-postgres: vanilla Postgres image needs /var/run/postgresql, /tmp
   - id: KSV-0014
     paths:
       - "apps/adguard/adguard.yaml"
       - "apps/dozerdb/dozerdb.yaml"
+      - "apps/immich/postgres.yaml"

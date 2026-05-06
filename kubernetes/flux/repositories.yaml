@@ -129,7 +129,7 @@ spec:
   interval: 1h
   url: oci://ghcr.io/bjw-s-labs/helm/app-template
   ref:
-    tag: "4.6.2"
+    tag: "5.0.0"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

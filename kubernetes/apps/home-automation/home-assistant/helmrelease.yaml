@@ -40,7 +40,7 @@ spec:
   values:
     image:
       # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-      tag: "2026.4.4"
+      tag: "2026.5.0"
 
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet

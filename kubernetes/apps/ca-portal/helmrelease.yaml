@@ -65,6 +65,7 @@ spec:
                 drop: ["ALL"]
 
     defaultPodOptions:
+      automountServiceAccountToken: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

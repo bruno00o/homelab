@@ -75,7 +75,7 @@ spec:
           image: docker.io/adguard/adguardhome:v0.107.74
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
               add: ["NET_BIND_SERVICE"]
@@ -110,6 +110,8 @@ spec:
               mountPath: /opt/adguardhome/conf
             - name: work
               mountPath: /opt/adguardhome/work
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               cpu: 100m
@@ -122,6 +124,8 @@ spec:
           configMap:
             name: adguard-config
         - name: config
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
         - name: work
           persistentVolumeClaim:

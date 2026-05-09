@@ -410,6 +410,29 @@ tasks:
     cmds:
       - sops {{.FILE}}
 
+  sops:age-show:
+    desc: Print the Age private key for backup (paste into password manager / cold storage)
+    silent: true
+    cmds:
+      - |
+        AGE_KEY=""
+        if [ -f "$HOME/Library/Application Support/sops/age/keys.txt" ]; then
+          AGE_KEY="$HOME/Library/Application Support/sops/age/keys.txt"
+        elif [ -f "$HOME/.config/sops/age/keys.txt" ]; then
+          AGE_KEY="$HOME/.config/sops/age/keys.txt"
+        fi
+        if [ -z "$AGE_KEY" ]; then
+          echo "Age key not found in ~/.config/sops/age/keys.txt" >&2
+          exit 1
+        fi
+        EXPECTED=$(yq '.creation_rules[0].age' .sops.yaml)
+        ACTUAL=$(grep -oE 'age1[a-z0-9]+' "$AGE_KEY" | tail -1)
+        if [ "$EXPECTED" != "$ACTUAL" ]; then
+          echo "WARNING: public key in $AGE_KEY ($ACTUAL) does not match .sops.yaml ($EXPECTED)" >&2
+          echo "" >&2
+        fi
+        cat "$AGE_KEY"
+
   # =============================================================================
   # Kubernetes - Quick Commands
   # =============================================================================

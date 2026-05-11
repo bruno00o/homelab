@@ -27,7 +27,6 @@ spec:
         strategy: RollingUpdate
         containers:
           app:
-            # renovate: datasource=docker depName=zot.merry.home.arpa/doublons
             image:
               repository: zot.merry.home.arpa/doublons
               tag: "0.0.1"

@@ -27,7 +27,6 @@ spec:
         strategy: RollingUpdate
         containers:
           app:
-            # renovate: datasource=docker depName=zot.merry.home.arpa/gaspard/mcp
             image:
               repository: zot.merry.home.arpa/gaspard/mcp
               tag: "0.1.2"

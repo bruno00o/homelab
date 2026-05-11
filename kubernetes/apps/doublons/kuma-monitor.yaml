@@ -1,0 +1,16 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: doublons
+  namespace: doublons
+spec:
+  config:
+    type: http
+    name: Doublons
+    url: https://doublons.seilliebert.dev
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+      - "300-399"
+    notification_name_list:
+      - discord

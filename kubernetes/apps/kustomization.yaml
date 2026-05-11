@@ -4,6 +4,7 @@ resources:
   - adguard
   - aroma
   - authentik
+  - doublons
   - dozerdb
   - gaspard
   - homarr

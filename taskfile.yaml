@@ -247,6 +247,9 @@ tasks:
     cmds:
       - echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
       - talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}}
+      # talosctl upgrade-k8s re-applies its bootstrap manifests and reverts the
+      # Flux-managed CoreDNS ConfigMap to the Talos default. Reconcile it back.
+      - flux reconcile kustomization infrastructure-configs --with-source
 
   # =============================================================================
   # Talos - Status & Monitoring

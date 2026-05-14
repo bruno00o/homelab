@@ -211,9 +211,15 @@ tasks:
     prompt: "Upgrade {{.NODE}} ({{.NODE_IP}}) to Talos {{.TALOS_VERSION}}?"
     cmds:
       - echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
-      - talosctl upgrade --nodes {{.NODE_IP}} --image {{.INSTALLER_IMAGE}} --preserve --talosconfig {{.TALOS_DIR}}/clusterconfig/talosconfig
+      # Cordon manually and skip talosctl's drain: the kubectl-based drain
+      # deadlocks on Longhorn (evicting instance-manager vs. unmounting volumes).
+      # --preserve keeps replica data across the reboot, so pods are simply
+      # rescheduled and volumes reattach when the node returns.
+      - kubectl cordon {{.NODE}}
+      - talosctl upgrade --nodes {{.NODE_IP}} --image {{.INSTALLER_IMAGE}} --preserve --drain=false --talosconfig {{.TALOS_DIR}}/clusterconfig/talosconfig
       - task: talos:wait-healthy
         vars: { NODE_IP: "{{.NODE_IP}}" }
+      - kubectl uncordon {{.NODE}}
 
   talos:upgrade-all:
     desc: Upgrade Talos on all nodes sequentially

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflare-tunnel-config
+  namespace: cloudflare-tunnel
+data:
+  config.yaml: |
+    tunnel: 37521cb2-2315-49f9-bc1f-16f123709331
+    credentials-file: /etc/cloudflared/creds/credentials.json
+    metrics: 0.0.0.0:2000
+    no-autoupdate: true
+
+    ingress:
+      - hostname: auth-merry.seilliebert.dev
+        service: http://authentik-server.authentik.svc.cluster.local:80
+      - hostname: home-assistant-merry.seilliebert.dev
+        service: http://home-assistant.home-automation.svc.cluster.local:8123
+      - hostname: homarr-merry.seilliebert.dev
+        service: http://homarr.homarr.svc.cluster.local:7575
+      - hostname: random-gif.seilliebert.dev
+        service: http://random-gif.random-gif.svc.cluster.local:8080
+      - hostname: umami.seilliebert.dev
+        service: http://umami.umami.svc.cluster.local:3000
+      - hostname: aroma.seilliebert.dev
+        service: http://aroma-app.aroma.svc.cluster.local:3000
+      - hostname: pb-aroma.seilliebert.dev
+        service: http://aroma-pocketbase.aroma.svc.cluster.local:8090
+      - hostname: gaspard-mcp.seilliebert.dev
+        service: http://mcp.gaspard.svc.cluster.local:8000
+        originRequest:
+          httpHostHeader: localhost:8000
+      - hostname: bruno.seilliebert.dev
+        service: http://portfolio.portfolio.svc.cluster.local:8080
+      - hostname: doublons.seilliebert.dev
+        service: http://doublons.doublons.svc.cluster.local:3000
+      - service: http_status:404

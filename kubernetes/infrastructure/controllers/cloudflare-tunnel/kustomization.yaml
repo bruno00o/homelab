@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - secret.sops.yaml
+  - credentials-file.sops.yaml
+  - config.yaml
   - cloudflare-tunnel.yaml
   - network-policies.yaml
   - pdb.yaml

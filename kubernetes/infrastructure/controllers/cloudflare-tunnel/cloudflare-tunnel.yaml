@@ -5,6 +5,8 @@ metadata:
   namespace: cloudflare-tunnel
   labels:
     app.kubernetes.io/name: cloudflare-tunnel
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 2
   selector:
@@ -26,17 +28,9 @@ spec:
           image: docker.io/cloudflare/cloudflared:2026.5.0
           args:
             - tunnel
-            - --metrics
-            - 0.0.0.0:2000
+            - --config
+            - /etc/cloudflared/config/config.yaml
             - run
-            - --token
-            - $(TUNNEL_TOKEN)
-          env:
-            - name: TUNNEL_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: cloudflare-tunnel-credentials
-                  key: TUNNEL_TOKEN
           ports:
             - name: metrics
               containerPort: 2000
@@ -65,3 +59,17 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cloudflared/config
+              readOnly: true
+            - name: credentials
+              mountPath: /etc/cloudflared/creds
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: cloudflare-tunnel-config
+        - name: credentials
+          secret:
+            secretName: cloudflare-tunnel-credentials-file

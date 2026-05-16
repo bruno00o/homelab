@@ -47,6 +47,24 @@ spec:
         - protocol: TCP
           port: 6443
 ---
+# DNS-01 self-check: query authoritative nameservers (e.g. Cloudflare DNS)
+# to confirm TXT record propagation before notifying ACME server.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-dns-egress
+  namespace: cert-manager
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
 # Webhook needs to receive requests from API server
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -4,4 +4,5 @@ resources:
   - namespace.yaml
   - helmrelease.yaml
   - mugiwara-ca-secret.sops.yaml
+  - cloudflare-api-token.sops.yaml
   - network-policies.yaml

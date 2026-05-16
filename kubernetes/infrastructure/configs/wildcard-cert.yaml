@@ -1,0 +1,19 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-merry-seilliebert-dev
+  namespace: kube-system
+spec:
+  secretName: wildcard-merry-seilliebert-dev-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: merry.seilliebert.dev
+  dnsNames:
+    - merry.seilliebert.dev
+    - "*.merry.seilliebert.dev"
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always

@@ -366,7 +366,8 @@ tasks:
       - flux reconcile source git flux-system
       - flux reconcile kustomization flux-system --with-source
       - flux reconcile kustomization cluster-vars --with-source
-      - flux reconcile kustomization infrastructure --with-source
+      - flux reconcile kustomization infrastructure-controllers --with-source
+      - flux reconcile kustomization infrastructure-configs --with-source
       - flux reconcile kustomization apps --with-source
 
   flux:status:

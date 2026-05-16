@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - homarr.yaml
+  - dnsendpoint.yaml
   - homarr-secrets.sops.yaml
   - valkey-auth.sops.yaml
   - reference-grant.yaml

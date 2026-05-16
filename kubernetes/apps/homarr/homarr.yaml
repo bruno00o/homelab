@@ -128,7 +128,7 @@ spec:
             - name: TZ
               value: ${TIMEZONE}
             - name: BASE_URL
-              value: https://homarr.${CLUSTER_DOMAIN}
+              value: https://homarr.${PUBLIC_DOMAIN}
             - name: SECRET_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
@@ -148,7 +148,7 @@ spec:
             - name: AUTH_OIDC_CLIENT_NAME
               value: "Authentik"
             - name: AUTH_OIDC_ISSUER
-              value: "https://auth-merry.seilliebert.dev/application/o/homarr/"
+              value: "https://auth.${PUBLIC_DOMAIN}/application/o/homarr/"
             - name: AUTH_OIDC_CLIENT_ID
               value: "homarr"
             - name: AUTH_OIDC_CLIENT_SECRET
@@ -232,11 +232,15 @@ spec:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-homarr
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-merry-wildcard
     - name: external-gateway
       namespace: kube-system
       sectionName: https-homarr
   hostnames:
     - homarr.${CLUSTER_DOMAIN}
+    - homarr.${PUBLIC_DOMAIN}
   rules:
     - matches:
         - path:

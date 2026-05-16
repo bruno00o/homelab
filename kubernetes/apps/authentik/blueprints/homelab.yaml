@@ -88,6 +88,8 @@ data:
             - matching_mode: strict
               url: https://homarr.${CLUSTER_DOMAIN}/api/auth/callback/oidc
             - matching_mode: strict
+              url: https://homarr.${PUBLIC_DOMAIN}/api/auth/callback/oidc
+            - matching_mode: strict
               url: https://homarr-merry.seilliebert.dev/api/auth/callback/oidc
           property_mappings:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]

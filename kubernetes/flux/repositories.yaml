@@ -166,3 +166,12 @@ metadata:
 spec:
   interval: 1h
   url: https://immich-app.github.io/immich-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: external-dns
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://kubernetes-sigs.github.io/external-dns/

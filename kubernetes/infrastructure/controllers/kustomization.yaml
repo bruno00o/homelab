@@ -17,3 +17,4 @@ resources:
   - kyverno-policies
   - intel-gpu-plugin
   - cloudflare-tunnel
+  - external-dns

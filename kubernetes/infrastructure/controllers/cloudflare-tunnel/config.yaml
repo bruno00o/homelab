@@ -11,6 +11,8 @@ data:
     no-autoupdate: true
 
     ingress:
+      - hostname: auth.merry.seilliebert.dev
+        service: http://authentik-server.authentik.svc.cluster.local:80
       - hostname: auth-merry.seilliebert.dev
         service: http://authentik-server.authentik.svc.cluster.local:80
       - hostname: home-assistant-merry.seilliebert.dev

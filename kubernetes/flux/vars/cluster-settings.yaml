@@ -27,3 +27,5 @@ data:
   CLUSTER_ISSUER: "mugiwara-ca-issuer"
   LB_EXTERNAL_GATEWAY: "10.0.20.23"
   NFS_BACKUP_TARGET: "nfs://10.0.10.113:/volume1/backups"
+  PUBLIC_DOMAIN: "merry.seilliebert.dev"
+  CF_TUNNEL_HOSTNAME: "e314949b-7ce9-4ae0-aed6-eba2c82a8649.cfargotunnel.com"

@@ -3,16 +3,23 @@ kind: HTTPRoute
 metadata:
   name: authentik
   namespace: authentik
+  annotations:
+    external-dns.alpha.kubernetes.io/target: ${CF_TUNNEL_HOSTNAME}
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-auth
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-merry-wildcard
     - name: external-gateway
       namespace: kube-system
       sectionName: https-auth
   hostnames:
     - auth.${CLUSTER_DOMAIN}
+    - auth.${PUBLIC_DOMAIN}
   rules:
     - matches:
         - path:

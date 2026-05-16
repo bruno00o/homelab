@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-smtp
+  namespace: authentik
+type: Opaque
+stringData:
+  password: ENC[AES256_GCM,data:yGzTHGQnjcQkSIZ6KGsCx8F/1bLzEn5Zc512CQgXiWfuKAzJ,iv:2QDJO7uVRuS2+7uN5AMC0z804q1GrvVVGmOWnyiEbXI=,tag:SUuCbxkQzEx7VMeo5FUe3A==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBZRFVHL0dpSXRvMVpsMWdM
+        YkRkd0hKenE2SjI3SkRUSVhweURtNUp6QlUwCmFkUWYrZExRQStZTW5FM2g3UXpa
+        SUM1WnlZMGZBT3NDWHhGU1hnbnRMUncKLS0tIDJHeUFoMityYk9nSWEvaGtOcFJJ
+        UGVyMjZXSElEY1pJa1pTSWZ2MjNtb0UKlgWAYg/GKlKLaZNVbn7dKuWM531bT2Ud
+        OuMfF2GvZLw0U2CLdCZcOMtRdC4qHMRYtjvXFhLV+jkLssc6EaQ15g==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-05-16T12:20:06Z"
+  mac: ENC[AES256_GCM,data:x4Ej0tPH3qJHp/U59v0hWz6Zy/ZjjcnKngaNl/zl1eMiVXdEyqmuDGfsM2BQOQ9PRjyIfNCMcJJB90Hkb+9LoUNlxe9jQQ2D76htntnIOr+qVjk6XSsI+/JPgHRAZykKhSc0LoQWiztI+YRfCLy+vhK23eOZq6SCGwFNKiO3cL0=,iv:RsgxcjJ/MeWaqgvmoLjKbXYXKbUBO/dlZG+lGbD2rPE=,tag:aZ93mv0jqq3Ltl5OwpwdoA==,type:str]
+  version: 3.13.0

@@ -102,6 +102,25 @@ spec:
           value: "https://auth.${CLUSTER_DOMAIN}"
         - name: AUTHENTIK_HOST
           value: "https://auth.${CLUSTER_DOMAIN}"
+        - name: AUTHENTIK_EMAIL__HOST
+          value: "smtp.resend.com"
+        - name: AUTHENTIK_EMAIL__PORT
+          value: "587"
+        - name: AUTHENTIK_EMAIL__USERNAME
+          value: "resend"
+        - name: AUTHENTIK_EMAIL__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authentik-smtp
+              key: password
+        - name: AUTHENTIK_EMAIL__USE_TLS
+          value: "true"
+        - name: AUTHENTIK_EMAIL__USE_SSL
+          value: "false"
+        - name: AUTHENTIK_EMAIL__TIMEOUT
+          value: "30"
+        - name: AUTHENTIK_EMAIL__FROM
+          value: "noreply@seilliebert.dev"
 
     authentik:
       error_reporting:

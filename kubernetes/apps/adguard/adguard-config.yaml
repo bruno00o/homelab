@@ -62,6 +62,9 @@ data:
         - domain: '*.${CLUSTER_DOMAIN}'
           answer: ${LB_GATEWAY}
           enabled: true
+        - domain: '*.merry.seilliebert.dev'
+          answer: ${LB_GATEWAY}
+          enabled: true
       filtering_enabled: true
       rewrites_enabled: true
       protection_enabled: true

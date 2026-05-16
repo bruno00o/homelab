@@ -39,7 +39,6 @@ spec:
       name: cloudflare
 
     sources:
-      - gateway-httproute
       - crd
 
     policy: upsert-only

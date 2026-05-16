@@ -205,6 +205,10 @@ data:
             - matching_mode: strict
               url: https://immich.${CLUSTER_DOMAIN}/user-settings
             - matching_mode: strict
+              url: https://immich.${PUBLIC_DOMAIN}/auth/login
+            - matching_mode: strict
+              url: https://immich.${PUBLIC_DOMAIN}/user-settings
+            - matching_mode: strict
               url: app.immich:///oauth-callback
           property_mappings:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]

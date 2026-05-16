@@ -8,8 +8,12 @@ spec:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-immich
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-merry-wildcard
   hostnames:
     - immich.${CLUSTER_DOMAIN}
+    - immich.${PUBLIC_DOMAIN}
   rules:
     - matches:
         - path:

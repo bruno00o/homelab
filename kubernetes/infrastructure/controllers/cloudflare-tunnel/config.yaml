@@ -39,4 +39,6 @@ data:
         service: http://portfolio.portfolio.svc.cluster.local:8080
       - hostname: doublons.seilliebert.dev
         service: http://doublons.doublons.svc.cluster.local:3000
+      - hostname: immich.merry.seilliebert.dev
+        service: http://immich-server.immich.svc.cluster.local:2283
       - service: http_status:404

@@ -8,11 +8,15 @@ spec:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-home-assistant
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-merry-wildcard
     - name: external-gateway
       namespace: kube-system
       sectionName: https-home-assistant
   hostnames:
     - home-assistant.${CLUSTER_DOMAIN}
+    - home-assistant.${PUBLIC_DOMAIN}
   rules:
     - matches:
         - path:

@@ -160,6 +160,8 @@ data:
             - matching_mode: strict
               url: https://home-assistant.${CLUSTER_DOMAIN}/auth/oidc/callback
             - matching_mode: strict
+              url: https://home-assistant.${PUBLIC_DOMAIN}/auth/oidc/callback
+            - matching_mode: strict
               url: https://home-assistant-merry.seilliebert.dev/auth/oidc/callback
           property_mappings:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]

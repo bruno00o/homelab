@@ -4,6 +4,7 @@ resources:
   - helmrelease.yaml
   - certificate.yaml
   - httproute.yaml
+  - dnsendpoint.yaml
   - network-policies.yaml
   - pdb.yaml
   - kuma-monitor.yaml

@@ -499,7 +499,26 @@ data:
           policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
 
       # =====================================================
-      # SECTION 4: OUTPOST
+      # SECTION 4: MFA ENFORCEMENT
+      # =====================================================
+      # Override the default MFA validation stage to force enrollment:
+      # if user has no MFA device, redirect to TOTP setup at first login.
+      - model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+        state: present
+        identifiers:
+          name: default-authentication-mfa-validation
+        attrs:
+          not_configured_action: configure
+          device_classes:
+            - totp
+            - webauthn
+            - static
+          configuration_stages:
+            - !Find [authentik_stages_authenticator_totp.authenticatortotpstage, [name, default-authenticator-totp-setup]]
+            - !Find [authentik_stages_authenticator_webauthn.authenticatorwebauthnstage, [name, default-authenticator-webauthn-setup]]
+
+      # =====================================================
+      # SECTION 5: OUTPOST
       # =====================================================
       - model: authentik_outposts.outpost
         state: present

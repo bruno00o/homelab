@@ -50,6 +50,9 @@ spec:
     domainFilters:
       - seilliebert.dev
 
+    extraArgs:
+      - --cloudflare-proxied
+
     interval: 1m
     triggerLoopOnEvent: true
 

@@ -72,7 +72,7 @@ spec:
             - name: RUSTFS_IDENTITY_OPENID_ENABLE
               value: "on"
             - name: RUSTFS_IDENTITY_OPENID_CONFIG_URL
-              value: "https://auth.${CLUSTER_DOMAIN}/application/o/rustfs/.well-known/openid-configuration"
+              value: "https://auth.${PUBLIC_DOMAIN}/application/o/rustfs/.well-known/openid-configuration"
             - name: RUSTFS_IDENTITY_OPENID_CLIENT_ID
               value: "rustfs"
             - name: RUSTFS_IDENTITY_OPENID_CLIENT_SECRET

@@ -68,46 +68,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-barman-plugin-egress
-  namespace: cnpg-system
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: plugin-barman-cloud
-  policyTypes:
-    - Egress
-  egress:
-    # API server (for leader election + watching CRs)
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-barman-plugin-ingress
-  namespace: cnpg-system
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: plugin-barman-cloud
-  policyTypes:
-    - Ingress
-  ingress:
-    # gRPC from CNPG operator
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: cloudnative-pg
-      ports:
-        - protocol: TCP
-          port: 9090
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-ingress-from-authentik
   namespace: valkey-system
 spec:

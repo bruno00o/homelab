@@ -18,3 +18,4 @@ resources:
   - intel-gpu-plugin
   - cloudflare-tunnel
   - external-dns
+  - rustfs

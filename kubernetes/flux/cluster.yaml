@@ -134,7 +134,7 @@ spec:
       namespace: cloudflare-tunnel
     - apiVersion: apps/v1
       kind: Deployment
-      name: barman-cloud
+      name: plugin-barman-cloud
       namespace: cnpg-system
     - apiVersion: apps/v1
       kind: StatefulSet

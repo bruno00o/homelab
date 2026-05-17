@@ -387,10 +387,3 @@ spec:
           port: 5000
         - protocol: TCP
           port: 8080
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: rustfs
-      ports:
-        - protocol: TCP
-          port: 9001

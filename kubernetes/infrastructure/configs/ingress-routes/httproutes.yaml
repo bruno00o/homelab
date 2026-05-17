@@ -146,6 +146,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: authentik-server
-          namespace: authentik
-          port: 80
+        - name: rustfs
+          port: 9001

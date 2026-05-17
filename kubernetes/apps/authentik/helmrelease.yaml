@@ -98,6 +98,11 @@ spec:
             secretKeyRef:
               name: authentik-secrets
               key: cloudflare_access_client_secret
+        - name: AUTHENTIK_RUSTFS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secrets
+              key: rustfs_client_secret
         - name: AUTHENTIK_HOST_BROWSER
           value: "https://auth.${CLUSTER_DOMAIN}"
         - name: AUTHENTIK_HOST

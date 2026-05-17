@@ -32,9 +32,6 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: home-automation
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: rustfs
   to:
     - group: ""
       kind: Service

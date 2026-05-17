@@ -126,7 +126,7 @@ spec:
         auth_oidc:
           client_id: "home-assistant"
           client_secret: "${HA_OIDC_CLIENT_SECRET}"
-          discovery_url: "https://auth-merry.seilliebert.dev/application/o/home-assistant/.well-known/openid-configuration"
+          discovery_url: "https://auth.merry.seilliebert.dev/application/o/home-assistant/.well-known/openid-configuration"
           roles:
             admin: "homelab-admins"
             user: "homelab-users"

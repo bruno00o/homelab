@@ -84,6 +84,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-rustfs
+      protocol: HTTPS
+      port: 443
+      hostname: rustfs.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: rustfs-tls
+            namespace: rustfs
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: https-adguard
       protocol: HTTPS
       port: 443

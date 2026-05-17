@@ -135,6 +135,19 @@ data:
           internal_host: http://zigbee2mqtt.home-automation.svc.cluster.local:8080
           internal_host_ssl_validation: false
 
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-rustfs
+        state: present
+        identifiers:
+          name: RustFS Proxy
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          mode: proxy
+          external_host: https://rustfs.${CLUSTER_DOMAIN}
+          internal_host: http://rustfs.rustfs.svc.cluster.local:9001
+          internal_host_ssl_validation: false
+
       # Cloudflare Access (OIDC)
       - model: authentik_providers_oauth2.oauth2provider
         id: provider-cloudflare-access
@@ -292,6 +305,30 @@ data:
         identifiers:
           order: 0
           target: !Find [authentik_core.application, [slug, longhorn]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # RustFS (admins only)
+      - model: authentik_core.application
+        id: app-rustfs
+        state: present
+        identifiers:
+          slug: rustfs
+        attrs:
+          name: RustFS
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, RustFS Proxy]]
+          meta_launch_url: https://rustfs.${CLUSTER_DOMAIN}
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-rustfs-admin
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, rustfs]]
           policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
         attrs:
           enabled: true
@@ -577,3 +614,4 @@ data:
 
             - !Find [authentik_providers_proxy.proxyprovider, [name, Frigate Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Zigbee2MQTT Proxy]]
+            - !Find [authentik_providers_proxy.proxyprovider, [name, RustFS Proxy]]

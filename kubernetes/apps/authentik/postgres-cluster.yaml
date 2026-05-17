@@ -28,6 +28,23 @@ spec:
   monitoring:
     enablePodMonitor: true
 
+  backup:
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: s3://cnpg-authentik/
+      endpointURL: http://rustfs.rustfs.svc.cluster.local:9000
+      s3Credentials:
+        accessKeyId:
+          name: rustfs-s3-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: rustfs-s3-credentials
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+
   resources:
     requests:
       cpu: 100m
@@ -35,3 +52,14 @@ spec:
     limits:
       cpu: 2000m
       memory: 1Gi
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: authentik-postgres-daily
+  namespace: authentik
+spec:
+  schedule: "0 0 3 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: authentik-postgres

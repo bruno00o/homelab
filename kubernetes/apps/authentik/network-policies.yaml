@@ -176,6 +176,17 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    # S3 backups to RustFS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - protocol: TCP
+          port: 9000
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

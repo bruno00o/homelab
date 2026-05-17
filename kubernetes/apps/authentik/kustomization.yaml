@@ -5,6 +5,7 @@ resources:
   - secrets.sops.yaml
   - smtp.sops.yaml
   - valkey-auth.sops.yaml
+  - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
   - helmrelease.yaml
   - certificate.yaml

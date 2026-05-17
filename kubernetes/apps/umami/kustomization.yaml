@@ -4,6 +4,7 @@ resources:
   - dnsendpoint.yaml
   - namespace.yaml
   - umami-secrets.sops.yaml
+  - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
   - helmrelease.yaml
   - certificate.yaml

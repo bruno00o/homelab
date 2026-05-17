@@ -32,6 +32,20 @@ data:
       # SECTION 2: PROVIDERS
       # =====================================================
 
+      # Scope mapping exposing Authentik group names in the `groups`
+      # claim so downstream OIDC apps (Homarr) can sync membership.
+      - model: authentik_providers_oauth2.scopemapping
+        id: scope-mapping-groups
+        state: present
+        identifiers:
+          managed: goauthentik.io/providers/oauth2/scope-groups
+        attrs:
+          name: "authentik default OAuth Mapping: OpenID 'groups'"
+          scope_name: groups
+          description: "Groups the user is a member of"
+          expression: |
+            return {"groups": [group.name for group in request.user.ak_groups.all()]}
+
       # Proxy Providers (forward_single)
       - model: authentik_providers_proxy.proxyprovider
         id: provider-hubble
@@ -93,6 +107,7 @@ data:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
 
       - model: authentik_providers_proxy.proxyprovider
         id: provider-frigate

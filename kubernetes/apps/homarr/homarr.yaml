@@ -158,6 +158,10 @@ spec:
                   key: AUTH_OIDC_CLIENT_SECRET
             - name: AUTH_OIDC_AUTO_LOGIN
               value: "true"
+            - name: AUTH_OIDC_SCOPE_OVERWRITE
+              value: "openid email profile groups"
+            - name: AUTH_OIDC_GROUPS_ATTRIBUTE
+              value: "groups"
             - name: NODE_EXTRA_CA_CERTS
               value: /appdata/trusted-certificates/ca.crt
             - name: NODE_OPTIONS

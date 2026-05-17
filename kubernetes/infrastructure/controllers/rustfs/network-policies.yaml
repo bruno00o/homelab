@@ -53,11 +53,11 @@ spec:
       ports:
         - { protocol: TCP, port: 9000 }
 ---
-# Console UI (port 9001) directly from gateway (native OIDC auth in RustFS)
+# Console UI (port 9001) from authentik proxy (SSO) — gateway hits authentik-server, which proxies here
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-console-from-gateway
+  name: allow-console-from-authentik
   namespace: rustfs
 spec:
   podSelector:
@@ -66,57 +66,11 @@ spec:
   policyTypes: [Ingress]
   ingress:
     - from:
-        - ipBlock: { cidr: 10.0.20.0/24 }
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
       ports:
         - { protocol: TCP, port: 9001 }
----
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-console-gateway-proxy
-  namespace: rustfs
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: rustfs
-  ingress:
-    - fromEntities: [ingress]
-      toPorts:
-        - ports:
-            - { port: "9001", protocol: TCP }
----
-# RustFS needs to reach Authentik (via gateway) for OIDC discovery + JWKS
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-oidc-egress
-  namespace: rustfs
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: rustfs
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - ipBlock: { cidr: 10.0.20.20/32 }   # LB_GATEWAY (internal-gateway)
-      ports:
-        - { protocol: TCP, port: 443 }
----
-# Cilium identity-aware: gateway envoy has 'ingress' entity, ipBlock alone misses it
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-oidc-egress-to-gateway
-  namespace: rustfs
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: rustfs
-  egress:
-    - toEntities: [ingress]
-      toPorts:
-        - ports:
-            - { port: "443", protocol: TCP }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

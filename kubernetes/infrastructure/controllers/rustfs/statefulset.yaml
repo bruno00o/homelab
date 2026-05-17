@@ -68,28 +68,6 @@ spec:
                 secretKeyRef:
                   name: rustfs-credentials
                   key: secret-key
-            # OIDC (Authentik)
-            - name: RUSTFS_IDENTITY_OPENID_ENABLE
-              value: "on"
-            - name: RUSTFS_IDENTITY_OPENID_CONFIG_URL
-              value: "https://auth.${CLUSTER_DOMAIN}/application/o/rustfs/.well-known/openid-configuration"
-            - name: RUSTFS_IDENTITY_OPENID_CLIENT_ID
-              value: "rustfs"
-            - name: RUSTFS_IDENTITY_OPENID_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: rustfs-oidc-credentials
-                  key: client_secret
-            - name: RUSTFS_IDENTITY_OPENID_SCOPES
-              value: "openid,email,profile,groups"
-            - name: RUSTFS_IDENTITY_OPENID_CLAIM_NAME
-              value: "groups"
-            - name: RUSTFS_IDENTITY_OPENID_ROLE_POLICY
-              value: "consoleAdmin"
-            - name: RUSTFS_IDENTITY_OPENID_DISPLAY_NAME
-              value: "Authentik"
-            - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
-              value: "on"
           ports:
             - name: s3
               containerPort: 9000

@@ -102,6 +102,22 @@ spec:
       ports:
         - { protocol: TCP, port: 443 }
 ---
+# Cilium identity-aware: gateway envoy has 'ingress' entity, ipBlock alone misses it
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-oidc-egress-to-gateway
+  namespace: rustfs
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: rustfs
+  egress:
+    - toEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "443", protocol: TCP }
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

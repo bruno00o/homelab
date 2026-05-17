@@ -518,7 +518,38 @@ data:
             - !Find [authentik_stages_authenticator_webauthn.authenticatorwebauthnstage, [name, default-authenticator-webauthn-setup]]
 
       # =====================================================
-      # SECTION 5: OUTPOST
+      # SECTION 5: LOGIN-FAILURE NOTIFICATIONS
+      # =====================================================
+      # Detect bursts of failed logins and email homelab-admins via the
+      # built-in default-email-transport (Resend SMTP).
+      - model: authentik_policies_event_matcher.eventmatcherpolicy
+        state: present
+        identifiers:
+          name: match-login-failed
+        attrs:
+          action: login_failed
+
+      - model: authentik_events.notificationrule
+        state: present
+        identifiers:
+          name: notify-login-failed
+        attrs:
+          severity: alert
+          group: !Find [authentik_core.group, [name, homelab-admins]]
+          transports:
+            - !Find [authentik_events.notificationtransport, [name, default-email-transport]]
+
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_events.notificationrule, [name, notify-login-failed]]
+          policy: !Find [authentik_policies_event_matcher.eventmatcherpolicy, [name, match-login-failed]]
+        attrs:
+          enabled: true
+
+      # =====================================================
+      # SECTION 6: OUTPOST
       # =====================================================
       - model: authentik_outposts.outpost
         state: present

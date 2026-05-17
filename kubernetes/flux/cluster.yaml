@@ -132,6 +132,14 @@ spec:
       kind: Deployment
       name: cloudflare-tunnel
       namespace: cloudflare-tunnel
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: barman-cloud
+      namespace: cnpg-system
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: rustfs
+      namespace: rustfs
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

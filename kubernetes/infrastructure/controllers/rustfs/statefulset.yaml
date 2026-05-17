@@ -87,7 +87,7 @@ spec:
             periodSeconds: 10
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           resources:
@@ -102,8 +102,12 @@ spec:
               mountPath: /data
             - name: logs
               mountPath: /logs
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: logs
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
   volumeClaimTemplates:
     - metadata:

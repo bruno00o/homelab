@@ -28,22 +28,11 @@ spec:
   monitoring:
     enablePodMonitor: true
 
-  backup:
-    retentionPolicy: "30d"
-    barmanObjectStore:
-      destinationPath: s3://cnpg-authentik/
-      endpointURL: http://rustfs.rustfs.svc.cluster.local:9000
-      s3Credentials:
-        accessKeyId:
-          name: rustfs-s3-credentials
-          key: ACCESS_KEY_ID
-        secretAccessKey:
-          name: rustfs-s3-credentials
-          key: ACCESS_SECRET_KEY
-      wal:
-        compression: gzip
-      data:
-        compression: gzip
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: authentik-backups
 
   resources:
     requests:
@@ -53,6 +42,28 @@ spec:
       cpu: 2000m
       memory: 1Gi
 ---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: authentik-backups
+  namespace: authentik
+spec:
+  retentionPolicy: "30d"
+  configuration:
+    destinationPath: s3://cnpg-authentik/
+    endpointURL: http://rustfs.rustfs.svc.cluster.local:9000
+    s3Credentials:
+      accessKeyId:
+        name: rustfs-s3-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: rustfs-s3-credentials
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+---
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
@@ -61,5 +72,8 @@ metadata:
 spec:
   schedule: "0 0 3 * * *"
   backupOwnerReference: self
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
   cluster:
     name: authentik-postgres

@@ -41,7 +41,7 @@ spec:
     sources:
       - crd
 
-    policy: upsert-only
+    policy: sync
 
     txtOwnerId: going-merry
     txtPrefix: "_externaldns."

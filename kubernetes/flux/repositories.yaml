@@ -118,7 +118,7 @@ spec:
   interval: 1h
   url: oci://ghcr.io/kyverno/charts/kyverno
   ref:
-    tag: "3.8.0"
+    tag: "3.8.1"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository

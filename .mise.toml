@@ -6,7 +6,7 @@ talhelper = "3.1.10"
 # Should match talos/talconfig.yaml kubernetesVersion
 kubectl = "1.36.1"
 # https://github.com/fluxcd/flux2
-flux2 = "2.8.7"
+flux2 = "2.8.8"
 helm = "4.2.0"
 # https://github.com/helmfile/helmfile
 helmfile = "1.5.1"

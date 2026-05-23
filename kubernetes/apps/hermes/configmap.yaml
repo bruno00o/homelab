@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-config
+  namespace: hermes
+data:
+  # Seeded into the PVC at /opt/data/config.yaml by the init container ONLY if
+  # the file does not already exist. After first boot Hermes owns this file at
+  # runtime (it writes skills/memories/config to /opt/data by design), so edits
+  # here only affect a fresh volume. Secrets (API keys) come from env, not here.
+  config.yaml: |
+    model:
+      provider: openrouter
+      default: minimax/minimax-m2.5:free
+      base_url: ''
+      api_mode: chat_completions
+    # NOTE: verify the exact fallback key on first run (`hermes config`):
+    # docs diverge between top-level `fallback_providers` and `fallback_model`.
+    fallback_providers:
+      - provider: openrouter
+        model: deepseek/deepseek-v4-flash:free
+      - provider: openrouter
+        model: nvidia/nemotron-3-super-120b-a12b:free

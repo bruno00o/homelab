@@ -266,6 +266,32 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-hermes
+      protocol: HTTPS
+      port: 443
+      hostname: hermes.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: hermes-tls
+            namespace: hermes
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-hermes-api
+      protocol: HTTPS
+      port: 443
+      hostname: hermes-api.${CLUSTER_DOMAIN}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: hermes-tls
+            namespace: hermes
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: http-ca-portal
       protocol: HTTP
       port: 80

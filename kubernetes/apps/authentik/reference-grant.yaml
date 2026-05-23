@@ -35,6 +35,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: rustfs
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: hermes
   to:
     - group: ""
       kind: Service

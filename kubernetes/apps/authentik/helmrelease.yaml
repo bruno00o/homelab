@@ -98,6 +98,11 @@ spec:
             secretKeyRef:
               name: authentik-secrets
               key: cloudflare_access_client_secret
+        - name: AUTHENTIK_SYNAPSE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-synapse-oidc
+              key: synapse_oidc_client_secret
         - name: AUTHENTIK_HOST_BROWSER
           value: "https://auth.${CLUSTER_DOMAIN}"
         - name: AUTHENTIK_HOST

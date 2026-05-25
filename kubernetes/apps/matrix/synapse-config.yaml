@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synapse-config
+  namespace: matrix
+data:
+  homeserver.yaml: |
+    server_name: "matrix.merry.seilliebert.dev"
+    public_baseurl: "https://matrix.merry.seilliebert.dev/"
+    pid_file: /data/homeserver.pid
+    signing_key_path: "/data/signing.key"
+    report_stats: false
+    log_config: "/config/log.config"
+
+    listeners:
+      - port: 8008
+        tls: false
+        type: http
+        x_forwarded: true
+        bind_addresses: ['0.0.0.0']
+        resources:
+          - names: [client]
+            compress: false
+
+    media_store_path: /data/media_store
+    max_upload_size: "50M"
+
+    # Federation OFF (empty whitelist = federate with nobody).
+    federation_domain_whitelist: []
+    trusted_key_servers: []
+    suppress_key_server_warning: true
+
+    # Closed registration: humans via SSO, the Hermes bot via shared secret.
+    enable_registration: false
+
+    # Keep local password login enabled so the Hermes bot can use a token.
+    password_config:
+      enabled: true
+
+    # OIDC via Authentik. Explicit endpoints: the browser hits the public
+    # auth host, but the backchannel (token/userinfo/jwks) goes straight to the
+    # in-cluster authentik service to avoid the Cilium L7 LB-gateway block.
+    oidc_providers:
+      - idp_id: authentik
+        idp_name: "SSO"
+        discover: false
+        issuer: "https://auth.merry.seilliebert.dev/application/o/synapse/"
+        client_id: "synapse"
+        client_secret_path: "/secrets/oidc_client_secret"
+        scopes: ["openid", "profile", "email"]
+        authorization_endpoint: "https://auth.merry.seilliebert.dev/application/o/authorize/"
+        token_endpoint: "http://authentik-server.authentik.svc.cluster.local/application/o/token/"
+        userinfo_endpoint: "http://authentik-server.authentik.svc.cluster.local/application/o/userinfo/"
+        jwks_uri: "http://authentik-server.authentik.svc.cluster.local/application/o/synapse/jwks/"
+        user_mapping_provider:
+          config:
+            localpart_template: "{{ user.preferred_username }}"
+            display_name_template: "{{ user.name }}"
+            email_template: "{{ user.email }}"
+  log.config: |
+    version: 1
+    formatters:
+      precise:
+        format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: precise
+    loggers:
+      synapse.storage.SQL:
+        level: INFO
+    root:
+      level: INFO
+      handlers: [console]
+    disable_existing_loggers: false

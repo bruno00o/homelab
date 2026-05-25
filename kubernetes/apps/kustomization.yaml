@@ -11,6 +11,7 @@ resources:
   - homarr
   - home-automation
   - immich
+  - matrix
   - portfolio
   - qdrant
   - random-gif

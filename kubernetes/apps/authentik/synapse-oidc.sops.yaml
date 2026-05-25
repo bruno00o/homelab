@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-synapse-oidc
+  namespace: authentik
+type: Opaque
+stringData:
+  synapse_oidc_client_secret: ENC[AES256_GCM,data:fEpqTAHG+WOhNQi6FjHk+YX5sBfSkQnyd2y71kuAzJSxvcET5+DkRx6xIRS5XtRXYiOLdbH7Cj59SzTGWfn0sQ==,iv:DIX/RvdMD8fFSLCR08+SYFmE9HyBSSYhjocPUEMxUCo=,tag:k+zT3yl2SUhvE9lFKO6CUA==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA5WTM4L2poUk1mclFmZldK
+        clk5RitoNktwYjh2eWt6ciszYThwVnhCWVJ3Cml3a2lmdFBWaHIyMjNHS1Q5a055
+        MklCYVlHVS80b0YxWTZ4VUxRZnpQM2cKLS0tIDNhclhuYnU4MWN1VVNQcDc1NURz
+        K1ArcitlSGhjZGFsN3dGNndOaUFtbncKbemI7zmdM0g2t6oULPlnJCAJtfJe3/sH
+        EGPugnYDbWYvZYa0drFDoZDuwYo5vp3V+CRTXlTVgJL5b1YYwqEn+g==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-05-25T12:55:24Z"
+  mac: ENC[AES256_GCM,data:7bQ+Gf9fR41OJOulleOZtfi5qQTj3Itctfm1yWJsoXvJf+n9C0BLWLEyAP8jLJ5GQzAaJGV1lsIcaTRSHU0EXIYKuL8Na92aEDWM7JQdwjbHSHrFu5m71Zn1aznTR35pGrCLkRDBHK+Qz2IvRiTMSeSNdjdkXSoaQCPcvTENMlk=,iv:cHmAqfIeZiw5tnZcvtLcZgCDlRMm94JtZiM3TrOO+YM=,tag:Lpg946e9bTIuYNPhhJDl1g==,type:str]
+  version: 3.13.1

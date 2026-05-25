@@ -1,0 +1,220 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: matrix
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: matrix
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+# Synapse client API reachable from the LAN gateway (host-network same node).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-ingress-from-gateway
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 8008 }
+---
+# Cross-node envoy proxy traffic (Cilium ingress identity).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: matrix
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "8008", protocol: TCP }
+            - { port: "80", protocol: TCP }
+---
+# Public access via the Cloudflare tunnel (routes straight to the services).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cloudflare-tunnel
+  namespace: matrix
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 8008 }
+        - { protocol: TCP, port: 80 }
+---
+# The Hermes bot talks to Synapse directly in-cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-ingress-from-hermes
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: hermes
+      ports:
+        - { protocol: TCP, port: 8008 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-egress-to-postgres
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: synapse-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+# OIDC backchannel: Synapse -> Authentik service (token/userinfo/jwks).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-egress-to-authentik
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
+      ports:
+        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 9000 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-ingress-from-synapse
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: synapse-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: synapse
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: synapse-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-egress
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: synapse-postgres
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - ports:
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 6443 }
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: synapse-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape-postgres
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: synapse-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - { protocol: TCP, port: 9187 }
+---
+# Element / Cinny static web UIs: reachable from gateway + tunnel only.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webui-ingress-from-gateway
+  namespace: matrix
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app.kubernetes.io/name, operator: In, values: [element, cinny] }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 80 }

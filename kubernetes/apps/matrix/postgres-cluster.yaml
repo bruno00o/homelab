@@ -1,0 +1,42 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: synapse-postgres
+  namespace: matrix
+spec:
+  instances: 2
+  # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
+
+  storage:
+    storageClass: ${DEFAULT_STORAGE_CLASS}
+    size: 20Gi
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+      max_slot_wal_keep_size: "2GB"
+
+  bootstrap:
+    initdb:
+      database: synapse
+      owner: synapse
+      # Synapse REQUIRES the database collation to be C (set at creation only).
+      localeCollate: "C"
+      localeCType: "C"
+      encoding: "UTF8"
+      dataChecksums: true
+      secret:
+        name: synapse-postgres-credentials
+
+  monitoring:
+    enablePodMonitor: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 2000m
+      memory: 1Gi

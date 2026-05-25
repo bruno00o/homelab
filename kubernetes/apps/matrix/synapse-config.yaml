@@ -33,9 +33,10 @@ data:
     # Closed registration: humans via SSO, the Hermes bot via shared secret.
     enable_registration: false
 
-    # Keep local password login enabled so the Hermes bot can use a token.
+    # Password login disabled: humans must use SSO. The Hermes bot keeps working
+    # via its existing access token (token validity is unaffected by this).
     password_config:
-      enabled: true
+      enabled: false
 
     # OIDC via Authentik. authorization_endpoint stays port-less (browser hits it
     # via the gateway, which works). The backchannel (token/userinfo/jwks) uses

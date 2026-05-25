@@ -52,12 +52,23 @@ spec:
       labels:
         app.kubernetes.io/name: element
     spec:
+      # The element-web image already drops to the nginx user (uid 101) at
+      # runtime; declare it so the pod is not flagged as running with the
+      # default (root-capable) security context.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: element
           # renovate: datasource=docker depName=ghcr.io/element-hq/element-web
           image: ghcr.io/element-hq/element-web:v1.12.18
           securityContext:
             allowPrivilegeEscalation: false
+            # nginx entrypoint rewrites config + uses /var/cache, /tmp at runtime
+            readOnlyRootFilesystem: false
           ports:
             - name: http
               containerPort: 80

@@ -112,11 +112,13 @@ spec:
       ports:
         - { protocol: TCP, port: 5432 }
 ---
-# OIDC backchannel: Synapse -> Authentik service (token/userinfo/jwks).
+# OIDC backchannel: Synapse needs HTTPS, so it reaches Authentik via the public
+# host (auth.merry.seilliebert.dev -> LB gateway 10.0.20.20:443), not the
+# internal http service (Synapse rejects non-https OIDC endpoints).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-synapse-egress-to-authentik
+  name: allow-synapse-egress-to-gateway-https
   namespace: matrix
 spec:
   podSelector:
@@ -125,12 +127,9 @@ spec:
   policyTypes: [Egress]
   egress:
     - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: authentik
+        - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
-        - { protocol: TCP, port: 80 }
-        - { protocol: TCP, port: 9000 }
+        - { protocol: TCP, port: 443 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

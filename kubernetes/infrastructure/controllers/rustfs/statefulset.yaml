@@ -40,6 +40,12 @@ spec:
       labels:
         app.kubernetes.io/name: rustfs
     spec:
+      # Resolve the auth host to the in-pod nginx sidecar (pod-only; browsers are
+      # unaffected) so RustFS's OIDC backchannel skips the Cilium LB hairpin.
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - auth.merry.seilliebert.dev
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -68,6 +74,27 @@ spec:
                 secretKeyRef:
                   name: rustfs-credentials
                   key: secret-key
+            # Native OIDC (Authentik) for the console — removes the second login.
+            # Backchannel (config_url) goes to the in-pod sidecar via hostAlias.
+            - name: RUSTFS_IDENTITY_OPENID_ENABLE
+              value: "true"
+            - name: RUSTFS_IDENTITY_OPENID_CONFIG_URL
+              value: "https://auth.merry.seilliebert.dev/application/o/rustfs/.well-known/openid-configuration"
+            - name: RUSTFS_IDENTITY_OPENID_CLIENT_ID
+              value: "rustfs"
+            - name: RUSTFS_IDENTITY_OPENID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-oidc
+                  key: client-secret
+            - name: RUSTFS_IDENTITY_OPENID_SCOPES
+              value: "openid,profile,email"
+            - name: RUSTFS_IDENTITY_OPENID_ROLE_POLICY
+              value: "consoleAdmin"
+            - name: RUSTFS_IDENTITY_OPENID_DISPLAY_NAME
+              value: "SSO (Authentik)"
+            - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI
+              value: "https://rustfs.${CLUSTER_DOMAIN}/rustfs/console/oauth_callback"
           ports:
             - name: s3
               containerPort: 9000
@@ -104,11 +131,45 @@ spec:
               mountPath: /logs
             - name: tmp
               mountPath: /tmp
+        # TLS sidecar: terminates https with a valid LE cert for the auth host
+        # and forwards to the Authentik service, so RustFS's OIDC backchannel
+        # avoids the Cilium LB-gateway hairpin. Listens on 443 (NET_BIND_SERVICE)
+        # because RustFS follows the port-less discovery endpoints.
+        - name: oidc-proxy
+          # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
+          image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
+          ports:
+            - name: oidc-tls
+              containerPort: 443
+              protocol: TCP
+          volumeMounts:
+            - name: oidc-proxy-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: oidc-proxy-tls
+              mountPath: /tls
+              readOnly: true
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { cpu: 200m, memory: 64Mi }
       volumes:
         - name: logs
           emptyDir: {}
         - name: tmp
           emptyDir: {}
+        - name: oidc-proxy-conf
+          configMap:
+            name: rustfs-oidc-proxy
+        - name: oidc-proxy-tls
+          secret:
+            secretName: auth-oidc-tls
   volumeClaimTemplates:
     - metadata:
         name: data

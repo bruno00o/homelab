@@ -168,18 +168,29 @@ data:
           internal_host: http://zigbee2mqtt.home-automation.svc.cluster.local:8080
           internal_host_ssl_validation: false
 
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider-rustfs
+      # RustFS native OIDC (replaces the old proxy provider). Backchannel reaches
+      # Authentik via an in-pod TLS sidecar (bypasses Cilium LB hairpin).
+      # redirect_uri is a permissive regex for the first iteration — tighten once
+      # the exact RustFS console callback path is confirmed.
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-rustfs-oidc
         state: present
         identifiers:
-          name: RustFS Proxy
+          name: RustFS OIDC
         attrs:
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          mode: proxy
-          external_host: https://rustfs.${CLUSTER_DOMAIN}
-          internal_host: http://rustfs.rustfs.svc.cluster.local:9001
-          internal_host_ssl_validation: false
+          client_type: confidential
+          client_id: rustfs
+          client_secret: !Env AUTHENTIK_RUSTFS_CLIENT_SECRET
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+          redirect_uris:
+            - matching_mode: regex
+              url: https://rustfs\.${CLUSTER_DOMAIN}/.*
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
 
       - model: authentik_providers_proxy.proxyprovider
         id: provider-hermes
@@ -375,7 +386,7 @@ data:
           slug: rustfs
         attrs:
           name: RustFS
-          provider: !Find [authentik_providers_proxy.proxyprovider, [name, RustFS Proxy]]
+          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, RustFS OIDC]]
           meta_launch_url: https://rustfs.${CLUSTER_DOMAIN}
           policy_engine_mode: all
 
@@ -633,6 +644,13 @@ data:
           negate: false
           timeout: 30
 
+      # Cleanup: RustFS migrated from proxy mode to native OIDC — drop old proxy provider
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-rustfs
+        state: absent
+        identifiers:
+          name: RustFS Proxy
+
       # Cleanup: remove old orphaned bindings
       - model: authentik_policies.policybinding
         id: binding-homarr-admin
@@ -718,5 +736,4 @@ data:
 
             - !Find [authentik_providers_proxy.proxyprovider, [name, Frigate Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Zigbee2MQTT Proxy]]
-            - !Find [authentik_providers_proxy.proxyprovider, [name, RustFS Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Hermes Proxy]]

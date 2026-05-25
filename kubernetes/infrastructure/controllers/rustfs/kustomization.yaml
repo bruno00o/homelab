@@ -3,5 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - credentials.sops.yaml
+  - rustfs-oidc.sops.yaml
+  - oidc-proxy.yaml
   - statefulset.yaml
   - network-policies.yaml

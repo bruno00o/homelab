@@ -1,0 +1,51 @@
+---
+# Valid LE cert for auth.merry.seilliebert.dev, used by the in-pod nginx sidecar
+# so Synapse's OIDC backchannel reaches Authentik directly (bypassing the Cilium
+# LB-gateway hairpin) over HTTPS with a cert Synapse trusts natively.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: auth-oidc-tls
+  namespace: matrix
+spec:
+  secretName: auth-oidc-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - auth.merry.seilliebert.dev
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synapse-oidc-proxy
+  namespace: matrix
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    events {}
+    http {
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path /tmp/proxy_temp;
+      fastcgi_temp_path /tmp/fastcgi_temp;
+      uwsgi_temp_path /tmp/uwsgi_temp;
+      scgi_temp_path /tmp/scgi_temp;
+      server {
+        listen 8443 ssl;
+        http2 on;
+        server_name auth.merry.seilliebert.dev;
+        ssl_certificate /tls/tls.crt;
+        ssl_certificate_key /tls/tls.key;
+        location / {
+          proxy_pass http://authentik-server.authentik.svc.cluster.local:9000;
+          proxy_set_header Host auth.merry.seilliebert.dev;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-Host auth.merry.seilliebert.dev;
+          proxy_set_header X-Forwarded-For $remote_addr;
+        }
+      }
+    }

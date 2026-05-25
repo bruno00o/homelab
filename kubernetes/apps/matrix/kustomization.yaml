@@ -5,6 +5,7 @@ resources:
   - matrix-secrets.sops.yaml
   - postgres-cluster.yaml
   - synapse-config.yaml
+  - oidc-proxy.yaml
   - synapse.yaml
   - element.yaml
   - cinny.yaml

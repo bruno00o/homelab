@@ -37,9 +37,10 @@ data:
     password_config:
       enabled: true
 
-    # OIDC via Authentik. Explicit HTTPS endpoints (discover: false) so Synapse
-    # never depends on the discovery doc timing/cache. All endpoints go through
-    # the public auth host (LB gateway, proven reliable). Synapse mandates https.
+    # OIDC via Authentik. authorization_endpoint stays port-less (browser hits it
+    # via the gateway, which works). The backchannel (token/userinfo/jwks) uses
+    # :8443 -> the in-pod nginx sidecar -> Authentik service, bypassing the
+    # Cilium LB-gateway hairpin. issuer is port-less to match the id_token iss.
     oidc_providers:
       - idp_id: authentik
         idp_name: "SSO"
@@ -49,9 +50,9 @@ data:
         client_secret_path: "/secrets/oidc_client_secret"
         scopes: ["openid", "profile", "email"]
         authorization_endpoint: "https://auth.merry.seilliebert.dev/application/o/authorize/"
-        token_endpoint: "https://auth.merry.seilliebert.dev/application/o/token/"
-        userinfo_endpoint: "https://auth.merry.seilliebert.dev/application/o/userinfo/"
-        jwks_uri: "https://auth.merry.seilliebert.dev/application/o/synapse/jwks/"
+        token_endpoint: "https://auth.merry.seilliebert.dev:8443/application/o/token/"
+        userinfo_endpoint: "https://auth.merry.seilliebert.dev:8443/application/o/userinfo/"
+        jwks_uri: "https://auth.merry.seilliebert.dev:8443/application/o/synapse/jwks/"
         user_mapping_provider:
           config:
             localpart_template: "{{ user.preferred_username }}"

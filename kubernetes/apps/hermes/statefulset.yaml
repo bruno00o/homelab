@@ -118,19 +118,6 @@ spec:
                 secretKeyRef:
                   name: hermes-secrets
                   key: OPENROUTER_API_KEY
-            # Discord chat interface (outbound-only, no inbound ports needed).
-            - name: DISCORD_BOT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: hermes-secrets
-                  key: DISCORD_BOT_TOKEN
-            # Your Discord user ID (not a credential, but kept out of the public
-            # repo); without it the bot denies everyone by default.
-            - name: DISCORD_ALLOWED_USERS
-              valueFrom:
-                secretKeyRef:
-                  name: hermes-secrets
-                  key: DISCORD_ALLOWED_USERS
             # Matrix chat interface (in-cluster, outbound-only). Token from secret.
             - name: MATRIX_HOMESERVER
               value: http://synapse.matrix.svc.cluster.local:8008

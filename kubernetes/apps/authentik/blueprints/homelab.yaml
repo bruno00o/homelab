@@ -131,6 +131,9 @@ data:
           client_id: synapse
           client_secret: !Env AUTHENTIK_SYNAPSE_CLIENT_SECRET
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+          grant_types:
+            - authorization_code
+            - refresh_token
           redirect_uris:
             - matching_mode: strict
               url: https://matrix.${PUBLIC_DOMAIN}/_synapse/client/oidc/callback

@@ -131,6 +131,18 @@ spec:
                 secretKeyRef:
                   name: hermes-secrets
                   key: DISCORD_ALLOWED_USERS
+            # Matrix chat interface (in-cluster, outbound-only). Token from secret.
+            - name: MATRIX_HOMESERVER
+              value: http://synapse.matrix.svc.cluster.local:8008
+            - name: MATRIX_USER_ID
+              value: "@hermes:matrix.merry.seilliebert.dev"
+            - name: MATRIX_ALLOWED_USERS
+              value: "@bruno:matrix.merry.seilliebert.dev"
+            - name: MATRIX_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-matrix
+                  key: MATRIX_ACCESS_TOKEN
           volumeMounts:
             - name: data
               mountPath: /opt/data

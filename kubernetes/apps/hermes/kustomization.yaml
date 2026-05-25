@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - hermes-secrets.sops.yaml
+  - hermes-matrix.sops.yaml
   - statefulset.yaml
   - certificate.yaml
   - httproute.yaml

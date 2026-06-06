@@ -2,18 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - secrets.sops.yaml
-  - synapse-oidc.sops.yaml
-  - smtp.sops.yaml
-  - valkey-auth.sops.yaml
+  - matrix-secrets.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
-  - helmrelease.yaml
-  - certificate.yaml
+  - synapse-config.yaml
+  - oidc-proxy.yaml
+  - synapse.yaml
+  - element.yaml
+  - cinny.yaml
   - httproute.yaml
   - dnsendpoint.yaml
-  - reference-grant.yaml
-  - blueprints/
-  - pdb.yaml
   - network-policies.yaml
-  - kuma-monitor.yaml

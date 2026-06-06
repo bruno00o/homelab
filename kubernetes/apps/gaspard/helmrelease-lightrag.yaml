@@ -30,7 +30,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/hkuds/lightrag
             image:
               repository: ghcr.io/hkuds/lightrag
-              tag: v1.4.16
+              tag: v1.5.0
             env:
               TZ: ${TIMEZONE}
             envFrom:

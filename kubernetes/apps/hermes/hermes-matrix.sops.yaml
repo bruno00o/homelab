@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hermes-matrix
+  namespace: hermes
+type: Opaque
+stringData:
+  MATRIX_ACCESS_TOKEN: ENC[AES256_GCM,data:gHkJ8a/VvtzHHlLW/JzZtr6MV6svpWIb1VYm3Rwc3/ScSOimW5xDiQ==,iv:fRn968TNNISE5KKLUux3Qt/RSh+dfFlrFHuKGVZjLhY=,tag:19zXiFEEd3mip64YHbX6og==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBkZWtsbUJXWkx6dkJlNUtV
+        S3lvbG5wbTBNOTVxOVNnTldOZVRVVm1LeWxBCjF2ZXhGamxjcHhlb2hDZ3QyUkZU
+        djVDcHJ2N1ZNL0dYREN4V0NnUTdSdWsKLS0tIHQvcjlPS1MwZ09xaUlOVFJsaCsv
+        eEJuNHJZOEZvcXRRbTlyeXFpOVN2WDgKuH+vbWTfAn4Yn7MnkAXTp6MOaWkIJrot
+        oPqNM/eEr7IzcH5OOL1/l/wYcWHcWt+H1KONj7dFha9W6PHxxHExHw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-05-25T19:15:30Z"
+  mac: ENC[AES256_GCM,data:kYrY68cRsP6DrECg41c58ex9CSXCk2vY/ruEUob7aJqkh3YpYxtyhn7z18d/RmVZ3NzqjXZ87U9fN9S4ifH2OuF+BQWuGEm7mnfBnPbI6xXziydKpQ966JpY7icSFRhTCo/2k74WlfChqKslQdo7pY5vXTq3N4S2eNsEYj8ckp4=,iv:RtE6g69QCJeCDU1Ysg4xqATNhMaked89DKWlagnR3P8=,tag:ATalgbBpG/BavPddk/YiLA==,type:str]
+  version: 3.13.1

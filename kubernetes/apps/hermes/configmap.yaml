@@ -11,13 +11,12 @@ data:
   config.yaml: |
     model:
       provider: openrouter
-      default: minimax/minimax-m2.5:free
+      default: minimax/minimax-m2.7
       base_url: ''
       api_mode: chat_completions
-    # NOTE: verify the exact fallback key on first run (`hermes config`):
-    # docs diverge between top-level `fallback_providers` and `fallback_model`.
+    # OpenRouter ":free" models are throttled upstream (shared pool) and 429
+    # constantly — unusable for an always-on agent. Use paid models (cheap).
+    # fallback_providers is the correct key (verified: Hermes switched to it live).
     fallback_providers:
       - provider: openrouter
-        model: deepseek/deepseek-v4-flash:free
-      - provider: openrouter
-        model: nvidia/nemotron-3-super-120b-a12b:free
+        model: nousresearch/hermes-4-70b

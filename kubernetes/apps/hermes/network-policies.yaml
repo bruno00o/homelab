@@ -97,4 +97,23 @@ spec:
               - 10.96.0.0/12
       ports:
         - { protocol: TCP, port: 443 }
+---
+# Talk to the self-hosted Matrix homeserver (Synapse) in-cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-matrix
+  namespace: hermes
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: matrix
+      ports:
+        - { protocol: TCP, port: 8008 }
         - { protocol: TCP, port: 80 }

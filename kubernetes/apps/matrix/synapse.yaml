@@ -116,7 +116,7 @@ spec:
         # the Cilium LB-gateway hairpin entirely.
         - name: oidc-proxy
           # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
-          image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
+          image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

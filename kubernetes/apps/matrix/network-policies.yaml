@@ -204,6 +204,16 @@ spec:
               cnpg.io/cluster: synapse-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+    # Barman sidecar → RustFS S3 for backups/WAL archiving.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - { protocol: TCP, port: 9000 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

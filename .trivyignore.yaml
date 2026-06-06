@@ -16,6 +16,10 @@ misconfigurations:
   - id: KSV-0118
     paths:
       - "infrastructure/controllers/intel-gpu-plugin/intel-gpu-plugin.yaml"
+      # cinny ships nginx:alpine which runs as root by design; it only serves a
+      # static SPA and is isolated by namespace NetworkPolicies. Hardening to
+      # rootless requires verifying writable-path mounts and is deferred.
+      - "apps/matrix/cinny.yaml"
 
   # Authentik blueprints use `!Env AUTHENTIK_*_CLIENT_SECRET` syntax to inject
   # values from the authentik deployment's environment at load time — these are
@@ -37,7 +41,13 @@ misconfigurations:
   # backed by an emptyDir mount.
   #   - DozerDB (Neo4j fork): writes /logs, /conf, /plugins and others
   #   - immich-postgres: vanilla Postgres image needs /var/run/postgresql, /tmp
+  #   - synapse: writes /data signing key, media; oidc-proxy/element/cinny are
+  #     nginx images that need /var/cache and /tmp; hermes-agent owns its rootfs
   - id: KSV-0014
     paths:
       - "apps/dozerdb/dozerdb.yaml"
       - "apps/immich/postgres.yaml"
+      - "apps/hermes/statefulset.yaml"
+      - "apps/matrix/synapse.yaml"
+      - "apps/matrix/cinny.yaml"
+      - "apps/matrix/element.yaml"

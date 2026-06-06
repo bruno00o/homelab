@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - matrix-secrets.sops.yaml
+  - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
   - synapse-config.yaml
   - oidc-proxy.yaml

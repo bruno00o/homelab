@@ -41,7 +41,7 @@ data:
         ssl_certificate /tls/tls.crt;
         ssl_certificate_key /tls/tls.key;
         location / {
-          proxy_pass http://authentik-server.authentik.svc.cluster.local:9000;
+          proxy_pass http://authentik-server.authentik.svc.cluster.local:80;
           proxy_set_header Host auth.merry.seilliebert.dev;
           proxy_set_header X-Forwarded-Proto https;
           proxy_set_header X-Forwarded-Host auth.merry.seilliebert.dev;

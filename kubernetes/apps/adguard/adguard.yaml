@@ -45,7 +45,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: copy-config
-          image: docker.io/busybox:1.37
+          image: docker.io/busybox:1.38
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -72,7 +72,7 @@ spec:
       containers:
         - name: adguard-home
           # renovate: datasource=docker depName=adguard/adguardhome
-          image: docker.io/adguard/adguardhome:v0.107.76
+          image: docker.io/adguard/adguardhome:v0.107.77
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

@@ -45,7 +45,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: copy-config
-          image: docker.io/busybox:1.37
+          image: docker.io/busybox:1.38
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

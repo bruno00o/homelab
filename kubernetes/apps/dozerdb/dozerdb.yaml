@@ -65,7 +65,7 @@ spec:
       containers:
         - name: dozerdb
           # renovate: datasource=docker depName=graphstack/dozerdb
-          image: docker.io/graphstack/dozerdb:5.26.3
+          image: docker.io/graphstack/dozerdb:5.26.27
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

@@ -139,8 +139,11 @@ spec:
               value: "consoleAdmin"
             - name: RUSTFS_IDENTITY_OPENID_DISPLAY_NAME
               value: "SSO (Authentik)"
+            # Backend OIDC callback handler (NOT the console path); rustfs exchanges
+            # the code here. Wrong path => code lands on a console route, no token
+            # exchange, "session expired". Fixed since #2924 (SigV4 no longer blocks).
             - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI
-              value: "https://rustfs.${CLUSTER_DOMAIN}/rustfs/console/oauth_callback"
+              value: "https://rustfs.${CLUSTER_DOMAIN}/rustfs/admin/v3/oidc/callback"
           ports:
             - name: s3
               containerPort: 9000

@@ -61,7 +61,7 @@ spec:
       initContainers:
         - name: oidc-proxy
           # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
-          image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
+          image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine
           restartPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false

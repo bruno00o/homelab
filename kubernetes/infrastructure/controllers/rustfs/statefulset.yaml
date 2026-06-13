@@ -40,11 +40,10 @@ spec:
       labels:
         app.kubernetes.io/name: rustfs
     spec:
-      # Resolve the auth host to the in-pod nginx sidecar (pod-only; browsers are
-      # unaffected) so RustFS's OIDC backchannel skips the Cilium LB hairpin.
-      # Internal host (home.arpa) keeps the whole flow same-site with the console
-      # (rustfs.merry.home.arpa) and matches AUTHENTIK_HOST_BROWSER, so the
-      # authentik_session cookie survives the redirect (no "session expired").
+      # Point the auth host at the in-pod sidecar (pod-only) so the OIDC
+      # backchannel skips the Cilium LB hairpin. home.arpa keeps the browser flow
+      # same-site with the console + matches AUTHENTIK_HOST_BROWSER (else the
+      # authentik_session cookie is lost → "session expired").
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
@@ -56,15 +55,10 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
-      # Native sidecar (k8s 1.29+): the proxy starts and passes its startupProbe
-      # BEFORE the rustfs container, so RustFS's one-shot OIDC discovery at boot
-      # never races an unready nginx (which produced "discovery failed: Request
-      # failed" and then disabled the SSO login button for good).
+      # Native sidecar (k8s 1.29+): starts and passes its startupProbe BEFORE
+      # rustfs, so rustfs's one-shot OIDC discovery at boot can't race an unready
+      # nginx (which left the SSO button disabled). TLS proxy config: oidc-proxy.yaml.
       initContainers:
-        # TLS sidecar: terminates https with a valid LE cert for the auth host
-        # and forwards to the Authentik service, so RustFS's OIDC backchannel
-        # avoids the Cilium LB-gateway hairpin. Listens on 443 (NET_BIND_SERVICE)
-        # because RustFS follows the port-less discovery endpoints.
         - name: oidc-proxy
           # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
           image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
@@ -116,10 +110,9 @@ spec:
                 secretKeyRef:
                   name: rustfs-credentials
                   key: secret-key
-            # Native OIDC (Authentik) for the console — removes the second login.
-            # Backchannel (config_url) goes to the in-pod sidecar via hostAlias.
-            # SSL_CERT_FILE points rustls at the mugiwara CA so it trusts the
-            # sidecar's internal cert for auth.merry.home.arpa.
+            # Native OIDC (Authentik) for the console, no second login. Backchannel
+            # goes to the sidecar via hostAlias; SSL_CERT_FILE makes rustls trust
+            # the sidecar's mugiwara cert.
             - name: SSL_CERT_FILE
               value: /etc/ssl/mugiwara/ca.crt
             - name: RUSTFS_IDENTITY_OPENID_ENABLE
@@ -139,11 +132,9 @@ spec:
               value: "consoleAdmin"
             - name: RUSTFS_IDENTITY_OPENID_DISPLAY_NAME
               value: "SSO (Authentik)"
-            # Backend OIDC callback, with the PROVIDER ID suffix ('default'). Per
-            # rustfs#2924: only /callback/<provider_id> is on the unauthenticated
-            # allowlist; the providerless /callback hits the SigV4 admin check and
-            # returns "AccessDenied: Signature is required". provider_id = the last
-            # segment of rustfs's authorize URL (logs say OIDC provider 'default').
+            # Callback MUST carry the provider id ('default'): only
+            # /callback/<provider_id> is on rustfs's unauthenticated allowlist; the
+            # providerless path hits the SigV4 check → "Signature is required" (rustfs#2924).
             - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI
               value: "https://rustfs.${CLUSTER_DOMAIN}/rustfs/admin/v3/oidc/callback/default"
             - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
@@ -198,8 +189,7 @@ spec:
         - name: oidc-proxy-tls
           secret:
             secretName: auth-oidc-tls
-        # ca.crt from the cert-manager-issued auth-oidc-tls secret = the mugiwara
-        # CA, mounted so rustls (SSL_CERT_FILE) trusts the sidecar's internal cert.
+        # ca.crt of the auth-oidc-tls secret = the mugiwara CA (see SSL_CERT_FILE).
         - name: mugiwara-ca
           secret:
             secretName: auth-oidc-tls

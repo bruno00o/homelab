@@ -42,10 +42,13 @@ spec:
     spec:
       # Resolve the auth host to the in-pod nginx sidecar (pod-only; browsers are
       # unaffected) so RustFS's OIDC backchannel skips the Cilium LB hairpin.
+      # Internal host (home.arpa) keeps the whole flow same-site with the console
+      # (rustfs.merry.home.arpa) and matches AUTHENTIK_HOST_BROWSER, so the
+      # authentik_session cookie survives the redirect (no "session expired").
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-            - auth.merry.seilliebert.dev
+            - auth.merry.home.arpa
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -115,10 +118,14 @@ spec:
                   key: secret-key
             # Native OIDC (Authentik) for the console — removes the second login.
             # Backchannel (config_url) goes to the in-pod sidecar via hostAlias.
+            # SSL_CERT_FILE points rustls at the mugiwara CA so it trusts the
+            # sidecar's internal cert for auth.merry.home.arpa.
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/mugiwara/ca.crt
             - name: RUSTFS_IDENTITY_OPENID_ENABLE
               value: "true"
             - name: RUSTFS_IDENTITY_OPENID_CONFIG_URL
-              value: "https://auth.merry.seilliebert.dev/application/o/rustfs/.well-known/openid-configuration"
+              value: "https://auth.merry.home.arpa/application/o/rustfs/.well-known/openid-configuration"
             - name: RUSTFS_IDENTITY_OPENID_CLIENT_ID
               value: "rustfs"
             - name: RUSTFS_IDENTITY_OPENID_CLIENT_SECRET
@@ -170,6 +177,9 @@ spec:
               mountPath: /logs
             - name: tmp
               mountPath: /tmp
+            - name: mugiwara-ca
+              mountPath: /etc/ssl/mugiwara
+              readOnly: true
       volumes:
         - name: logs
           emptyDir: {}
@@ -181,6 +191,14 @@ spec:
         - name: oidc-proxy-tls
           secret:
             secretName: auth-oidc-tls
+        # ca.crt from the cert-manager-issued auth-oidc-tls secret = the mugiwara
+        # CA, mounted so rustls (SSL_CERT_FILE) trusts the sidecar's internal cert.
+        - name: mugiwara-ca
+          secret:
+            secretName: auth-oidc-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
   volumeClaimTemplates:
     - metadata:
         name: data

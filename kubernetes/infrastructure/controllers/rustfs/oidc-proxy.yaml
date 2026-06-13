@@ -1,0 +1,53 @@
+---
+# Internal cert (mugiwara) for the sidecar that terminates the OIDC backchannel.
+# The secret's ca.crt is also mounted into rustfs so rustls trusts this cert
+# (see SSL_CERT_FILE in statefulset.yaml).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: auth-oidc-tls
+  namespace: rustfs
+spec:
+  secretName: auth-oidc-tls
+  issuerRef:
+    name: ${CLUSTER_ISSUER}
+    kind: ClusterIssuer
+  dnsNames:
+    - auth.merry.home.arpa
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rustfs-oidc-proxy
+  namespace: rustfs
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    events {}
+    http {
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path /tmp/proxy_temp;
+      fastcgi_temp_path /tmp/fastcgi_temp;
+      uwsgi_temp_path /tmp/uwsgi_temp;
+      scgi_temp_path /tmp/scgi_temp;
+      # Listens on 443 so RustFS (which follows the port-less discovery endpoints)
+      # reaches the sidecar via hostAlias auth.merry.home.arpa -> 127.0.0.1.
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name auth.merry.home.arpa;
+        ssl_certificate /tls/tls.crt;
+        ssl_certificate_key /tls/tls.key;
+        location / {
+          proxy_pass http://authentik-server.authentik.svc.cluster.local:80;
+          proxy_set_header Host auth.merry.home.arpa;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-Host auth.merry.home.arpa;
+          proxy_set_header X-Forwarded-For $remote_addr;
+        }
+      }
+    }

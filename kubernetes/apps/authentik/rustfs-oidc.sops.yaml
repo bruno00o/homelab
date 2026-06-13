@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-rustfs-oidc
+  namespace: authentik
+type: Opaque
+stringData:
+  rustfs_oidc_client_secret: ENC[AES256_GCM,data:HZyENBsq7d6vRKoPPZ/QddPzUZz1pCotnFyR//xBaNj5dpqNU85ZBWVWzZvDCeAln0BdOK6HXpWF4uFLknSHnw==,iv:7tRAlU9xJLcZzzO6I9TnmGb5rfbMjBKnJnf7LxmovMo=,tag:3OZilcRYOfRUXSP1+JH05g==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBOZTFQUG1KaE12ZHFaSWVz
+        bFpuZHpqSEdJTzBpSHExczh4Wm8zc25kaTBvCk9JTTJ0bjFWMzB6MTRxM1liY0ht
+        RVJWR2JhU3RBWjRoWG1HRXFiUWp0OWsKLS0tIFJKbFZmNDF5SEozSWFxbVN2R0di
+        c1lJQTUxMEx2SmsxbFdZS044citna1UKXW1B7I2E8KNo0116pYvN1Smzm3eu5yF7
+        L7VpQNjAwFTOEicrowASXCmIeC8spgYpxKykOxTF4awtvR5d0p7WdQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-05-25T20:44:11Z"
+  mac: ENC[AES256_GCM,data:CCt28rR8R8oRjco9Ex9JU41eMQCx2dVN6NHuGeCKZIrYzDVMQJJWp/75aI6wuDhweAjFRrmNEfzpHw+o/b+AaE+La8fHYVIC0x6+eb28YnAioOscEUZmFUv8sLj0P/qYkbh+J1GW8zsORdNmLyjloOPwv1eZmACLNxYuIojq1vc=,iv:k4XfyrYGxq0vtYXB7M6U4XNCvuvPVIRzVXdIZUu5FT4=,tag:xGmFQJ8FDKzS4zH+ZVYRvg==,type:str]
+  version: 3.13.1

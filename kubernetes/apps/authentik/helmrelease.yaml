@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: authentik
-      version: "2026.5.2"
+      version: "2026.5.3"
       sourceRef:
         kind: HelmRepository
         name: authentik
@@ -103,6 +103,11 @@ spec:
             secretKeyRef:
               name: authentik-synapse-oidc
               key: synapse_oidc_client_secret
+        - name: AUTHENTIK_RUSTFS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-rustfs-oidc
+              key: rustfs_oidc_client_secret
         - name: AUTHENTIK_HOST_BROWSER
           value: "https://auth.${CLUSTER_DOMAIN}"
         - name: AUTHENTIK_HOST

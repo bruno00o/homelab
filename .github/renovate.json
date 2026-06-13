@@ -113,6 +113,14 @@
       "matchUpdateTypes": ["digest"],
       "automerge": true
     },
+    {
+      "description": "Track rustfs prereleases (no stable release yet)",
+      "matchPackageNames": ["rustfs/rustfs"],
+      "versioning": "semver",
+      "ignoreUnstable": false,
+      "automerge": false,
+      "labels": ["unstable", "review-required"]
+    },
 
     {
       "description": "Group Cilium",

@@ -139,11 +139,15 @@ spec:
               value: "consoleAdmin"
             - name: RUSTFS_IDENTITY_OPENID_DISPLAY_NAME
               value: "SSO (Authentik)"
-            # Backend OIDC callback handler (NOT the console path); rustfs exchanges
-            # the code here. Wrong path => code lands on a console route, no token
-            # exchange, "session expired". Fixed since #2924 (SigV4 no longer blocks).
+            # Backend OIDC callback, with the PROVIDER ID suffix ('default'). Per
+            # rustfs#2924: only /callback/<provider_id> is on the unauthenticated
+            # allowlist; the providerless /callback hits the SigV4 admin check and
+            # returns "AccessDenied: Signature is required". provider_id = the last
+            # segment of rustfs's authorize URL (logs say OIDC provider 'default').
             - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI
-              value: "https://rustfs.${CLUSTER_DOMAIN}/rustfs/admin/v3/oidc/callback"
+              value: "https://rustfs.${CLUSTER_DOMAIN}/rustfs/admin/v3/oidc/callback/default"
+            - name: RUSTFS_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
+              value: "false"
           ports:
             - name: s3
               containerPort: 9000

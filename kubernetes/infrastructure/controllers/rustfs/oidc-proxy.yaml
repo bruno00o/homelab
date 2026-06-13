@@ -1,10 +1,7 @@
 ---
-# Internal cert for auth.merry.home.arpa (mugiwara CA), used by the in-pod nginx
-# sidecar so RustFS's native OIDC backchannel reaches Authentik directly
-# (bypassing the Cilium LB-gateway hairpin). RustFS trusts it via the mugiwara
-# ca.crt this secret also carries (mounted + SSL_CERT_FILE in the StatefulSet).
-# home.arpa keeps the browser flow same-site with the console and matches
-# AUTHENTIK_HOST_BROWSER, fixing the "session expired" cookie loss.
+# Internal cert (mugiwara) for the sidecar that terminates the OIDC backchannel.
+# The secret's ca.crt is also mounted into rustfs so rustls trusts this cert
+# (see SSL_CERT_FILE in statefulset.yaml).
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:

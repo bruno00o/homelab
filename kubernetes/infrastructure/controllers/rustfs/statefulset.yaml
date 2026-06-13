@@ -65,7 +65,7 @@ spec:
           restartPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
@@ -86,6 +86,9 @@ spec:
             - name: oidc-proxy-tls
               mountPath: /tls
               readOnly: true
+            # nginx.conf points pid + temp paths here; needed under readOnlyRootFilesystem.
+            - name: oidc-proxy-tmp
+              mountPath: /tmp
           resources:
             requests: { cpu: 10m, memory: 16Mi }
             limits: { cpu: 200m, memory: 64Mi }
@@ -186,6 +189,8 @@ spec:
         - name: oidc-proxy-conf
           configMap:
             name: rustfs-oidc-proxy
+        - name: oidc-proxy-tmp
+          emptyDir: {}
         - name: oidc-proxy-tls
           secret:
             secretName: auth-oidc-tls

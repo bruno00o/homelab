@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - secrets.sops.yaml
   - synapse-oidc.sops.yaml
+  - rustfs-oidc.sops.yaml
   - smtp.sops.yaml
   - valkey-auth.sops.yaml
   - rustfs-s3-credentials.sops.yaml

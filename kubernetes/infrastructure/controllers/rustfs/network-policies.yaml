@@ -56,11 +56,11 @@ spec:
       ports:
         - { protocol: TCP, port: 9000 }
 ---
-# Console UI (port 9001) from authentik proxy (SSO) — gateway hits authentik-server, which proxies here
+# Console UI (port 9001) now exposed directly via the gateway (native OIDC).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-console-from-authentik
+  name: allow-console-from-gateway
   namespace: rustfs
 spec:
   podSelector:
@@ -69,11 +69,45 @@ spec:
   policyTypes: [Ingress]
   ingress:
     - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 9001 }
+---
+# Cross-node envoy proxy traffic (Cilium ingress identity) for the console route.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: rustfs
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: rustfs
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "9001", protocol: TCP }
+---
+# OIDC backchannel: the in-pod nginx sidecar forwards to the Authentik service.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-authentik
+  namespace: rustfs
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rustfs
+  policyTypes: [Egress]
+  egress:
+    - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: authentik
       ports:
-        - { protocol: TCP, port: 9001 }
+        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 9000 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

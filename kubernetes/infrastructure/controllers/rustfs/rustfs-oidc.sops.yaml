@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rustfs-oidc
+  namespace: rustfs
+type: Opaque
+stringData:
+  client-secret: ENC[AES256_GCM,data:toXDW1ZB/6nXH6ReuxnOFXlgoMwMx4K28OlOCceMdKYN8BT0t+On/E+MpfEFlPq0EykmBsiGvpEvgCdGy1JM/w==,iv:piaCCEWwStmEB/euabHOV3aOvm+ABwCSZl+a9ps7Rf4=,tag:6jdu6L5MZ8XbFHVDYB7Bqg==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpamdSSzd2UCtUS3pJMlpn
+        cUZZVy9MZ3BEa29JckYwRXlrclZZbWRuRlc0CmJhakM2dGlqTmdlTGRHNE5YeTJp
+        enF2c2lacjBLdVd4UWYzZVNpREMxZVEKLS0tIE9LdkNqWHRSc1RtN2hNOExZYUdu
+        WFpjWXR1cmltcmFOTksvSmkyQ0lTYm8KvYXarIWD5Uu0EcSTsj1mYYi8dujZKi5e
+        N9c1fbLq03n9KDvDicc/wp+GgBTEsY7UuICLHZCiNu60TsUUk4B4BQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-05-25T20:44:11Z"
+  mac: ENC[AES256_GCM,data:OBqSCZirGBOcVvdLsRMfVlqYuT9jJ0hc98Nh+wzVnh6XtKUTmVRvEcrUw8R7Y+cT6abe5XciclRz/G+aQzTrzJoms6x1ONRmTQtJuLvzPzeLziJG4zWY7Z797uq7S0byH36MadbcFi8pNOHtWrsSSnjGt8QUaM6cu1UwDCvbBIY=,iv:oENqJTPmFQfxnX6KIWCX91px05Q4sbx/+EdCmys2Nr4=,tag:ruPGarVZ+svW/5nGb52Hng==,type:str]
+  version: 3.13.1

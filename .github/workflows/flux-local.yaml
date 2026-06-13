@@ -24,7 +24,7 @@ jobs:
 
       - uses: fluxcd/flux2/action@main
 
-      - uses: allenporter/flux-local/action/test@8.2.0
+      - uses: allenporter/flux-local/action/test@8.3.0
         with:
           path: kubernetes/flux
           enable-helm: true
@@ -40,7 +40,7 @@ jobs:
 
       - uses: fluxcd/flux2/action@main
 
-      - uses: allenporter/flux-local/action/diff@8.2.0
+      - uses: allenporter/flux-local/action/diff@8.3.0
         with:
           path: kubernetes/flux
           live-branch: main

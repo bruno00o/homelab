@@ -53,6 +53,45 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
+      # Native sidecar (k8s 1.29+): the proxy starts and passes its startupProbe
+      # BEFORE the rustfs container, so RustFS's one-shot OIDC discovery at boot
+      # never races an unready nginx (which produced "discovery failed: Request
+      # failed" and then disabled the SSO login button for good).
+      initContainers:
+        # TLS sidecar: terminates https with a valid LE cert for the auth host
+        # and forwards to the Authentik service, so RustFS's OIDC backchannel
+        # avoids the Cilium LB-gateway hairpin. Listens on 443 (NET_BIND_SERVICE)
+        # because RustFS follows the port-less discovery endpoints.
+        - name: oidc-proxy
+          # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
+          image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
+          restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
+          ports:
+            - name: oidc-tls
+              containerPort: 443
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: 443
+            periodSeconds: 1
+            failureThreshold: 30
+          volumeMounts:
+            - name: oidc-proxy-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: oidc-proxy-tls
+              mountPath: /tls
+              readOnly: true
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { cpu: 200m, memory: 64Mi }
       containers:
         - name: rustfs
           # renovate: datasource=docker depName=rustfs/rustfs
@@ -131,34 +170,6 @@ spec:
               mountPath: /logs
             - name: tmp
               mountPath: /tmp
-        # TLS sidecar: terminates https with a valid LE cert for the auth host
-        # and forwards to the Authentik service, so RustFS's OIDC backchannel
-        # avoids the Cilium LB-gateway hairpin. Listens on 443 (NET_BIND_SERVICE)
-        # because RustFS follows the port-less discovery endpoints.
-        - name: oidc-proxy
-          # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
-          image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            runAsNonRoot: true
-            capabilities:
-              drop: ["ALL"]
-              add: ["NET_BIND_SERVICE"]
-          ports:
-            - name: oidc-tls
-              containerPort: 443
-              protocol: TCP
-          volumeMounts:
-            - name: oidc-proxy-conf
-              mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
-            - name: oidc-proxy-tls
-              mountPath: /tls
-              readOnly: true
-          resources:
-            requests: { cpu: 10m, memory: 16Mi }
-            limits: { cpu: 200m, memory: 64Mi }
       volumes:
         - name: logs
           emptyDir: {}

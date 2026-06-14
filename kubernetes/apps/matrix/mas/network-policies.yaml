@@ -114,12 +114,14 @@ spec:
               app.kubernetes.io/name: synapse
       ports:
         - { protocol: TCP, port: 8008 }
+    # Cilium evaluates egress against the pod targetPort (9000), not the
+    # authentik-server service port (80).
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: authentik
       ports:
-        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 9000 }
 ---
 # mas-postgres mirrors synapse-postgres rules (operator + intra-cluster + S3 backups).
 apiVersion: networking.k8s.io/v1

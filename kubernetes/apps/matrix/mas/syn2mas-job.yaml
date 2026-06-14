@@ -39,9 +39,6 @@ spec:
             - migrate
             - --config=/config/config.yaml
             - --synapse-config=/synapse/homeserver.yaml
-          env:
-            - name: SSL_CERT_FILE
-              value: /tls/ca.crt
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -55,7 +52,6 @@ spec:
             - { name: secrets, mountPath: /secrets, readOnly: true }
             - { name: db-password, mountPath: /db, readOnly: true }
             - { name: synapse-config, mountPath: /synapse, readOnly: true }
-            - { name: tls-ca, mountPath: /tls, readOnly: true }
             - { name: tmp, mountPath: /tmp }
       volumes:
         - name: config
@@ -73,11 +69,5 @@ spec:
         - name: synapse-config
           configMap:
             name: synapse-config
-        - name: tls-ca
-          secret:
-            secretName: auth-oidc-tls
-            items:
-              - key: ca.crt
-                path: ca.crt
         - name: tmp
           emptyDir: {}

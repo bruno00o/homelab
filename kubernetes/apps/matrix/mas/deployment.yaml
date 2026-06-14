@@ -94,10 +94,6 @@ spec:
           args:
             - server
             - --config=/config/config.yaml
-          env:
-            # rustls needs the LE CA to trust the sidecar's wildcard cert.
-            - name: SSL_CERT_FILE
-              value: /tls/ca.crt
           ports:
             - name: http
               containerPort: 8080
@@ -139,9 +135,6 @@ spec:
             - name: db-password
               mountPath: /db
               readOnly: true
-            - name: tls-ca
-              mountPath: /tls
-              readOnly: true
             - name: tmp
               mountPath: /tmp
       volumes:
@@ -158,13 +151,6 @@ spec:
             items:
               - key: password
                 path: password
-        # ca.crt of the auth-oidc-tls secret = the LE chain trusted by SSL_CERT_FILE
-        - name: tls-ca
-          secret:
-            secretName: auth-oidc-tls
-            items:
-              - key: ca.crt
-                path: ca.crt
         - name: tmp
           emptyDir: {}
         - name: oidc-proxy-conf

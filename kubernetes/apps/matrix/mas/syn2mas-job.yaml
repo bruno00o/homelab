@@ -12,7 +12,7 @@ metadata:
   namespace: matrix
   annotations:
     # Re-run when manifest is updated (bump this if we need to retry).
-    syn2mas/revision: "1"
+    syn2mas/revision: "2"
 spec:
   backoffLimit: 6
   ttlSecondsAfterFinished: 86400
@@ -30,6 +30,25 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: render-db-config
+          image: docker.io/library/busybox:1.37
+          command:
+            - sh
+            - -c
+            - 'printf "database:\n  password: \"%s\"\n" "$(cat /db/password)" > /rendered/db.yaml'
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: { cpu: 10m, memory: 8Mi }
+            limits: { cpu: 100m, memory: 32Mi }
+          volumeMounts:
+            - { name: db-password, mountPath: /db, readOnly: true }
+            - { name: rendered-config, mountPath: /rendered }
       containers:
         - name: syn2mas
           # renovate: datasource=docker depName=ghcr.io/element-hq/matrix-authentication-service
@@ -38,7 +57,9 @@ spec:
             - syn2mas
             - migrate
             - --config=/config/config.yaml
+            - --config=/rendered/db.yaml
             - --synapse-config=/synapse/homeserver.yaml
+            - --synapse-config=/synapse-secrets/extra.yaml
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -50,8 +71,9 @@ spec:
           volumeMounts:
             - { name: config, mountPath: /config, readOnly: true }
             - { name: secrets, mountPath: /secrets, readOnly: true }
-            - { name: db-password, mountPath: /db, readOnly: true }
+            - { name: rendered-config, mountPath: /rendered, readOnly: true }
             - { name: synapse-config, mountPath: /synapse, readOnly: true }
+            - { name: synapse-secrets, mountPath: /synapse-secrets, readOnly: true }
             - { name: tmp, mountPath: /tmp }
       volumes:
         - name: config
@@ -66,8 +88,13 @@ spec:
             items:
               - key: password
                 path: password
+        - name: rendered-config
+          emptyDir: {}
         - name: synapse-config
           configMap:
             name: synapse-config
+        - name: synapse-secrets
+          secret:
+            secretName: synapse-secrets
         - name: tmp
           emptyDir: {}

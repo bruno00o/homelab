@@ -40,8 +40,9 @@ data:
       port: 5432
       database: mas
       username: mas
-      # password is loaded from /db/password (CNPG-managed secret mounted in the pod)
-      password_file: /db/password
+      # password is rendered into /rendered/db.yaml by an init container reading
+      # the CNPG-managed mas-postgres-credentials secret (MAS' database section
+      # does NOT support password_file — only inline `password`).
       ssl_mode: disable
 
     matrix:

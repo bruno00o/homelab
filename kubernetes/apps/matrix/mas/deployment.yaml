@@ -55,6 +55,28 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       initContainers:
+        # Templates the CNPG-managed postgres password into a small MAS config
+        # snippet, merged at runtime via a second --config flag. MAS' database
+        # section does not support password_file, so we inline the password
+        # here (file stays inside the pod's emptyDir).
+        - name: render-db-config
+          image: docker.io/library/busybox:1.37
+          command:
+            - sh
+            - -c
+            - 'printf "database:\n  password: \"%s\"\n" "$(cat /db/password)" > /rendered/db.yaml'
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: { cpu: 10m, memory: 8Mi }
+            limits: { cpu: 100m, memory: 32Mi }
+          volumeMounts:
+            - { name: db-password, mountPath: /db, readOnly: true }
+            - { name: rendered-config, mountPath: /rendered }
         - name: oidc-proxy
           # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
           image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine
@@ -94,6 +116,7 @@ spec:
           args:
             - server
             - --config=/config/config.yaml
+            - --config=/rendered/db.yaml
           ports:
             - name: http
               containerPort: 8080
@@ -132,8 +155,8 @@ spec:
             - name: secrets
               mountPath: /secrets
               readOnly: true
-            - name: db-password
-              mountPath: /db
+            - name: rendered-config
+              mountPath: /rendered
               readOnly: true
             - name: tmp
               mountPath: /tmp
@@ -144,13 +167,15 @@ spec:
         - name: secrets
           secret:
             secretName: mas-secrets
-        # CNPG-managed credentials: ./password contains the connection password
+        # CNPG-managed credentials: only read by the render-db-config init
         - name: db-password
           secret:
             secretName: mas-postgres-credentials
             items:
               - key: password
                 path: password
+        - name: rendered-config
+          emptyDir: {}
         - name: tmp
           emptyDir: {}
         - name: oidc-proxy-conf

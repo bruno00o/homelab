@@ -146,6 +146,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: synapse
+        - podSelector:
+            matchLabels:
+              job-name: syn2mas-migrate
       ports:
         - { protocol: TCP, port: 5432 }
     - from:

@@ -130,11 +130,17 @@ spec:
                 secretKeyRef:
                   name: hermes-matrix
                   key: MATRIX_ACCESS_TOKEN
-            # E2EE: olm keys live on the PVC (/opt/data/crypto.db). Device must
-            # be verified manually from Element web on first boot — no recovery
-            # key passed, to avoid the bot becoming an account-takeover path.
+            # E2EE: olm keys live on the PVC (/opt/data/crypto.db). The recovery
+            # key is Hermes' OWN (bootstrapped at first encrypted boot, not bruno's
+            # account key), so it lets the bot re-sign its own device after a key
+            # rotation but cannot recover bruno's session.
             - name: MATRIX_ENCRYPTION
               value: "true"
+            - name: MATRIX_RECOVERY_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-matrix
+                  key: MATRIX_RECOVERY_KEY
           volumeMounts:
             - name: data
               mountPath: /opt/data

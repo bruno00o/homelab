@@ -5,19 +5,19 @@ metadata:
   namespace: hermes
 type: Opaque
 stringData:
-  MATRIX_ACCESS_TOKEN: ENC[AES256_GCM,data:gHkJ8a/VvtzHHlLW/JzZtr6MV6svpWIb1VYm3Rwc3/ScSOimW5xDiQ==,iv:fRn968TNNISE5KKLUux3Qt/RSh+dfFlrFHuKGVZjLhY=,tag:19zXiFEEd3mip64YHbX6og==,type:str]
+  MATRIX_ACCESS_TOKEN: ENC[AES256_GCM,data:MvbKispil9+oj7m0sxAwdmXs/TE5gDj1Yvta1kZUn3t5tm0NmZwQaZc=,iv:BEJUn7b7SdPNBqljf1Y9mdPLKgJpZNzOsSIiMTuEev8=,tag:vkO7r3DxJv2ByrVPMHHHCw==,type:str]
 sops:
   age:
     - enc: |
         -----BEGIN AGE ENCRYPTED FILE-----
-        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBkZWtsbUJXWkx6dkJlNUtV
-        S3lvbG5wbTBNOTVxOVNnTldOZVRVVm1LeWxBCjF2ZXhGamxjcHhlb2hDZ3QyUkZU
-        djVDcHJ2N1ZNL0dYREN4V0NnUTdSdWsKLS0tIHQvcjlPS1MwZ09xaUlOVFJsaCsv
-        eEJuNHJZOEZvcXRRbTlyeXFpOVN2WDgKuH+vbWTfAn4Yn7MnkAXTp6MOaWkIJrot
-        oPqNM/eEr7IzcH5OOL1/l/wYcWHcWt+H1KONj7dFha9W6PHxxHExHw==
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBzU0pyOE5FeC9QREEwNkRS
+        dDNKQkJPMkRLKzFucmw0RDVTOGpmZVhpUTJZClB1YmM2WFRKU0JZZWNHOXBCdnBj
+        TUNWU2VNOWRXbEZnQkhyWG01enJIWmsKLS0tIDZ0NnBralFVMDgvZFJKVWtqMmFv
+        TlFEUTYydC85YlFqTzhSQ29QODRPbWcK04DBvGolyc+0Ksk4wYWcU7WS+Tvgfelu
+        3zl6ave6RKpbxlOysFiOqDPddQi2xH9wGKxE/R4zTOJGKmGtM31ruQ==
         -----END AGE ENCRYPTED FILE-----
       recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
   encrypted_regex: ^(data|stringData)$
-  lastmodified: "2026-05-25T19:15:30Z"
-  mac: ENC[AES256_GCM,data:kYrY68cRsP6DrECg41c58ex9CSXCk2vY/ruEUob7aJqkh3YpYxtyhn7z18d/RmVZ3NzqjXZ87U9fN9S4ifH2OuF+BQWuGEm7mnfBnPbI6xXziydKpQ966JpY7icSFRhTCo/2k74WlfChqKslQdo7pY5vXTq3N4S2eNsEYj8ckp4=,iv:RtE6g69QCJeCDU1Ysg4xqATNhMaked89DKWlagnR3P8=,tag:ATalgbBpG/BavPddk/YiLA==,type:str]
+  lastmodified: "2026-06-14T10:20:38Z"
+  mac: ENC[AES256_GCM,data:hzv8PczLHtaNy3H9D10rdORTrY92onz/GFLbSiC/sCGS17zqOHZoFjnNHkIRY4YiKOsRpKnV3lFFW7NbH8xrCGsuQlv887sdkH3t98yF/fE/DN9Y3vDtKbgG4NfzHNW8WAFZVVlLYUAMsW2FBUV97sZbvMzgmBGF7WdZUBUwqWY=,iv:rPdUGOg+aNkpixAC607lwDdYnMsLM7Mp8fhiEKhjsTA=,tag:ocSyvFmijF7ycjD0UxE+6g==,type:str]
   version: 3.13.1

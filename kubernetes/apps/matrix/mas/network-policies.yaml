@@ -140,10 +140,6 @@ spec:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: mas-postgres
-        # syn2mas Job runs ad-hoc — labeled job=syn2mas
-        - podSelector:
-            matchLabels:
-              job-name: syn2mas-migrate
       ports:
         - { protocol: TCP, port: 5432 }
     - from:
@@ -196,29 +192,3 @@ spec:
               app.kubernetes.io/name: rustfs
       ports:
         - { protocol: TCP, port: 9000 }
----
-# syn2mas Job needs to reach BOTH postgres clusters + read configs.
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-syn2mas-egress
-  namespace: matrix
-spec:
-  podSelector:
-    matchLabels:
-      job-name: syn2mas-migrate
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - { protocol: UDP, port: 53 }
-        - { protocol: TCP, port: 53 }
-    - to:
-        - podSelector:
-            matchExpressions:
-              - { key: cnpg.io/cluster, operator: In, values: [mas-postgres, synapse-postgres] }
-      ports:
-        - { protocol: TCP, port: 5432 }

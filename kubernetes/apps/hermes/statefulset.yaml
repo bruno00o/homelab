@@ -130,6 +130,11 @@ spec:
                 secretKeyRef:
                   name: hermes-matrix
                   key: MATRIX_ACCESS_TOKEN
+            # E2EE: olm keys live on the PVC (/opt/data/crypto.db). Device must
+            # be verified manually from Element web on first boot — no recovery
+            # key passed, to avoid the bot becoming an account-takeover path.
+            - name: MATRIX_ENCRYPTION
+              value: "true"
           volumeMounts:
             - name: data
               mountPath: /opt/data

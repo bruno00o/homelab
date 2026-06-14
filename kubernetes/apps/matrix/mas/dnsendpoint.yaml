@@ -1,0 +1,14 @@
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: mas-public
+  namespace: matrix
+spec:
+  endpoints:
+    - dnsName: mas.${PUBLIC_DOMAIN}
+      recordType: CNAME
+      targets:
+        - ${CF_TUNNEL_HOSTNAME}
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "true"

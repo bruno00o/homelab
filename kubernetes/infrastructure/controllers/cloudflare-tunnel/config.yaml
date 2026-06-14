@@ -37,6 +37,8 @@ data:
         service: http://immich-server.immich.svc.cluster.local:2283
       - hostname: matrix.merry.seilliebert.dev
         service: http://synapse.matrix.svc.cluster.local:8008
+      - hostname: mas.merry.seilliebert.dev
+        service: http://mas.matrix.svc.cluster.local:8080
       - hostname: element.merry.seilliebert.dev
         service: http://element.matrix.svc.cluster.local:80
       - hostname: cinny.merry.seilliebert.dev

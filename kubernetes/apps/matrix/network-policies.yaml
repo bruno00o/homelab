@@ -112,12 +112,11 @@ spec:
       ports:
         - { protocol: TCP, port: 5432 }
 ---
-# OIDC backchannel: the in-pod nginx sidecar forwards to the Authentik service
-# (http 9000), so it bypasses the Cilium LB-gateway hairpin entirely.
+# msc3861 introspection: Synapse delegates auth decisions to MAS over HTTP.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-synapse-egress-to-authentik
+  name: allow-synapse-egress-to-mas
   namespace: matrix
 spec:
   podSelector:
@@ -126,11 +125,11 @@ spec:
   policyTypes: [Egress]
   egress:
     - to:
-        - namespaceSelector:
+        - podSelector:
             matchLabels:
-              kubernetes.io/metadata.name: authentik
+              app.kubernetes.io/name: mas
       ports:
-        - { protocol: TCP, port: 9000 }
+        - { protocol: TCP, port: 8080 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

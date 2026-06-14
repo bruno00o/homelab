@@ -34,12 +34,9 @@ spec:
       labels:
         app.kubernetes.io/name: synapse
     spec:
-      # Resolve the auth host to the in-pod nginx sidecar (pod-only; browsers are
-      # unaffected). Lets Synapse's OIDC backchannel skip the Cilium LB hairpin.
-      hostAliases:
-        - ip: "127.0.0.1"
-          hostnames:
-            - auth.merry.seilliebert.dev
+      # OIDC delegation now lives in MAS. The hostAlias + nginx sidecar that
+      # used to bypass the Cilium LB hairpin for Synapse's own OIDC are no
+      # longer needed (MAS owns the upstream OIDC backchannel now).
       securityContext:
         runAsNonRoot: true
         runAsUser: 991
@@ -99,6 +96,7 @@ spec:
           volumeMounts:
             - { name: config, mountPath: /config }
             - { name: secrets, mountPath: /secrets }
+            - { name: mas-secrets, mountPath: /mas-secrets, readOnly: true }
             - { name: data, mountPath: /data }
           readinessProbe:
             httpGet: { path: /health, port: 8008 }
@@ -111,31 +109,6 @@ spec:
           resources:
             requests: { cpu: 200m, memory: 512Mi }
             limits: { cpu: 2000m, memory: 2Gi }
-        # TLS sidecar: terminates https with a valid LE cert for the auth host
-        # and forwards to the Authentik service, so the OIDC backchannel avoids
-        # the Cilium LB-gateway hairpin entirely.
-        - name: oidc-proxy
-          # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
-          image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            capabilities:
-              drop: ["ALL"]
-          ports:
-            - name: oidc-tls
-              containerPort: 8443
-              protocol: TCP
-          volumeMounts:
-            - name: oidc-proxy-conf
-              mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
-            - name: oidc-proxy-tls
-              mountPath: /tls
-              readOnly: true
-          resources:
-            requests: { cpu: 10m, memory: 16Mi }
-            limits: { cpu: 200m, memory: 64Mi }
       volumes:
         - name: config
           configMap:
@@ -143,12 +116,12 @@ spec:
         - name: secrets
           secret:
             secretName: synapse-secrets
-        - name: oidc-proxy-conf
-          configMap:
-            name: synapse-oidc-proxy
-        - name: oidc-proxy-tls
+        - name: mas-secrets
           secret:
-            secretName: auth-oidc-tls
+            secretName: mas-secrets
+            items:
+              - key: matrix_shared_secret
+                path: matrix_shared_secret
   volumeClaimTemplates:
     - metadata:
         name: data

@@ -30,35 +30,17 @@ data:
     trusted_key_servers: []
     suppress_key_server_warning: true
 
-    # Closed registration: humans via SSO, the Hermes bot via shared secret.
+    # Closed registration: humans go through MAS (which itself delegates to
+    # Authentik upstream OIDC). Local Synapse registration disabled.
     enable_registration: false
 
-    # Password login disabled: humans must use SSO. The Hermes bot keeps working
-    # via its existing access token (token validity is unaffected by this).
-    password_config:
-      enabled: false
-
-    # OIDC via Authentik. authorization_endpoint stays port-less (browser hits it
-    # via the gateway, which works). The backchannel (token/userinfo/jwks) uses
-    # :8443 -> the in-pod nginx sidecar -> Authentik service, bypassing the
-    # Cilium LB-gateway hairpin. issuer is port-less to match the id_token iss.
-    oidc_providers:
-      - idp_id: authentik
-        idp_name: "SSO"
-        discover: false
-        issuer: "https://auth.merry.seilliebert.dev/application/o/synapse/"
-        client_id: "synapse"
-        client_secret_path: "/secrets/oidc_client_secret"
-        scopes: ["openid", "profile", "email"]
-        authorization_endpoint: "https://auth.merry.seilliebert.dev/application/o/authorize/"
-        token_endpoint: "https://auth.merry.seilliebert.dev:8443/application/o/token/"
-        userinfo_endpoint: "https://auth.merry.seilliebert.dev:8443/application/o/userinfo/"
-        jwks_uri: "https://auth.merry.seilliebert.dev:8443/application/o/synapse/jwks/"
-        user_mapping_provider:
-          config:
-            localpart_template: "{{ user.preferred_username }}"
-            display_name_template: "{{ user.name }}"
-            email_template: "{{ user.email }}"
+    # Delegate auth to MAS. Synapse no longer handles OIDC or passwords
+    # directly — MAS is the OAuth2 client of Authentik and Synapse trusts MAS
+    # via the shared secret. Endpoint is in-cluster (HTTP, behind netpol).
+    matrix_authentication_service:
+      enabled: true
+      endpoint: http://mas.matrix.svc.cluster.local:8080/
+      secret_file: /mas-secrets/matrix_shared_secret
   log.config: |
     version: 1
     formatters:

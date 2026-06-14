@@ -1,0 +1,112 @@
+---
+# MAS config — split across two files (this one + the secrets one mounted next
+# to it). MAS merges configs by --config flag order, so secrets win on overlap.
+# References:
+#   - public_base / issuer = the public MAS URL (must match Authentik redirect)
+#   - matrix.endpoint = in-cluster Synapse (HTTP, behind netpol)
+#   - upstream_oauth2 = Authentik OIDC; backchannel goes via the in-pod nginx
+#     sidecar (hostAlias + listen 443) to skip the Cilium LB hairpin
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mas-config
+  namespace: matrix
+data:
+  config.yaml: |
+    http:
+      public_base: https://mas.merry.seilliebert.dev/
+      issuer: https://mas.merry.seilliebert.dev/
+      listeners:
+        - name: web
+          resources:
+            - name: discovery
+            - name: human
+            - name: oauth
+            - name: compat
+            - name: graphql
+            - name: assets
+          binds:
+            - host: 0.0.0.0
+              port: 8080
+        - name: internal
+          resources:
+            - name: health
+          binds:
+            - host: 0.0.0.0
+              port: 8081
+
+    database:
+      host: mas-postgres-rw.matrix.svc.cluster.local
+      port: 5432
+      database: mas
+      username: mas
+      # password is loaded from /db/password (CNPG-managed secret mounted in the pod)
+      password_file: /db/password
+      ssl_mode: disable
+
+    matrix:
+      homeserver: matrix.merry.seilliebert.dev
+      endpoint: http://synapse.matrix.svc.cluster.local:8008
+      secret_file: /secrets/matrix_shared_secret
+
+    secrets:
+      encryption_file: /secrets/encryption
+      keys:
+        - kid: rsa-2026-06
+          key_file: /secrets/rsa_key
+        - kid: ec-2026-06
+          key_file: /secrets/ec_key
+
+    # Upstream identity provider: Authentik OIDC. PKCE on, discovery on.
+    # The auth host resolves to 127.0.0.1 (hostAlias) → in-pod nginx sidecar.
+    upstream_oauth2:
+      providers:
+        - id: 01J00MAS000000000000000001
+          issuer: https://auth.merry.seilliebert.dev/application/o/mas/
+          human_name: Authentik
+          brand_name: ""
+          client_id: mas
+          client_secret_file: /secrets/upstream_client_secret
+          token_endpoint_auth_method: client_secret_post
+          scope: "openid email profile"
+          discovery_mode: oidc
+          pkce_method: auto
+          claims_imports:
+            subject:
+              template: "{{ user.sub }}"
+            localpart:
+              action: force
+              template: "{{ user.preferred_username }}"
+            displayname:
+              action: suggest
+              template: "{{ user.name }}"
+            email:
+              action: suggest
+              template: "{{ user.email }}"
+
+    # Disable local password registration: humans go through upstream OIDC only.
+    passwords:
+      enabled: false
+
+    account:
+      password_registration_enabled: false
+      email_change_allowed: false
+      displayname_change_allowed: true
+
+    branding:
+      service_name: "Going Merry Matrix"
+
+    clients: []
+
+    policy:
+      data:
+        admin_users:
+          - bruno
+
+    telemetry:
+      sentry:
+        dsn: ~
+      tracing:
+        exporter: none
+      metrics:
+        exporter: prometheus

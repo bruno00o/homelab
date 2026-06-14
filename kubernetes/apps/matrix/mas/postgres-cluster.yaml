@@ -1,0 +1,80 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: mas-postgres
+  namespace: matrix
+spec:
+  instances: 2
+  # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
+
+  storage:
+    storageClass: ${DEFAULT_STORAGE_CLASS}
+    size: 10Gi
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+
+  bootstrap:
+    initdb:
+      database: mas
+      owner: mas
+      encoding: "UTF8"
+      dataChecksums: true
+      secret:
+        name: mas-postgres-credentials
+
+  monitoring:
+    enablePodMonitor: true
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: mas-backups
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: mas-backups
+  namespace: matrix
+spec:
+  retentionPolicy: "30d"
+  configuration:
+    destinationPath: s3://cnpg-mas/
+    endpointURL: http://rustfs.rustfs.svc.cluster.local:9000
+    s3Credentials:
+      accessKeyId:
+        name: rustfs-s3-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: rustfs-s3-credentials
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: mas-postgres-daily
+  namespace: matrix
+spec:
+  schedule: "0 30 3 * * *"
+  backupOwnerReference: self
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+  cluster:
+    name: mas-postgres

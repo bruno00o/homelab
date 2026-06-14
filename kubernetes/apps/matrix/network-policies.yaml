@@ -131,6 +131,30 @@ spec:
       ports:
         - { protocol: TCP, port: 8080 }
 ---
+# Synapse → public push gateways (matrix.org for Element X iOS, FCM endpoints
+# for Android). Without this, mobile notifications time out at the homeserver.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-egress-https
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - { protocol: TCP, port: 443 }
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

@@ -41,6 +41,11 @@ data:
       enabled: true
       endpoint: http://mas.matrix.svc.cluster.local:8080/
       secret_path: /mas-secrets/matrix_shared_secret
+
+    # MSC4108 (Sign in with QR code) — delegate the rendezvous endpoint to MAS
+    # so Element X mobile can pair via QR with Element Web sessions.
+    experimental_features:
+      msc4108_delegation_endpoint: "https://mas.merry.seilliebert.dev/link"
   log.config: |
     version: 1
     formatters:

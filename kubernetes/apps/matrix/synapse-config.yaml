@@ -40,7 +40,7 @@ data:
     matrix_authentication_service:
       enabled: true
       endpoint: http://mas.matrix.svc.cluster.local:8080/
-      secret_file: /mas-secrets/matrix_shared_secret
+      secret_path: /mas-secrets/matrix_shared_secret
   log.config: |
     version: 1
     formatters:

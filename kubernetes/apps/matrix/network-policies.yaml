@@ -241,7 +241,7 @@ metadata:
 spec:
   podSelector:
     matchExpressions:
-      - { key: app.kubernetes.io/name, operator: In, values: [element, cinny] }
+      - { key: app.kubernetes.io/name, operator: In, values: [element] }
   policyTypes: [Ingress]
   ingress:
     - from:

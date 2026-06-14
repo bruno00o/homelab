@@ -41,6 +41,4 @@ data:
         service: http://mas.matrix.svc.cluster.local:8080
       - hostname: element.merry.seilliebert.dev
         service: http://element.matrix.svc.cluster.local:80
-      - hostname: cinny.merry.seilliebert.dev
-        service: http://cinny.matrix.svc.cluster.local:80
       - service: http_status:404

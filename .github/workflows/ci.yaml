@@ -11,7 +11,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install yamllint
         run: pip install yamllint
@@ -24,7 +24,7 @@ jobs:
     name: Kubernetes Manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install kubeconform
         run: |
@@ -51,7 +51,7 @@ jobs:
     name: Flux HelmReleases
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@main
@@ -72,7 +72,7 @@ jobs:
     name: Renovate Config
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Validate Renovate config
         run: |
@@ -82,7 +82,7 @@ jobs:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Trivy
         # Pinned to v0.69.3 — last version before CVE-2026-33634 supply-chain

@@ -35,10 +35,10 @@ data:
         service: http://doublons.doublons.svc.cluster.local:3000
       - hostname: immich.seilliebert.app
         service: http://immich-server.immich.svc.cluster.local:2283
-      - hostname: matrix.merry.seilliebert.dev
+      - hostname: matrix.seilliebert.app
         service: http://synapse.matrix.svc.cluster.local:8008
-      - hostname: mas.merry.seilliebert.dev
+      - hostname: mas.seilliebert.app
         service: http://mas.matrix.svc.cluster.local:8080
-      - hostname: element.merry.seilliebert.dev
+      - hostname: element.seilliebert.app
         service: http://element.matrix.svc.cluster.local:80
       - service: http_status:404

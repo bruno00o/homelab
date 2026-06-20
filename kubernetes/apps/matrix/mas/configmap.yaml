@@ -14,8 +14,8 @@ metadata:
 data:
   config.yaml: |
     http:
-      public_base: https://mas.merry.seilliebert.dev/
-      issuer: https://mas.merry.seilliebert.dev/
+      public_base: https://mas.seilliebert.app/
+      issuer: https://mas.seilliebert.app/
       listeners:
         - name: web
           resources:
@@ -46,7 +46,7 @@ data:
       ssl_mode: disable
 
     matrix:
-      homeserver: matrix.merry.seilliebert.dev
+      homeserver: matrix.seilliebert.app
       endpoint: http://synapse.matrix.svc.cluster.local:8008
       secret_file: /secrets/matrix_shared_secret
 
@@ -65,7 +65,7 @@ data:
         - id: 01J00MAS000000000000000001
           # Authentik discovery URL uses the APPLICATION slug, not the client_id.
           # Our app is slug 'matrix' (provider client_id 'mas').
-          issuer: https://auth.merry.seilliebert.dev/application/o/matrix/
+          issuer: https://auth.seilliebert.app/application/o/matrix/
           human_name: Authentik
           brand_name: ""
           client_id: mas

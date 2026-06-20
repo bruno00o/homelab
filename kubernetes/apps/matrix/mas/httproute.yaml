@@ -8,7 +8,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-merry-wildcard
+      sectionName: https-app-wildcard
   hostnames:
     - mas.${PUBLIC_DOMAIN}
   rules:

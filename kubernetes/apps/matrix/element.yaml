@@ -9,8 +9,8 @@ data:
     {
       "default_server_config": {
         "m.homeserver": {
-          "base_url": "https://matrix.merry.seilliebert.dev",
-          "server_name": "matrix.merry.seilliebert.dev"
+          "base_url": "https://matrix.seilliebert.app",
+          "server_name": "matrix.seilliebert.app"
         }
       },
       "disable_custom_urls": true,

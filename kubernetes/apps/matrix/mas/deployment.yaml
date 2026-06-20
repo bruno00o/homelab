@@ -46,7 +46,7 @@ spec:
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-            - auth.merry.seilliebert.dev
+            - auth.seilliebert.app
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001

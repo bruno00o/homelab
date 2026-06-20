@@ -73,6 +73,7 @@ spec:
               kubernetes.io/metadata.name: cloudflare-tunnel
       ports:
         - { protocol: TCP, port: 8008 }
+        - { protocol: TCP, port: 8080 }
         - { protocol: TCP, port: 80 }
 ---
 # The Hermes bot talks to Synapse directly in-cluster.

@@ -9,7 +9,6 @@ resources:
   - oidc-proxy.yaml
   - synapse.yaml
   - element.yaml
-  - cinny.yaml
   - httproute.yaml
   - dnsendpoint.yaml
   - network-policies.yaml

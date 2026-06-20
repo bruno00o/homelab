@@ -19,10 +19,3 @@ spec:
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
           value: "true"
-    - dnsName: cinny.${PUBLIC_DOMAIN}
-      recordType: CNAME
-      targets:
-        - ${CF_TUNNEL_HOSTNAME}
-      providerSpecific:
-        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-          value: "true"

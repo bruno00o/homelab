@@ -41,6 +41,11 @@ data:
       enabled: true
       endpoint: http://mas.matrix.svc.cluster.local:8080/
       secret_path: /mas-secrets/matrix_shared_secret
+
+    # MSC4108 (Sign in with QR code): Synapse runs the rendezvous server itself
+    # (MAS' /link is a device-code consent page, NOT a rendezvous channel).
+    experimental_features:
+      msc4108_enabled: true
   log.config: |
     version: 1
     formatters:

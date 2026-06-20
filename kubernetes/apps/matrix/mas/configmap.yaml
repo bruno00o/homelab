@@ -63,7 +63,9 @@ data:
     upstream_oauth2:
       providers:
         - id: 01J00MAS000000000000000001
-          issuer: https://auth.merry.seilliebert.dev/application/o/mas/
+          # Authentik discovery URL uses the APPLICATION slug, not the client_id.
+          # Our app is slug 'matrix' (provider client_id 'mas').
+          issuer: https://auth.merry.seilliebert.dev/application/o/matrix/
           human_name: Authentik
           brand_name: ""
           client_id: mas

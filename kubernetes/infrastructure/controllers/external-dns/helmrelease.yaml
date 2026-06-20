@@ -48,6 +48,7 @@ spec:
 
     domainFilters:
       - seilliebert.dev
+      - seilliebert.app
 
     extraArgs:
       - --cloudflare-proxied

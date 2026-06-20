@@ -32,6 +32,7 @@ spec:
         selector:
           dnsZones:
             - seilliebert.dev
+            - seilliebert.app
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -52,3 +53,4 @@ spec:
         selector:
           dnsZones:
             - seilliebert.dev
+            - seilliebert.app

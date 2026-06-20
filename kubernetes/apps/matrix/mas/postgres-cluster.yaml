@@ -10,12 +10,15 @@ spec:
 
   storage:
     storageClass: ${DEFAULT_STORAGE_CLASS}
-    size: 10Gi
+    size: 20Gi
 
   postgresql:
     parameters:
       max_connections: "100"
       shared_buffers: "128MB"
+      # Cap WAL retained for a lagging replication slot so a stuck replica
+      # can never fill the volume again (see WAL-disk-full incident 2026-06-17)
+      max_slot_wal_keep_size: "2GB"
 
   bootstrap:
     initdb:

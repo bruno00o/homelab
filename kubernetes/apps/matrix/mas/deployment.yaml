@@ -60,7 +60,7 @@ spec:
         # section does not support password_file, so we inline the password
         # here (file stays inside the pod's emptyDir).
         - name: render-db-config
-          image: docker.io/library/busybox:1.37
+          image: docker.io/library/busybox:1.38
           command:
             - sh
             - -c

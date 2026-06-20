@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-mas-oidc
+  namespace: authentik
+type: Opaque
+stringData:
+  mas_oidc_client_secret: ENC[AES256_GCM,data:I417J+N0yJzdc1ZN0nkSQ3UUGvcprrVP0P93/QAzIoXZJbFhvLKcIekC8KlDm8VIBvwjb6haod0WlMBjGb9OAA==,iv:YtS4jyIqxwaxpwCU5eaQd+0tUpsE+SAOIcaLM7Uao98=,tag:YJLa2mxJGhbcBHBOAijk5w==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3RU1HRTFBWTZXemt2VFl5
+        RXI5UG9GdEI5MFZvZG1XRE1lYit4cnJ5WkVvClpWZkEvcExoY1kxaEE2a2g3dDRs
+        WWVMeEVFRVZCcXJEbXFHeU1sNTNDZncKLS0tIFN3Rk9YK2tMenY4dTUzZk85Vkls
+        T2wrRUJSdk9ScC94M09XVnRuMUtkSGsKE5nlpp1eQCZDkW3193HLVUm3GjjXdzNA
+        9azYXrNIpJUbqbXDwji8Ua7rd9J8C2MfrlkPPy0xykE98PBnBSd5xA==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-06-14T08:43:04Z"
+  mac: ENC[AES256_GCM,data:SOnt+1a3XZLEr8Znbij0RQvV2GJsPDAYNlu3tD+ZLRwrVTCHyHtjY8gGpnkvowvNMtBA8gr6kZ8H1+uPAQDKG+QPizQwD8g9PKn9ph8nLxPdegBqB/oIw3LX1DZ2VOkwcUQgB7e0SjKoEB51DswtfVWp8CPsuyx7CxwYm7ZJM+4=,iv:mMcsvtNdYvB+b0GPvwCUS7YDyWBueGi2YXf88jdjJBY=,tag:ckaMkf+Kp/Gq/nbm2acKkA==,type:str]
+  version: 3.13.1

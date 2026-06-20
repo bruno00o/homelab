@@ -93,6 +93,29 @@ spec:
         - protocol: TCP
           port: 9000
 ---
+# MAS upstream-OIDC backchannel: the in-pod sidecar nginx in the matrix ns
+# forwards to authentik-server on pod targetPort 9000 (svc port 80).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-matrix
+  namespace: authentik
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: authentik
+      app.kubernetes.io/component: server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: matrix
+      ports:
+        - protocol: TCP
+          port: 9000
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

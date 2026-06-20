@@ -1,0 +1,196 @@
+---
+# MAS client API reachable from the LAN gateway (HTTPRoute → mas:8080).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-ingress-from-gateway
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mas
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+# Cross-node envoy proxy traffic (Cilium ingress identity).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-mas-ingress-from-envoy
+  namespace: matrix
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: mas
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "8080", protocol: TCP }
+---
+# Public access via the Cloudflare tunnel (mas.merry.seilliebert.dev).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-ingress-from-cloudflare-tunnel
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mas
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+# Synapse hits MAS for msc3861 introspection (in-cluster, port 8080).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-ingress-from-synapse
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mas
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: synapse
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+# Prometheus scrapes MAS metrics on 8081.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-prometheus-scrape
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mas
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - { protocol: TCP, port: 8081 }
+---
+# MAS egress: postgres (own DB), synapse (msc3861 admin API), authentik
+# (OIDC backchannel via sidecar — goes out to authentik:80 in cluster).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-egress
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mas
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: mas-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: synapse
+      ports:
+        - { protocol: TCP, port: 8008 }
+    # Cilium evaluates egress against the pod targetPort (9000), not the
+    # authentik-server service port (80).
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
+      ports:
+        - { protocol: TCP, port: 9000 }
+---
+# mas-postgres mirrors synapse-postgres rules (operator + intra-cluster + S3 backups).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-postgres-ingress
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: mas-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mas
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: mas-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - { protocol: TCP, port: 9187 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mas-postgres-egress
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: mas-postgres
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - ports:
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 6443 }
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: mas-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - { protocol: TCP, port: 9000 }

@@ -108,6 +108,11 @@ spec:
             secretKeyRef:
               name: authentik-rustfs-oidc
               key: rustfs_oidc_client_secret
+        - name: AUTHENTIK_MAS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-mas-oidc
+              key: mas_oidc_client_secret
         - name: AUTHENTIK_HOST_BROWSER
           value: "https://auth.${CLUSTER_DOMAIN}"
         - name: AUTHENTIK_HOST

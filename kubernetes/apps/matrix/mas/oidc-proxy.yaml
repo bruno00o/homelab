@@ -1,0 +1,35 @@
+---
+# nginx sidecar for MAS: terminates HTTPS with the LE wildcard cert and forwards
+# to the Authentik in-cluster service. Lets MAS' upstream-OIDC discovery and
+# token/userinfo backchannel skip the Cilium LB-gateway hairpin entirely.
+# Reuses the existing auth-oidc-tls cert from the synapse sidecar.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mas-oidc-proxy
+  namespace: matrix
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    events {}
+    http {
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path /tmp/proxy_temp;
+      fastcgi_temp_path /tmp/fastcgi_temp;
+      uwsgi_temp_path /tmp/uwsgi_temp;
+      scgi_temp_path /tmp/scgi_temp;
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name auth.merry.seilliebert.dev;
+        ssl_certificate /tls/tls.crt;
+        ssl_certificate_key /tls/tls.key;
+        location / {
+          proxy_pass http://authentik-server.authentik.svc.cluster.local:80;
+          proxy_set_header Host auth.merry.seilliebert.dev;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-Host auth.merry.seilliebert.dev;
+          proxy_set_header X-Forwarded-For $remote_addr;
+        }
+      }
+    }

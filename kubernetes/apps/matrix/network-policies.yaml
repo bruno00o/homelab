@@ -112,12 +112,11 @@ spec:
       ports:
         - { protocol: TCP, port: 5432 }
 ---
-# OIDC backchannel: the in-pod nginx sidecar forwards to the Authentik service
-# (http 9000), so it bypasses the Cilium LB-gateway hairpin entirely.
+# msc3861 introspection: Synapse delegates auth decisions to MAS over HTTP.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-synapse-egress-to-authentik
+  name: allow-synapse-egress-to-mas
   namespace: matrix
 spec:
   podSelector:
@@ -126,11 +125,35 @@ spec:
   policyTypes: [Egress]
   egress:
     - to:
-        - namespaceSelector:
+        - podSelector:
             matchLabels:
-              kubernetes.io/metadata.name: authentik
+              app.kubernetes.io/name: mas
       ports:
-        - { protocol: TCP, port: 9000 }
+        - { protocol: TCP, port: 8080 }
+---
+# Synapse → public push gateways (matrix.org for Element X iOS, FCM endpoints
+# for Android). Without this, mobile notifications time out at the homeserver.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-egress-https
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - { protocol: TCP, port: 443 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -242,7 +265,7 @@ metadata:
 spec:
   podSelector:
     matchExpressions:
-      - { key: app.kubernetes.io/name, operator: In, values: [element, cinny] }
+      - { key: app.kubernetes.io/name, operator: In, values: [element] }
   policyTypes: [Ingress]
   ingress:
     - from:

@@ -117,26 +117,30 @@ data:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
 
-      # Matrix Synapse OIDC (slug "synapse" — must match the issuer path used
-      # in homeserver.yaml: /application/o/synapse/).
+      # Matrix Authentication Service (MAS) — replaces the old direct
+      # Synapse-as-OIDC-client setup. MAS is the OAuth2 client of Authentik;
+      # Synapse delegates auth to MAS (msc3861). slug "mas" must match the
+      # MAS upstream_oauth2 issuer: /application/o/mas/. redirect_uri stays
+      # permissive (regex) for the first iteration; tighten once the exact
+      # MAS upstream callback path is confirmed in the logs.
       - model: authentik_providers_oauth2.oauth2provider
-        id: provider-synapse-oidc
+        id: provider-mas-oidc
         state: present
         identifiers:
-          name: Synapse OIDC
+          name: MAS OIDC
         attrs:
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
           client_type: confidential
-          client_id: synapse
-          client_secret: !Env AUTHENTIK_SYNAPSE_CLIENT_SECRET
+          client_id: mas
+          client_secret: !Env AUTHENTIK_MAS_CLIENT_SECRET
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           grant_types:
             - authorization_code
             - refresh_token
           redirect_uris:
-            - matching_mode: strict
-              url: https://matrix.${PUBLIC_DOMAIN}/_synapse/client/oidc/callback
+            - matching_mode: regex
+              url: https://mas\.${PUBLIC_DOMAIN}/.*
           property_mappings:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
@@ -620,29 +624,42 @@ data:
           negate: false
           timeout: 30
 
-      # Matrix / Synapse (admins + users + friends, OIDC)
+      # Matrix (admins + users + friends, OIDC via MAS)
       - model: authentik_core.application
-        id: app-synapse
+        id: app-matrix
         state: present
         identifiers:
-          slug: synapse
+          slug: matrix
         attrs:
           name: Matrix
-          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Synapse OIDC]]
+          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, MAS OIDC]]
           meta_launch_url: https://element.${PUBLIC_DOMAIN}
           policy_engine_mode: all
 
       - model: authentik_policies.policybinding
-        id: binding-synapse-friends
+        id: binding-matrix-friends
         state: present
         identifiers:
           order: 0
-          target: !Find [authentik_core.application, [slug, synapse]]
+          target: !Find [authentik_core.application, [slug, matrix]]
           policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-friends]]
         attrs:
           enabled: true
           negate: false
           timeout: 30
+
+      # Cleanup: Synapse direct-OIDC replaced by MAS; drop old provider + app
+      - model: authentik_core.application
+        id: app-synapse
+        state: absent
+        identifiers:
+          slug: synapse
+
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-synapse-oidc
+        state: absent
+        identifiers:
+          name: Synapse OIDC
 
       # Cleanup: RustFS migrated from proxy mode to native OIDC — drop old proxy provider
       - model: authentik_providers_proxy.proxyprovider

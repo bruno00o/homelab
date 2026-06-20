@@ -238,7 +238,7 @@ spec:
       sectionName: https-homarr
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-merry-wildcard
+      sectionName: https-app-wildcard
     - name: external-gateway
       namespace: kube-system
       sectionName: https-homarr

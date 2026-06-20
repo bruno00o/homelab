@@ -11,11 +11,11 @@ data:
     no-autoupdate: true
 
     ingress:
-      - hostname: auth.merry.seilliebert.dev
+      - hostname: auth.seilliebert.app
         service: http://authentik-server.authentik.svc.cluster.local:80
-      - hostname: home-assistant.merry.seilliebert.dev
+      - hostname: home-assistant.seilliebert.app
         service: http://home-assistant.home-automation.svc.cluster.local:8123
-      - hostname: homarr.merry.seilliebert.dev
+      - hostname: homarr.seilliebert.app
         service: http://homarr.homarr.svc.cluster.local:7575
       - hostname: random-gif.seilliebert.dev
         service: http://random-gif.random-gif.svc.cluster.local:8080
@@ -33,7 +33,7 @@ data:
         service: http://portfolio.portfolio.svc.cluster.local:8080
       - hostname: doublons.seilliebert.dev
         service: http://doublons.doublons.svc.cluster.local:3000
-      - hostname: immich.merry.seilliebert.dev
+      - hostname: immich.seilliebert.app
         service: http://immich-server.immich.svc.cluster.local:2283
       - hostname: matrix.merry.seilliebert.dev
         service: http://synapse.matrix.svc.cluster.local:8008

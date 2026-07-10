@@ -13,7 +13,7 @@ data:
         reload
     }
 
-    # Split-horizon for the public domain: pods resolving *.merry.seilliebert.dev
+    # Split-horizon for the perso/family domain: pods resolving *.seilliebert.app
     # must hit AdGuard (which rewrites them to LB_GATEWAY) so traffic stays on
     # the LAN via the internal-gateway instead of looping through the CF tunnel.
     ${PUBLIC_DOMAIN}:53 {

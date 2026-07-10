@@ -15,27 +15,10 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    # Wildcard listener for the public domain — serves all
-    # *.merry.seilliebert.dev hostnames on the LAN (AdGuard rewrites them
-    # to LB_GATEWAY) using the LE wildcard cert. External traffic for the
-    # same hostnames bypasses the gateway and goes via cloudflared tunnel.
-    - name: https-merry-wildcard
-      protocol: HTTPS
-      port: 443
-      hostname: "*.merry.seilliebert.dev"
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: wildcard-merry-seilliebert-dev-tls
-            namespace: kube-system
-      allowedRoutes:
-        namespaces:
-          from: All
-    # Wildcard listener for the perso/family domain seilliebert.app (Phase 8
-    # migration off the 2-level *.merry.seilliebert.dev, uncovered by CF's free
-    # Universal SSL). Serves the LAN split-horizon for *.seilliebert.app; the
-    # external path goes via cloudflared tunnel directly to services.
+    # Wildcard listener for the perso/family domain seilliebert.app. Serves the
+    # LAN split-horizon for *.seilliebert.app (AdGuard rewrites the hostnames to
+    # LB_GATEWAY) using the LE wildcard cert; the external path bypasses the
+    # gateway and goes via cloudflared tunnel directly to services.
     - name: https-app-wildcard
       protocol: HTTPS
       port: 443

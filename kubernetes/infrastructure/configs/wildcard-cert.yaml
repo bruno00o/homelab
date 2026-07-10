@@ -2,25 +2,6 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wildcard-merry-seilliebert-dev
-  namespace: kube-system
-spec:
-  secretName: wildcard-merry-seilliebert-dev-tls
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
-  commonName: merry.seilliebert.dev
-  dnsNames:
-    - merry.seilliebert.dev
-    - "*.merry.seilliebert.dev"
-  privateKey:
-    algorithm: ECDSA
-    size: 256
-    rotationPolicy: Always
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
   name: wildcard-seilliebert-app
   namespace: kube-system
 spec:

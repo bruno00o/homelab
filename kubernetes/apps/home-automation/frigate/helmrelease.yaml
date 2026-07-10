@@ -41,7 +41,7 @@ spec:
   values:
     image:
       # renovate: datasource=docker depName=ghcr.io/blakeblackshear/frigate
-      tag: "0.17.1"
+      tag: "0.17.2"
 
     strategyType: Recreate
 

@@ -32,7 +32,7 @@ spec:
         - ports:
             - { port: "8080", protocol: TCP }
 ---
-# Public access via the Cloudflare tunnel (mas.merry.seilliebert.dev).
+# Public access via the Cloudflare tunnel (mas.seilliebert.app).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

@@ -73,7 +73,27 @@ spec:
               kubernetes.io/metadata.name: cloudflare-tunnel
       ports:
         - { protocol: TCP, port: 8008 }
+        - { protocol: TCP, port: 8080 }
         - { protocol: TCP, port: 80 }
+---
+# MAS provisions/queries users in Synapse via the /_synapse/mas/* admin API.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-synapse-ingress-from-mas
+  namespace: matrix
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: synapse
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mas
+      ports:
+        - { protocol: TCP, port: 8008 }
 ---
 # The Hermes bot talks to Synapse directly in-cluster.
 apiVersion: networking.k8s.io/v1

@@ -98,7 +98,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:v1.65.0
+          image: ghcr.io/homarr-labs/homarr:v1.70.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -238,7 +238,7 @@ spec:
       sectionName: https-homarr
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-merry-wildcard
+      sectionName: https-app-wildcard
     - name: external-gateway
       namespace: kube-system
       sectionName: https-homarr

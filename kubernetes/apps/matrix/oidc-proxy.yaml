@@ -1,5 +1,5 @@
 ---
-# Valid LE cert for auth.merry.seilliebert.dev, used by the in-pod nginx sidecar
+# Valid LE cert for auth.seilliebert.app, used by the in-pod nginx sidecar
 # in MAS (and previously Synapse, now retired). Lets MAS' upstream-OIDC
 # backchannel reach Authentik over HTTPS bypassing the Cilium LB-gateway hairpin.
 apiVersion: cert-manager.io/v1
@@ -13,7 +13,7 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-    - auth.merry.seilliebert.dev
+    - auth.seilliebert.app
   privateKey:
     algorithm: ECDSA
     size: 256

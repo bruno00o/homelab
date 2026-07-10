@@ -25,7 +25,7 @@ spec:
       containers:
         - name: cloudflared
           # renovate: datasource=docker depName=cloudflare/cloudflared
-          image: docker.io/cloudflare/cloudflared:2026.6.0
+          image: docker.io/cloudflare/cloudflared:2026.7.1
           args:
             - tunnel
             - --config

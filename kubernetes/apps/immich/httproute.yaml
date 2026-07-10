@@ -10,7 +10,7 @@ spec:
       sectionName: https-immich
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-merry-wildcard
+      sectionName: https-app-wildcard
   hostnames:
     - immich.${CLUSTER_DOMAIN}
     - immich.${PUBLIC_DOMAIN}

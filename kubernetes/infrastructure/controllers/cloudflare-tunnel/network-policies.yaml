@@ -134,6 +134,17 @@ spec:
       ports:
         - protocol: TCP
           port: 2283
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: matrix
+      ports:
+        - protocol: TCP
+          port: 8008
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 80
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

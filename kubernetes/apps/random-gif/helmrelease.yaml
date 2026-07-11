@@ -46,11 +46,11 @@ spec:
                   secretKeyRef:
                     name: random-gif-secrets
                     key: client_id
-              TENOR_KEY:
+              KLIPY_KEY:
                 valueFrom:
                   secretKeyRef:
                     name: random-gif-secrets
-                    key: tenor_key
+                    key: klipy_key
             probes:
               liveness:
                 enabled: true

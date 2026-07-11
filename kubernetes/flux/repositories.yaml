@@ -19,7 +19,7 @@ spec:
   interval: 1h
   url: oci://quay.io/jetstack/charts/cert-manager
   ref:
-    tag: "v1.20.2"
+    tag: "v1.21.0"
   # cert-manager's OCI artifact has a signed provenance file as layer[0] and
   # the chart tarball as layer[1]. Flux extracts layer[0] by default; this
   # selector picks the actual chart.

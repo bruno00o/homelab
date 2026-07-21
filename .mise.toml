@@ -1,6 +1,6 @@
 [tools]
 # Must match talos/talconfig.yaml talosVersion
-talosctl = "1.13.4"
+talosctl = "1.13.7"
 # https://github.com/budimanjojo/talhelper
 talhelper = "3.1.13"
 # Should match talos/talconfig.yaml kubernetesVersion

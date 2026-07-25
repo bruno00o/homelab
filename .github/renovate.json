@@ -5,14 +5,16 @@
     "docker:enableMajor",
     ":disableRateLimiting",
     ":dependencyDashboard",
-    ":semanticCommits",
-    ":automergeBranch"
+    ":semanticCommits"
   ],
 
   "dependencyDashboardTitle": "🚢 Renovate Dashboard - Going Merry",
   "suppressNotifications": ["prIgnoreNotification"],
-  "rebaseWhen": "conflicted",
+  "rebaseWhen": "behind-base-branch",
   "timezone": "Europe/Paris",
+
+  "platformAutomerge": true,
+  "automergeStrategy": "squash",
 
   "flux": {
     "fileMatch": ["kubernetes/.+\\.ya?ml$"]

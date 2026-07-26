@@ -316,32 +316,3 @@ spec:
                       remediateLastFailure: true
                   uninstall:
                     keepHistory: false
-  healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: adguard-home
-      namespace: adguard
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: authentik-server
-      namespace: authentik
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: authentik-worker
-      namespace: authentik
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: mosquitto
-      namespace: home-automation
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: frigate
-      namespace: home-automation
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: homarr
-      namespace: homarr
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: home-assistant
-      namespace: home-automation

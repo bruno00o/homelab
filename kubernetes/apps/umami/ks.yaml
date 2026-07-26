@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: umami
+  namespace: flux-system
+spec:
+  # interval, prune and sourceRef are required by the CRD, so they stay here: a manifest
+  # in git has to be valid on its own. The rest — wait, dependsOn, decryption, postBuild
+  # and the HelmRelease defaults — is injected by the `apps` Kustomization in
+  # kubernetes/flux/cluster.yaml.
+  interval: 10m
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/umami

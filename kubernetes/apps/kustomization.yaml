@@ -1,21 +1,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - adguard
-  - aroma
-  - authentik
-  - doublons
-  - dozerdb
-  - gaspard
-  - hermes
-  - homarr
-  - home-automation
-  - immich
-  - matrix
-  - portfolio
-  - qdrant
+  - adguard/ks.yaml
+  - aroma/ks.yaml
+  - authentik/ks.yaml
+  - doublons/ks.yaml
+  - dozerdb/ks.yaml
+  - gaspard/ks.yaml
+  - hermes/ks.yaml
+  - homarr/ks.yaml
+  - home-automation/ks.yaml
+  - immich/ks.yaml
+  - matrix/ks.yaml
+  - portfolio/ks.yaml
+  - qdrant/ks.yaml
   - random-gif/ks.yaml
-  - umami
-  - uptime-kuma
-  - ca-portal
-  - zot
+  - umami/ks.yaml
+  - uptime-kuma/ks.yaml
+  - ca-portal/ks.yaml
+  - zot/ks.yaml

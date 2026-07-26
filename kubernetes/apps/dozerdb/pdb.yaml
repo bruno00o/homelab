@@ -5,7 +5,9 @@ metadata:
   name: dozerdb
   namespace: dozerdb
 spec:
-  maxUnavailable: 0
+  # 1, not 0: with a single replica, maxUnavailable: 0 forbids every voluntary
+  # eviction, so `kubectl drain` blocks forever (see AUDIT.md R12).
+  maxUnavailable: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: dozerdb

@@ -473,6 +473,29 @@ tasks:
     cmds:
       - kubectl get pods -A | grep -v Running | grep -v Completed
 
+  k:prune-pods:
+    desc: Delete terminated pods left behind by hard node reboots
+    silent: true
+    cmds:
+      - |
+        # Job-owned pods are skipped: a completed Job pod is history, not a tombstone.
+        TARGETS=$(for PHASE in Succeeded Failed; do
+          kubectl get pods -A --field-selector=status.phase==$PHASE -o json \
+            | jq -r '.items[]
+                     | select((.metadata.ownerReferences[0].kind // "") != "Job")
+                     | "\(.metadata.namespace) \(.metadata.name)"'
+        done)
+        if [ -z "$TARGETS" ]; then
+          echo "No terminated pods to prune"
+          exit 0
+        fi
+        echo "$TARGETS" | awk '{print "  " $1 "/" $2}'
+        echo "Pruning $(echo "$TARGETS" | wc -l) pod(s)..."
+        echo "$TARGETS" | awk '{print $1}' | sort -u | while read -r NS; do
+          PODS=$(echo "$TARGETS" | awk -v ns="$NS" '$1 == ns { printf "%s ", $2 }')
+          kubectl -n "$NS" delete pod $PODS --wait=false
+        done
+
   # =============================================================================
   # Dependencies
   # =============================================================================

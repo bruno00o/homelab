@@ -6,12 +6,20 @@ on:
   push:
     branches: [main]
 
+# Read-only for every job: nothing here writes to the repository. Combined with
+# persist-credentials: false on each checkout, a compromised action cannot reach the
+# git token.
+permissions:
+  contents: read
+
 jobs:
   yaml-lint:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install yamllint
         run: pip install yamllint
@@ -26,7 +34,9 @@ jobs:
     name: Kubernetes Manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # Versions come from .mise.toml so this job and `task validate` cannot validate
       # with different schemas.
@@ -47,7 +57,9 @@ jobs:
     name: Renovate Config
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Validate Renovate config
         run: |
@@ -57,7 +69,9 @@ jobs:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Trivy
         # Pinned to v0.69.3 — last version before CVE-2026-33634 supply-chain
@@ -107,10 +121,24 @@ jobs:
             echo "::endgroup::"
           done < /tmp/images.txt
 
+  zizmor:
+    name: Workflow Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # --offline skips the online audits, which need a token to query the GitHub API.
+      # The ones that matter here — unpinned actions, excessive permissions — are static.
+      - name: Audit workflows
+        run: |
+          pipx run zizmor==1.28.0 --format plain --offline .github/workflows/
+
   status-check:
     name: Status Check
     runs-on: ubuntu-latest
-    needs: [yaml-lint, kubeconform, renovate-validate, trivy]
+    needs: [yaml-lint, kubeconform, renovate-validate, trivy, zizmor]
     if: always()
     steps:
       - name: Check all jobs
@@ -118,6 +146,7 @@ jobs:
           if [[ "${{ needs.yaml-lint.result }}" == "failure" ]] || \
              [[ "${{ needs.kubeconform.result }}" == "failure" ]] || \
              [[ "${{ needs.renovate-validate.result }}" == "failure" ]] || \
+             [[ "${{ needs.zizmor.result }}" == "failure" ]] || \
              [[ "${{ needs.trivy.result }}" == "failure" ]]; then
             echo "❌ One or more checks failed"
             exit 1

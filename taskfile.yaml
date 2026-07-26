@@ -37,6 +37,7 @@ tasks:
       - task: validate:yaml
       - task: validate:manifests
       - task: validate:talos
+      - task: validate:workflows
       - task: validate:renovate
 
   validate:yaml:
@@ -57,6 +58,17 @@ tasks:
     dir: "{{.TALOS_DIR}}"
     cmds:
       - talhelper validate talconfig talconfig.yaml
+
+  validate:workflows:
+    desc: Audit the GitHub Actions workflows with zizmor
+    preconditions:
+      - sh: command -v pipx
+        msg: "pipx not found (needed to run zizmor)."
+    # Keep the version in step with .github/workflows/ci.yaml.
+    sources:
+      - .github/workflows/*.yaml
+    cmds:
+      - pipx run zizmor==1.28.0 --format plain --offline .github/workflows/
 
   validate:renovate:
     desc: Validate the Renovate config

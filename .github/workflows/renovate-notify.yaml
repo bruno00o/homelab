@@ -1,9 +1,16 @@
 name: Renovate Failure Notify
 
-on:
+# workflow_run is flagged because it usually checks out the pull request's code and runs
+# it with write permissions. This one never checks anything out: it reads the PR title
+# through the API and posts to Discord. Read-only permissions below.
+on: # zizmor: ignore[dangerous-triggers]
   workflow_run:
     workflows: [CI]
     types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   notify:

@@ -87,12 +87,12 @@
     },
     {
       "customType": "regex",
-      "description": "Metrics Server in Talos extraManifests",
+      "description": "kubelet-serving-cert-approver in Talos extraManifests",
       "fileMatch": ["talos/talconfig\\.ya?ml$"],
       "matchStrings": [
-        "metrics-server/releases/download/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
+        "kubelet-serving-cert-approver/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
       ],
-      "depNameTemplate": "kubernetes-sigs/metrics-server",
+      "depNameTemplate": "alex1989hu/kubelet-serving-cert-approver",
       "datasourceTemplate": "github-releases"
     }
   ],
@@ -166,6 +166,12 @@
       "description": "Talos - review manually",
       "matchPackageNames": ["siderolabs/talos"],
       "labels": ["talos", "infrastructure"],
+      "automerge": false
+    },
+    {
+      "description": "Talos extraManifests - Talos never updates an existing resource, so merging alone changes nothing in the cluster: review and roll out by hand",
+      "matchPackageNames": ["alex1989hu/kubelet-serving-cert-approver"],
+      "labels": ["talos", "review-required"],
       "automerge": false
     },
     {

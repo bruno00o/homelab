@@ -145,9 +145,14 @@ controlPlane:
                   namespaces:
                     - longhorn-system
                     - monitoring
+        # Talos only *creates* extraManifests resources; it never updates one
+        # that already exists. Anything that needs to be upgradable belongs in
+        # Flux instead (metrics-server moved there). Keep this list to what has
+        # to exist before Flux does: the CSR approver that signs the kubelet
+        # serving certificates enabled by rotate-server-certificates below.
         extraManifests:
-          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
-          - https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.0/components.yaml
+          # renovate: datasource=github-releases depName=alex1989hu/kubelet-serving-cert-approver
+          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.11.0/deploy/standalone-install.yaml
     - |-
       machine:
         kubelet:

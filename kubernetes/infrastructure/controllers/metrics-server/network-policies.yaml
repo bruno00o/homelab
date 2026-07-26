@@ -1,0 +1,43 @@
+---
+# metrics-server only talks to host-network endpoints: the kubelet on every node
+# (scrape) and the kube-apiserver (aggregated API + client auth). Both carry a
+# reserved Cilium identity that a standard NetworkPolicy ipBlock cannot match,
+# so the whole policy is expressed as a CiliumNetworkPolicy.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: metrics-server
+  namespace: kube-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: metrics-server
+  ingress:
+    # The aggregation layer proxies /apis/metrics.k8s.io calls to this pod.
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+  egress:
+    # Scrape the kubelet read-only summary API on every node, local and remote.
+    - toEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

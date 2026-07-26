@@ -5,9 +5,7 @@ resources:
   - namespace.yaml
   - helmrelease-app.yaml
   - helmrelease-pocketbase.yaml
-  - certificate.yaml
   - httproute.yaml
-  - reference-grant.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:

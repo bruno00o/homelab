@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-uptime-kuma
+      sectionName: https-internal-wildcard
   hostnames:
     - uptime.${CLUSTER_DOMAIN}
   rules:

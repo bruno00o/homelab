@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-zot
+      sectionName: https-internal-wildcard
   hostnames:
     - zot.${CLUSTER_DOMAIN}
   rules:

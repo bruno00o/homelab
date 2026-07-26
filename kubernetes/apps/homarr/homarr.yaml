@@ -4,6 +4,7 @@ kind: ServiceAccount
 metadata:
   name: homarr
   namespace: homarr
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -26,6 +27,7 @@ rules:
   - apiGroups: ["metrics.k8s.io"]
     resources: ["nodes", "pods"]
     verbs: ["get", "list"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -39,6 +41,7 @@ subjects:
   - kind: ServiceAccount
     name: homarr
     namespace: homarr
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -55,6 +58,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -71,6 +75,7 @@ spec:
   resources:
     requests:
       storage: 2Gi
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -198,6 +203,7 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
+
 ---
 apiVersion: v1
 kind: Service
@@ -212,19 +218,7 @@ spec:
     - name: http
       port: 7575
       targetPort: 3000
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: homarr-tls
-  namespace: homarr
-spec:
-  secretName: homarr-tls
-  issuerRef:
-    name: ${CLUSTER_ISSUER}
-    kind: ClusterIssuer
-  dnsNames:
-    - homarr.${CLUSTER_DOMAIN}
+
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -235,13 +229,13 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-homarr
+      sectionName: https-internal-wildcard
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-app-wildcard
     - name: external-gateway
       namespace: kube-system
-      sectionName: https-homarr
+      sectionName: https-internal-wildcard
   hostnames:
     - homarr.${CLUSTER_DOMAIN}
     - homarr.${PUBLIC_DOMAIN}

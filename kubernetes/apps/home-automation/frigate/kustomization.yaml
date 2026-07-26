@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - nfs-pvc.yaml
   - helmrelease.yaml
-  - certificate.yaml
   - httproute.yaml
   - network-policies.yaml
   - pdb.yaml

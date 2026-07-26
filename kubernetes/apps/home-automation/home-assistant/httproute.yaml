@@ -7,13 +7,13 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-home-assistant
+      sectionName: https-internal-wildcard
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-app-wildcard
     - name: external-gateway
       namespace: kube-system
-      sectionName: https-home-assistant
+      sectionName: https-internal-wildcard
   hostnames:
     - home-assistant.${CLUSTER_DOMAIN}
     - home-assistant.${PUBLIC_DOMAIN}

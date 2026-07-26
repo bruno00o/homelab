@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-umami
+      sectionName: https-internal-wildcard
   hostnames:
     - umami.${CLUSTER_DOMAIN}
   rules:

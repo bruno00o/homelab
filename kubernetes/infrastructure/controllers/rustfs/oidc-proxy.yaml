@@ -18,6 +18,7 @@ spec:
     algorithm: ECDSA
     size: 256
     rotationPolicy: Always
+
 ---
 apiVersion: v1
 kind: ConfigMap

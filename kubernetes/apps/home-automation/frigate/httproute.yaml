@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-frigate
+      sectionName: https-internal-wildcard
   hostnames:
     - frigate.${CLUSTER_DOMAIN}
   rules:

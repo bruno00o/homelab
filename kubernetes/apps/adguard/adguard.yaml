@@ -14,6 +14,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -130,6 +131,7 @@ spec:
         - name: work
           persistentVolumeClaim:
             claimName: adguard-work
+
 ---
 apiVersion: v1
 kind: Service
@@ -150,6 +152,7 @@ spec:
       port: 53
       targetPort: 53
       protocol: UDP
+
 ---
 apiVersion: v1
 kind: Service
@@ -164,19 +167,7 @@ spec:
     - name: http
       port: 80
       targetPort: 80
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: adguard-tls
-  namespace: adguard
-spec:
-  secretName: adguard-tls
-  dnsNames:
-    - adguard.${CLUSTER_DOMAIN}
-  issuerRef:
-    name: ${CLUSTER_ISSUER}
-    kind: ClusterIssuer
+
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -187,7 +178,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-adguard
+      sectionName: https-internal-wildcard
   hostnames:
     - adguard.${CLUSTER_DOMAIN}
   rules:

@@ -6,9 +6,7 @@ resources:
   - hermes-secrets.sops.yaml
   - hermes-matrix.sops.yaml
   - statefulset.yaml
-  - certificate.yaml
   - httproute.yaml
-  - reference-grant.yaml
   - network-policies.yaml
 components:
   - ../../components/network-policies/base

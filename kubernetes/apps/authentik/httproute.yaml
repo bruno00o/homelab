@@ -7,13 +7,13 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-auth
+      sectionName: https-internal-wildcard
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-app-wildcard
     - name: external-gateway
       namespace: kube-system
-      sectionName: https-auth
+      sectionName: https-internal-wildcard
   hostnames:
     - auth.${CLUSTER_DOMAIN}
     - auth.${PUBLIC_DOMAIN}

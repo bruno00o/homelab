@@ -5,9 +5,7 @@ resources:
   - config.yaml
   - zot-secrets.sops.yaml
   - helmrelease.yaml
-  - certificate.yaml
   - httproute.yaml
-  - reference-grant.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:

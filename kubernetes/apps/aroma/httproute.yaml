@@ -8,7 +8,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-aroma
+      sectionName: https-internal-wildcard
   hostnames:
     - aroma.${CLUSTER_DOMAIN}
   rules:
@@ -29,7 +29,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-pb-aroma
+      sectionName: https-internal-wildcard
   hostnames:
     - pb-aroma.${CLUSTER_DOMAIN}
   rules:

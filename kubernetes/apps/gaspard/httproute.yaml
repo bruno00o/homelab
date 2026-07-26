@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-lightrag
+      sectionName: https-internal-wildcard
   hostnames:
     - lightrag.${CLUSTER_DOMAIN}
   rules:

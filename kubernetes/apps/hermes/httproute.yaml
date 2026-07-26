@@ -9,7 +9,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-hermes
+      sectionName: https-internal-wildcard
   hostnames:
     - hermes.${CLUSTER_DOMAIN}
   rules:
@@ -32,7 +32,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-hermes-api
+      sectionName: https-internal-wildcard
   hostnames:
     - hermes-api.${CLUSTER_DOMAIN}
   rules:

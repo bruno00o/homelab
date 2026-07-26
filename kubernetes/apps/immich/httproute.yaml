@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-immich
+      sectionName: https-internal-wildcard
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-app-wildcard

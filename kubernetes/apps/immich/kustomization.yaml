@@ -10,7 +10,6 @@ resources:
   - certificate.yaml
   - httproute.yaml
   - dnsendpoint.yaml
-  - reference-grant.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:

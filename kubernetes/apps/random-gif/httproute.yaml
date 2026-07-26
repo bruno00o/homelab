@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-random-gif
+      sectionName: https-internal-wildcard
   hostnames:
     - random-gif.${CLUSTER_DOMAIN}
   rules:

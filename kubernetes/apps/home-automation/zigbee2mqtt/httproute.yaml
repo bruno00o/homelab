@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-zigbee2mqtt
+      sectionName: https-internal-wildcard
   hostnames:
     - zigbee2mqtt.${CLUSTER_DOMAIN}
   rules:

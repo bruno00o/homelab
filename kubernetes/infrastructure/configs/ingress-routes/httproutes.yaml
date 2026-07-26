@@ -1,20 +1,4 @@
 ---
-# ===================
-# Grafana
-# ===================
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: grafana-tls
-  namespace: monitoring
-spec:
-  secretName: grafana-tls
-  issuerRef:
-    name: ${CLUSTER_ISSUER}
-    kind: ClusterIssuer
-  dnsNames:
-    - grafana.${CLUSTER_DOMAIN}
----
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -24,7 +8,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-grafana
+      sectionName: https-internal-wildcard
   hostnames:
     - grafana.${CLUSTER_DOMAIN}
   rules:
@@ -35,22 +19,7 @@ spec:
       backendRefs:
         - name: kube-prometheus-stack-grafana
           port: 80
----
-# ===================
-# Hubble
-# ===================
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: hubble-tls
-  namespace: kube-system
-spec:
-  secretName: hubble-tls
-  issuerRef:
-    name: ${CLUSTER_ISSUER}
-    kind: ClusterIssuer
-  dnsNames:
-    - hubble.${CLUSTER_DOMAIN}
+
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -61,7 +30,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-hubble
+      sectionName: https-internal-wildcard
   hostnames:
     - hubble.${CLUSTER_DOMAIN}
   rules:
@@ -73,22 +42,7 @@ spec:
         - name: authentik-server
           namespace: authentik
           port: 80
----
-# ===================
-# Longhorn
-# ===================
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: longhorn-tls
-  namespace: longhorn-system
-spec:
-  secretName: longhorn-tls
-  issuerRef:
-    name: ${CLUSTER_ISSUER}
-    kind: ClusterIssuer
-  dnsNames:
-    - longhorn.${CLUSTER_DOMAIN}
+
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -99,7 +53,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-longhorn
+      sectionName: https-internal-wildcard
   hostnames:
     - longhorn.${CLUSTER_DOMAIN}
   rules:
@@ -111,22 +65,7 @@ spec:
         - name: authentik-server
           namespace: authentik
           port: 80
----
-# ===================
-# RustFS console
-# ===================
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: rustfs-tls
-  namespace: rustfs
-spec:
-  secretName: rustfs-tls
-  issuerRef:
-    name: ${CLUSTER_ISSUER}
-    kind: ClusterIssuer
-  dnsNames:
-    - rustfs.${CLUSTER_DOMAIN}
+
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -137,7 +76,7 @@ spec:
   parentRefs:
     - name: internal-gateway
       namespace: kube-system
-      sectionName: https-rustfs
+      sectionName: https-internal-wildcard
   hostnames:
     - rustfs.${CLUSTER_DOMAIN}
   rules:

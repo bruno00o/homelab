@@ -3,9 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helmrelease.yaml
-  - certificate.yaml
   - httproute.yaml
-  - reference-grant.yaml
   - network-policies.yaml
   - autokuma-crd.yaml
   - autokuma-rbac.yaml

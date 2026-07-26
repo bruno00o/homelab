@@ -30,13 +30,34 @@ find kubernetes -name '*.yaml' -not -name '*.sops.yaml' | while read -r f; do
   sed -f "$WORK/subst.sed" "$f" > "$WORK/$f"
 done
 
-curl -sfL https://github.com/fluxcd/flux2/releases/latest/download/crd-schemas.tar.gz |
-  tar xz -C "$WORK" --one-top-level=flux-crds
+# Schemas are cached so a second run needs no network — otherwise this cannot be used as
+# a pre-commit hook. The Flux cache is keyed on the version pinned in .mise.toml, both to
+# validate against the CRDs actually deployed and to invalidate itself when Renovate
+# bumps it.
+FLUX_VERSION=$(grep -oP '(?<=^flux2 = ")[^"]+' .mise.toml)
+CACHE=".cache/kubeconform"
+FLUX_CRDS="$CACHE/flux-$FLUX_VERSION"
+mkdir -p "$CACHE/schemas"
 
-find "$WORK/kubernetes" -name '*.yaml' -print0 | xargs -0 kubeconform \
+if [ ! -d "$FLUX_CRDS" ]; then
+  if ! curl -sfL "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/crd-schemas.tar.gz" |
+    tar xz -C "$CACHE" --one-top-level="flux-$FLUX_VERSION"; then
+    rm -rf "$FLUX_CRDS"
+    echo "Cannot download Flux $FLUX_VERSION CRD schemas (offline?), and no cache exists." >&2
+    exit 1
+  fi
+fi
+
+# kustomization.yaml files are kustomize config, not API resources, and no catalog holds a
+# schema for KumaEntity or for CRDs themselves. Declaring them skipped keeps them out of
+# the summary and, more importantly, stops kubeconform from re-requesting schemas that will
+# never exist — those lookups are not cacheable and hang when offline.
+find "$WORK/kubernetes" -name '*.yaml' -not -name 'kustomization.yaml' -print0 | xargs -0 kubeconform \
   -strict \
   -ignore-missing-schemas \
+  -skip KumaEntity,CustomResourceDefinition \
+  -cache "$CACHE/schemas" \
   -schema-location default \
-  -schema-location "$WORK/flux-crds/{{ .ResourceKind }}{{ .KindSuffix }}.json" \
+  -schema-location "$FLUX_CRDS/{{ .ResourceKind }}{{ .KindSuffix }}.json" \
   -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
   -summary

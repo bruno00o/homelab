@@ -49,7 +49,6 @@ spec:
               cpu: 40m
               memory: 45Mi
             limits:
-              cpu: 100m
               memory: 90Mi
           volumeMounts:
             - name: devfs

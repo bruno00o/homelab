@@ -73,7 +73,7 @@ spec:
               drop: ["ALL"]
           resources:
             requests: { cpu: 10m, memory: 8Mi }
-            limits: { cpu: 100m, memory: 32Mi }
+            limits: {memory: 32Mi}
           volumeMounts:
             - { name: db-password, mountPath: /db, readOnly: true }
             - { name: rendered-config, mountPath: /rendered }
@@ -108,7 +108,7 @@ spec:
               mountPath: /tmp
           resources:
             requests: { cpu: 10m, memory: 16Mi }
-            limits: { cpu: 200m, memory: 64Mi }
+            limits: {memory: 64Mi}
       containers:
         - name: mas
           # renovate: datasource=docker depName=ghcr.io/element-hq/matrix-authentication-service
@@ -146,7 +146,6 @@ spec:
               cpu: 50m
               memory: 128Mi
             limits:
-              cpu: 500m
               memory: 512Mi
           volumeMounts:
             - name: config

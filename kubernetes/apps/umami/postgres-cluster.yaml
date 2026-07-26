@@ -37,7 +37,6 @@ spec:
       cpu: 50m
       memory: 256Mi
     limits:
-      cpu: 1000m
       memory: 512Mi
 ---
 apiVersion: barmancloud.cnpg.io/v1

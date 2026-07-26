@@ -117,7 +117,6 @@ spec:
               cpu: 10m
               memory: 128Mi
             limits:
-              cpu: 500m
               memory: 384Mi
           volumeMounts:
             - name: data

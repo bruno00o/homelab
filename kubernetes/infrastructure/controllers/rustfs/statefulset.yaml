@@ -91,7 +91,7 @@ spec:
               mountPath: /tmp
           resources:
             requests: { cpu: 10m, memory: 16Mi }
-            limits: { cpu: 200m, memory: 64Mi }
+            limits: {memory: 64Mi}
       containers:
         - name: rustfs
           # renovate: datasource=docker depName=rustfs/rustfs
@@ -169,7 +169,6 @@ spec:
               cpu: 100m
               memory: 256Mi
             limits:
-              cpu: 1000m
               memory: 1Gi
           volumeMounts:
             - name: data

@@ -40,7 +40,6 @@ spec:
           cpu: 25m
           memory: 128Mi
         limits:
-          cpu: 200m
           memory: 512Mi
 
     grafana:
@@ -61,7 +60,6 @@ spec:
           cpu: 50m
           memory: 256Mi
         limits:
-          cpu: 500m
           memory: 512Mi
 
       envValueFrom:
@@ -96,7 +94,6 @@ spec:
             cpu: 10m
             memory: 64Mi
           limits:
-            cpu: 1000m
             memory: 128Mi
         dashboards:
           enabled: true
@@ -141,7 +138,6 @@ spec:
             cpu: 100m
             memory: 512Mi
           limits:
-            cpu: 1000m
             memory: 2Gi
         storageSpec:
           volumeClaimTemplate:
@@ -190,7 +186,6 @@ spec:
             cpu: 10m
             memory: 32Mi
           limits:
-            cpu: 100m
             memory: 128Mi
         storage:
           volumeClaimTemplate:
@@ -208,7 +203,6 @@ spec:
           cpu: 10m
           memory: 32Mi
         limits:
-          cpu: 100m
           memory: 64Mi
 
     kube-state-metrics:
@@ -217,7 +211,6 @@ spec:
           cpu: 10m
           memory: 128Mi
         limits:
-          cpu: 100m
           memory: 256Mi
 
     kubeStateMetrics:

@@ -251,6 +251,8 @@ tasks:
       - echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
       # Cordon manually and skip talosctl's drain: the kubectl-based drain
       # deadlocks on Longhorn (evicting instance-manager vs. unmounting volumes).
+      # instance-manager pods are owned by an InstanceManager CRD, not a DaemonSet, so
+      # --ignore-daemonsets does not spare them, and their PDB allows no disruption.
       # --preserve keeps replica data across the reboot, so pods are simply
       # rescheduled and volumes reattach when the node returns.
       - kubectl cordon {{.NODE}}

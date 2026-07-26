@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: cloudflare-tunnel
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: cloudflare-tunnel
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-cloudflare-egress
   namespace: cloudflare-tunnel
 spec:
@@ -49,6 +18,7 @@ spec:
           port: 7844
         - protocol: UDP
           port: 7844
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -145,6 +115,7 @@ spec:
           port: 8080
         - protocol: TCP
           port: 80
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -163,6 +134,7 @@ spec:
         - ports:
             - port: "8123"
               protocol: TCP
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

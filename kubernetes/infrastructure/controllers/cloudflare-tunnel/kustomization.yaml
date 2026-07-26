@@ -7,3 +7,6 @@ resources:
   - cloudflare-tunnel.yaml
   - network-policies.yaml
   - pdb.yaml
+components:
+  - ../../../components/network-policies/base
+namespace: cloudflare-tunnel

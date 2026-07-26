@@ -19,3 +19,6 @@ resources:
   - pdb.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
+components:
+  - ../../components/network-policies/base
+namespace: authentik

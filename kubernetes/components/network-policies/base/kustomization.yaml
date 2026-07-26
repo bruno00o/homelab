@@ -1,0 +1,8 @@
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# The two policies every namespace needs: deny everything, then let DNS out.
+# They carry no namespace — the consuming kustomization.yaml must set `namespace:`.
+resources:
+  - default-deny-all.yaml
+  - allow-dns-egress.yaml

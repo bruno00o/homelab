@@ -10,3 +10,6 @@ resources:
   - httproute.yaml
   - reference-grant.yaml
   - network-policies.yaml
+components:
+  - ../../components/network-policies/base
+namespace: hermes

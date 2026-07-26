@@ -1,35 +1,4 @@
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-all
-  namespace: cert-manager
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: cert-manager
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
 # Cert-manager needs Kubernetes API access
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -46,6 +15,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+
 ---
 # DNS-01 self-check: query authoritative nameservers (e.g. Cloudflare DNS)
 # to confirm TXT record propagation before notifying ACME server.
@@ -64,6 +34,7 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+
 ---
 # Webhook needs to receive requests from API server
 apiVersion: networking.k8s.io/v1
@@ -81,6 +52,7 @@ spec:
     - ports:
         - protocol: TCP
           port: 10250
+
 ---
 # Prometheus scraping
 apiVersion: networking.k8s.io/v1

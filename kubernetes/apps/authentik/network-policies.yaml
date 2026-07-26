@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: authentik
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: authentik
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-ingress-from-cnpg-operator
   namespace: authentik
 spec:
@@ -51,6 +20,7 @@ spec:
           port: 5432
         - protocol: TCP
           port: 8000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -75,6 +45,7 @@ spec:
           port: 9000
         - protocol: TCP
           port: 9443
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -92,6 +63,7 @@ spec:
     - ports:
         - protocol: TCP
           port: 9000
+
 ---
 # MAS upstream-OIDC backchannel: the in-pod sidecar nginx in the matrix ns
 # forwards to authentik-server on pod targetPort 9000 (svc port 80).
@@ -115,6 +87,7 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -135,6 +108,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -162,6 +136,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -210,6 +185,7 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -230,6 +206,7 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -248,6 +225,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+
 ---
 # SMTP egress for email notifications (Resend on STARTTLS:587 + SSL:465)
 apiVersion: networking.k8s.io/v1
@@ -267,6 +245,7 @@ spec:
           port: 587
         - protocol: TCP
           port: 465
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -284,6 +263,7 @@ spec:
   egress:
     - to:
         - podSelector: {}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -304,6 +284,7 @@ spec:
       ports:
         - protocol: TCP
           port: 9300
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -324,6 +305,7 @@ spec:
       ports:
         - protocol: TCP
           port: 9187
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -346,6 +328,7 @@ spec:
               protocol: TCP
             - port: "9443"
               protocol: TCP
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -367,6 +350,7 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

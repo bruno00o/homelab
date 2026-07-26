@@ -6,3 +6,6 @@ resources:
   - mugiwara-ca-secret.sops.yaml
   - cloudflare-api-token.sops.yaml
   - network-policies.yaml
+components:
+  - ../../../components/network-policies/base
+namespace: cert-manager

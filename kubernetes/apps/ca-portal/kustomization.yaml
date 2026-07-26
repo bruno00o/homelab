@@ -7,3 +7,17 @@ resources:
   - httproute.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
+components:
+  - ../../components/network-policies/base
+
+# The component's policies carry no namespace, and a global `namespace:` cannot be used
+# here: rbac.yaml deliberately puts a Role and RoleBinding in cert-manager so the portal
+# can read the CA secret, and the transformer would move them.
+patches:
+  - target:
+      kind: NetworkPolicy
+      name: "default-deny-all|allow-dns-egress"
+    patch: |-
+      - op: add
+        path: /metadata/namespace
+        value: ca-portal

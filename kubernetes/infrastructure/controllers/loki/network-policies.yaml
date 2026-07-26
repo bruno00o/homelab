@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: loki-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: loki-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-internal-communication
   namespace: loki-system
 spec:
@@ -46,6 +15,7 @@ spec:
   egress:
     - to:
         - podSelector: {}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -66,6 +36,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3100
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -86,6 +57,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3100
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -104,6 +76,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -120,6 +93,7 @@ spec:
     - ports:
         - protocol: TCP
           port: 6443
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

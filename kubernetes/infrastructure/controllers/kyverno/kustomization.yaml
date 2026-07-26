@@ -4,3 +4,6 @@ resources:
   - namespace.yaml
   - helmrelease.yaml
   - network-policies.yaml
+components:
+  - ../../../components/network-policies/base
+namespace: kyverno-system

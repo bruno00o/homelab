@@ -1,30 +1,4 @@
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-all
-  namespace: rustfs
-spec:
-  podSelector: {}
-  policyTypes: [Ingress, Egress]
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: rustfs
-spec:
-  podSelector: {}
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - { protocol: UDP, port: 53 }
-        - { protocol: TCP, port: 53 }
----
 # S3 API: from cnpg-system (operator) + namespaces that have CNPG clusters
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -55,6 +29,7 @@ spec:
               kubernetes.io/metadata.name: matrix
       ports:
         - { protocol: TCP, port: 9000 }
+
 ---
 # Console UI (port 9001) now exposed directly via the gateway (native OIDC).
 apiVersion: networking.k8s.io/v1
@@ -72,6 +47,7 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 9001 }
+
 ---
 # Cross-node envoy proxy traffic (Cilium ingress identity) for the console route.
 apiVersion: cilium.io/v2
@@ -88,6 +64,7 @@ spec:
       toPorts:
         - ports:
             - { port: "9001", protocol: TCP }
+
 ---
 # OIDC backchannel: the in-pod nginx sidecar forwards to the Authentik service.
 apiVersion: networking.k8s.io/v1
@@ -108,6 +85,7 @@ spec:
       ports:
         - { protocol: TCP, port: 80 }
         - { protocol: TCP, port: 9000 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -12,3 +12,6 @@ resources:
   - autokuma-helmrelease.yaml
   - autokuma-secrets.sops.yaml
   - notification.yaml
+components:
+  - ../../components/network-policies/base
+namespace: uptime-kuma

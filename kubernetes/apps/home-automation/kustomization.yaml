@@ -3,8 +3,10 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - reference-grant.yaml
-  - shared-network-policies.yaml
   - frigate
   - home-assistant
   - mosquitto
   - zigbee2mqtt
+components:
+  - ../../components/network-policies/base
+namespace: home-automation

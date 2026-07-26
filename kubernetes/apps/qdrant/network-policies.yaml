@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: qdrant
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: qdrant
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-ingress-from-lan
   namespace: qdrant
 spec:
@@ -50,6 +19,7 @@ spec:
           port: 6333
         - protocol: TCP
           port: 6334
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -71,6 +41,7 @@ spec:
               protocol: TCP
             - port: "6334"
               protocol: TCP
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -91,6 +62,7 @@ spec:
       ports:
         - protocol: TCP
           port: 6333
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

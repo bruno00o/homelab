@@ -7,3 +7,6 @@ resources:
   - oidc-proxy.yaml
   - statefulset.yaml
   - network-policies.yaml
+components:
+  - ../../../components/network-policies/base
+namespace: rustfs

@@ -2,32 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: aroma
-spec:
-  podSelector: {}
-  policyTypes: [Ingress, Egress]
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: aroma
-spec:
-  podSelector: {}
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - { protocol: UDP, port: 53 }
-        - { protocol: TCP, port: 53 }
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-ingress-from-gateway-app
   namespace: aroma
 spec:
@@ -40,6 +14,7 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 3000 }
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -55,6 +30,7 @@ spec:
       toPorts:
         - ports:
             - { port: "3000", protocol: TCP }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -71,6 +47,7 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 8090 }
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -86,6 +63,7 @@ spec:
       toPorts:
         - ports:
             - { port: "8090", protocol: TCP }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -104,6 +82,7 @@ spec:
               kubernetes.io/metadata.name: cloudflare-tunnel
       ports:
         - { protocol: TCP, port: 3000 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -122,6 +101,7 @@ spec:
               kubernetes.io/metadata.name: cloudflare-tunnel
       ports:
         - { protocol: TCP, port: 8090 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -146,6 +126,7 @@ spec:
         - { protocol: TCP, port: 443 }
         - { protocol: TCP, port: 465 }
         - { protocol: TCP, port: 587 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -164,6 +145,7 @@ spec:
               app.kubernetes.io/name: aroma-pocketbase
       ports:
         - { protocol: TCP, port: 8090 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

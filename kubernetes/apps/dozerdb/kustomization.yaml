@@ -6,3 +6,6 @@ resources:
   - dozerdb.yaml
   - network-policies.yaml
   - pdb.yaml
+components:
+  - ../../components/network-policies/base
+namespace: dozerdb

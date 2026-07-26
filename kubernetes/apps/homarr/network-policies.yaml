@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: homarr
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: homarr
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-ingress-from-gateway
   namespace: homarr
 spec:
@@ -48,6 +17,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -68,6 +38,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -86,6 +57,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -106,6 +78,7 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -123,6 +96,7 @@ spec:
         - ports:
             - port: "3000"
               protocol: TCP
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -143,6 +117,7 @@ spec:
       ports:
         - protocol: TCP
           port: 80
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

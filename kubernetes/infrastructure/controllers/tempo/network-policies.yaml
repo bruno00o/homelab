@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: tempo-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: tempo-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-internal-communication
   namespace: tempo-system
 spec:
@@ -46,6 +15,7 @@ spec:
   egress:
     - to:
         - podSelector: {}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -66,6 +36,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3200
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -84,6 +55,7 @@ spec:
           port: 4317
         - protocol: TCP
           port: 4318
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

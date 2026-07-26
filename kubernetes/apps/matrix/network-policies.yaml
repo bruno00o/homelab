@@ -1,30 +1,4 @@
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-all
-  namespace: matrix
-spec:
-  podSelector: {}
-  policyTypes: [Ingress, Egress]
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: matrix
-spec:
-  podSelector: {}
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - { protocol: UDP, port: 53 }
-        - { protocol: TCP, port: 53 }
----
 # Synapse client API reachable from the LAN gateway (host-network same node).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -41,6 +15,7 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 8008 }
+
 ---
 # Cross-node envoy proxy traffic (Cilium ingress identity).
 apiVersion: cilium.io/v2
@@ -56,6 +31,7 @@ spec:
         - ports:
             - { port: "8008", protocol: TCP }
             - { port: "80", protocol: TCP }
+
 ---
 # Public access via the Cloudflare tunnel (routes straight to the services).
 apiVersion: networking.k8s.io/v1
@@ -75,6 +51,7 @@ spec:
         - { protocol: TCP, port: 8008 }
         - { protocol: TCP, port: 8080 }
         - { protocol: TCP, port: 80 }
+
 ---
 # MAS provisions/queries users in Synapse via the /_synapse/mas/* admin API.
 apiVersion: networking.k8s.io/v1
@@ -94,6 +71,7 @@ spec:
               app.kubernetes.io/name: mas
       ports:
         - { protocol: TCP, port: 8008 }
+
 ---
 # The Hermes bot talks to Synapse directly in-cluster.
 apiVersion: networking.k8s.io/v1
@@ -113,6 +91,7 @@ spec:
               kubernetes.io/metadata.name: hermes
       ports:
         - { protocol: TCP, port: 8008 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -131,6 +110,7 @@ spec:
               cnpg.io/cluster: synapse-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+
 ---
 # msc3861 introspection: Synapse delegates auth decisions to MAS over HTTP.
 apiVersion: networking.k8s.io/v1
@@ -150,6 +130,7 @@ spec:
               app.kubernetes.io/name: mas
       ports:
         - { protocol: TCP, port: 8080 }
+
 ---
 # Synapse → public push gateways (matrix.org for Element X iOS, FCM endpoints
 # for Android). Without this, mobile notifications time out at the homeserver.
@@ -174,6 +155,7 @@ spec:
               - 169.254.0.0/16
       ports:
         - { protocol: TCP, port: 443 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -198,6 +180,7 @@ spec:
               cnpg.io/cluster: synapse-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+
 ---
 # CNPG operator (cnpg-system) reaches the instance manager (8000) for status
 # extraction and management, plus 5432 for the live cluster.
@@ -219,6 +202,7 @@ spec:
       ports:
         - { protocol: TCP, port: 5432 }
         - { protocol: TCP, port: 8000 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -257,6 +241,7 @@ spec:
               app.kubernetes.io/name: rustfs
       ports:
         - { protocol: TCP, port: 9000 }
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -275,6 +260,7 @@ spec:
               kubernetes.io/metadata.name: monitoring
       ports:
         - { protocol: TCP, port: 9187 }
+
 ---
 # Element / Cinny static web UIs: reachable from gateway + tunnel only.
 apiVersion: networking.k8s.io/v1

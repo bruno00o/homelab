@@ -2,37 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
-  namespace: longhorn-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: longhorn-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-internal-communication
   namespace: longhorn-system
 spec:
@@ -46,6 +15,7 @@ spec:
   egress:
     - to:
         - podSelector: {}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -62,6 +32,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -82,6 +53,7 @@ spec:
           port: 2049 # NFS
         - protocol: UDP
           port: 2049
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -101,6 +73,7 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -119,6 +92,7 @@ spec:
       ports:
         - protocol: TCP
           port: 9500
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -137,6 +111,7 @@ spec:
           port: 9502
         - protocol: TCP
           port: 9503
+
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -154,6 +129,7 @@ spec:
         - ports:
             - port: "8000"
               protocol: TCP
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -220,7 +220,7 @@ tasks:
       - talosctl reset --nodes {{.NODES}} --system-labels-to-wipe=STATE --system-labels-to-wipe=EPHEMERAL --graceful=false --reboot
       - echo ""
       - echo "Reset initiated. Nodes will reboot."
-      - echo "After reboot run 'task talos:apply-insecure-all' then 'task talos:bootstrap' then 'task talos:kubeconfig' then 'task bootstrap:full'"
+      - echo "After reboot run 'task bootstrap:cluster'"
 
   talos:reset-hard:
     desc: Full reset - wipes everything including Talos (requires USB reinstall)
@@ -361,11 +361,11 @@ tasks:
       - helm repo update
       - echo "Installing Cilium + Prometheus CRDs via helmfile..."
       - helmfile apply
-      - echo "Waiting for Cilium pods to be created..."
-      - sleep 30
-      - echo "Waiting for Cilium to be ready..."
-      - kubectl -n kube-system wait --for=condition=ready pod -l k8s-app=cilium --timeout=300s
-      - echo "Waiting for all nodes to be Ready..."
+      # Wait for the DaemonSet to exist rather than sleeping: helmfile returns before the
+      # API server has the object, and a fixed sleep is either too short or wasted time.
+      - kubectl -n kube-system wait --for=create daemonset/cilium --timeout=120s
+      - kubectl -n kube-system rollout status daemonset/cilium --timeout=5m
+      # Talos nodes only go Ready once the CNI is up, so this is the real gate.
       - kubectl wait --for=condition=ready node --all --timeout=300s
       - echo "Bootstrap complete - Cilium CNI + Prometheus CRDs installed"
 
@@ -392,30 +392,51 @@ tasks:
         cat "$AGE_KEY" | kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=/dev/stdin
         echo "SOPS secret created"
 
+  bootstrap:deploy-key:
+    desc: Install the Flux git deploy key from its encrypted copy
+    cmds:
+      - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -
+      - sops --decrypt bootstrap/deploy-key.sops.yaml | kubectl apply -f -
+
   bootstrap:flux:
-    desc: Bootstrap Flux GitOps (after Cilium)
+    desc: Install Flux and point it at this repo (after Cilium)
     preconditions:
       - sh: kubectl get nodes -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep -q True
         msg: "Nodes are not Ready. Run 'task bootstrap:helmfile' first."
     cmds:
       - task: bootstrap:sops-secret
-      - |
-        if [ -z "$GITHUB_TOKEN" ]; then
-          echo "GITHUB_TOKEN not set. Run 'export GITHUB_TOKEN=your-token' first."
-          exit 1
-        fi
-      - echo "Bootstrapping Flux..."
-      - flux bootstrap github --owner=bruno00o --repository=homelab --branch=main --path=kubernetes/flux --personal
-      - echo "Flux bootstrapped"
+      - task: bootstrap:deploy-key
+      # No `flux bootstrap github`: it needs a PAT with admin rights, writes to the repo
+      # and creates the deploy key. Everything it would generate is already committed, so
+      # a disaster recovery needs the Age key and nothing else.
+      # --force-conflicts so a re-run is idempotent: on a cluster where Flux is already
+      # installed the fields are owned by the "flux" field manager and a plain apply fails.
+      - kubectl apply --server-side --force-conflicts -f kubernetes/flux/flux-system/gotk-components.yaml
+      - kubectl wait --for=condition=established crd/kustomizations.kustomize.toolkit.fluxcd.io --timeout=120s
+      - kubectl -n flux-system rollout status deploy/source-controller --timeout=5m
+      - kubectl -n flux-system rollout status deploy/kustomize-controller --timeout=5m
+      - kubectl apply --server-side --force-conflicts -f kubernetes/flux/flux-system/gotk-sync.yaml
+      - echo "Flux installed. Watch with 'flux get kustomizations -w'"
 
   bootstrap:full:
-    desc: Full cluster bootstrap (Helmfile + Flux)
+    desc: Bootstrap on an already-running Kubernetes (Helmfile + Flux)
     cmds:
       - task: bootstrap:helmfile
       - task: bootstrap:flux
       - echo ""
       - echo "Cluster fully bootstrapped!"
       - echo "Watch progress with 'flux get kustomizations -w'"
+
+  bootstrap:cluster:
+    desc: Single entry point from bare Talos nodes to a reconciling cluster
+    prompt: "Bootstrap the WHOLE cluster from bare Talos nodes? Only for a new or reset cluster."
+    cmds:
+      # clusterconfig/ is gitignored, so a recovery machine has to regenerate it first.
+      - task: talos:genconfig
+      - task: talos:apply-insecure-all
+      - task: talos:bootstrap
+      - task: talos:kubeconfig
+      - task: bootstrap:full
 
   # =============================================================================
   # Flux

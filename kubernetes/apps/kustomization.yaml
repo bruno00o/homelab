@@ -14,7 +14,7 @@ resources:
   - matrix
   - portfolio
   - qdrant
-  - random-gif
+  - random-gif/ks.yaml
   - umami
   - uptime-kuma
   - ca-portal

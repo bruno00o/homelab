@@ -257,6 +257,60 @@ spec:
               remediateLastFailure: true
           uninstall:
             keepHistory: false
+
+    # Defaults for the per-app Kustomizations (the ks.yaml files). Each app declares only
+    # its own `path`; the boilerplate below — including the HelmRelease patch again, since
+    # a child Kustomization does its own build — is injected here.
+    - target:
+        group: kustomize.toolkit.fluxcd.io
+        kind: Kustomization
+      patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: _
+        spec:
+          timeout: 15m
+          retryInterval: 1m
+          # interval, prune and sourceRef are absent on purpose: the CRD requires them, so
+          # every ks.yaml declares them itself and keeps the freedom to differ.
+          # wait: true replaces the per-app healthChecks this Kustomization used to carry:
+          # Flux waits for every resource it applied, HelmReleases included, so a broken
+          # app is reported as such instead of silently passing (AUDIT R4).
+          wait: true
+          dependsOn:
+            - name: infrastructure-configs
+          decryption:
+            provider: sops
+            secretRef:
+              name: sops-age
+          postBuild:
+            substituteFrom:
+              - kind: ConfigMap
+                name: cluster-settings
+              - kind: Secret
+                name: cluster-secrets
+                optional: true
+          patches:
+            - target:
+                group: helm.toolkit.fluxcd.io
+                kind: HelmRelease
+              patch: |-
+                apiVersion: helm.toolkit.fluxcd.io/v2
+                kind: HelmRelease
+                metadata:
+                  name: _
+                spec:
+                  install:
+                    remediation:
+                      retries: 3
+                  upgrade:
+                    cleanupOnFail: true
+                    remediation:
+                      retries: 3
+                      remediateLastFailure: true
+                  uninstall:
+                    keepHistory: false
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment

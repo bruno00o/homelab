@@ -16,21 +16,26 @@
   "platformAutomerge": true,
   "automergeStrategy": "squash",
 
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": null,
+    "labels": ["security"]
+  },
+
   "flux": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+    "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"]
   },
   "helm-values": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+    "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"]
   },
   "kubernetes": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+    "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"]
   },
 
   "customManagers": [
     {
       "customType": "regex",
       "description": "Talos version in talconfig.yaml",
-      "fileMatch": ["talos/talconfig\\.ya?ml$"],
+      "managerFilePatterns": ["/talos/talconfig\\.ya?ml$/"],
       "matchStrings": [
         "talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
       ],
@@ -40,7 +45,7 @@
     {
       "customType": "regex",
       "description": "Kubernetes version in talconfig.yaml",
-      "fileMatch": ["talos/talconfig\\.ya?ml$"],
+      "managerFilePatterns": ["/talos/talconfig\\.ya?ml$/"],
       "matchStrings": [
         "kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
       ],
@@ -50,7 +55,7 @@
     {
       "customType": "regex",
       "description": "Cilium version in Taskfile",
-      "fileMatch": ["[Tt]askfile\\.ya?ml$"],
+      "managerFilePatterns": ["/[Tt]askfile\\.ya?ml$/"],
       "matchStrings": [
         "CILIUM_VERSION:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
       ],
@@ -61,7 +66,7 @@
     {
       "customType": "regex",
       "description": "CNPG PostgreSQL image",
-      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=docker\\s+depName=(?<depName>[^\\s]+)\\n\\s*imageName:\\s*[^:]+:(?<currentValue>[^\\s]+)"
       ],
@@ -70,7 +75,7 @@
     {
       "customType": "regex",
       "description": "Garage Helm values images",
-      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=docker\\s+depName=(?<depName>[^\\s]+)\\n\\s*repository:\\s*[^\\s]+\\n\\s*tag:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
       ],
@@ -79,7 +84,7 @@
     {
       "customType": "regex",
       "description": "Helm values image tag (tag-only, no repository)",
-      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=docker\\s+depName=(?<depName>[^\\s]+)\\n[ \\t]*tag:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
       ],
@@ -88,7 +93,7 @@
     {
       "customType": "regex",
       "description": "kubelet-serving-cert-approver in Talos extraManifests",
-      "fileMatch": ["talos/talconfig\\.ya?ml$"],
+      "managerFilePatterns": ["/talos/talconfig\\.ya?ml$/"],
       "matchStrings": [
         "kubelet-serving-cert-approver/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
       ],
@@ -116,6 +121,27 @@
       "automerge": true
     },
     {
+      "description": "Quarantine upstream releases for 3 days before they can automerge. Generic mitigation for the supply-chain class of incident that forced the trivy pin in ci.yaml: a compromised release reaches the cluster on its own otherwise",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "No quarantine on our own images - they are built from repos we control, and delaying them would delay our own deploys for no security gain",
+      "matchPackageNames": ["/^ghcr\\.io\\/bruno00o\\//"],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "GitHub Actions run with repository credentials, so quarantine them whatever the update type - majors included, which the rule above does not cover",
+      "matchManagers": ["github-actions"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "No quarantine for actions published by GitHub or Renovate themselves",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["/^actions\\//", "/^github\\//", "/^renovatebot\\//"],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "Track rustfs prereleases (no stable release yet)",
       "matchPackageNames": ["rustfs/rustfs"],
       "versioning": "semver",
@@ -125,39 +151,39 @@
     },
 
     {
-      "description": "Group Cilium",
-      "matchPackagePatterns": ["^cilium"],
+      "description": "Group Cilium - unanchored: depNames carry a registry prefix (quay.io/cilium/charts/cilium), so ^cilium matched only the plain Helm release and split every bump across two PRs",
+      "matchPackageNames": ["/cilium/"],
       "groupName": "Cilium",
       "labels": ["infrastructure", "networking"]
     },
     {
       "description": "Group cert-manager",
-      "matchPackagePatterns": ["^cert-manager"],
+      "matchPackageNames": ["/cert-manager/"],
       "groupName": "cert-manager",
       "labels": ["infrastructure", "security"]
     },
     {
       "description": "Group Longhorn",
-      "matchPackagePatterns": ["^longhorn"],
+      "matchPackageNames": ["/longhorn/"],
       "groupName": "Longhorn",
       "labels": ["infrastructure", "storage"]
     },
     {
       "description": "Group monitoring stack",
-      "matchPackagePatterns": [
-        "prometheus",
-        "grafana",
-        "alertmanager",
-        "kube-state-metrics",
-        "node-exporter"
+      "matchPackageNames": [
+        "/prometheus/",
+        "/grafana/",
+        "/alertmanager/",
+        "/kube-state-metrics/",
+        "/node-exporter/"
       ],
       "groupName": "Monitoring Stack",
       "labels": ["monitoring"]
     },
 
     {
-      "description": "Group Flux components",
-      "matchPackagePatterns": ["^flux", "^fluxcd"],
+      "description": "Group Flux components - keeps the gotk-components.yaml updates in one PR instead of five conflicting ones",
+      "matchPackageNames": ["/fluxcd/", "/^flux/"],
       "groupName": "Flux",
       "labels": ["gitops"]
     },

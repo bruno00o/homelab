@@ -218,12 +218,11 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/apps
-  # TEMPORARILY false while apps move to their own Kustomizations. Pruning here deletes
-  # every resource that leaves this Kustomization's inventory — proven on random-gif,
-  # whose Deployment came back with a new UID and its Helm release reinstalled at v1.
-  # With PVCs in the set that means data loss. Restore to true once every app is migrated
-  # and adopted by its child Kustomization.
-  prune: false
+  # This Kustomization now owns nothing but the 18 per-app Kustomizations. Beware when
+  # moving resources out of it: pruning deletes whatever leaves its inventory, which is how
+  # the random-gif pilot lost its Deployment and reinstalled its Helm release at v1. Set
+  # prune: false for the reconcile that moves them, then turn it back on.
+  prune: true
   wait: true
   dependsOn:
     - name: infrastructure-configs

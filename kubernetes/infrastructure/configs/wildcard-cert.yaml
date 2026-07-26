@@ -17,3 +17,24 @@ spec:
     algorithm: ECDSA
     size: 256
     rotationPolicy: Always
+---
+# Internal wildcard, issued by our own CA. It replaces one Certificate per app plus the
+# ReferenceGrant each of them needed for the Gateway to read a secret in another namespace.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-internal
+  namespace: kube-system
+spec:
+  secretName: wildcard-internal-tls
+  issuerRef:
+    name: ${CLUSTER_ISSUER}
+    kind: ClusterIssuer
+  commonName: ${CLUSTER_DOMAIN}
+  dnsNames:
+    - ${CLUSTER_DOMAIN}
+    - "*.${CLUSTER_DOMAIN}"
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always

@@ -32,6 +32,23 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+
+    # One listener for every internal hostname. An app attaches to it with
+    # `sectionName: https-internal-wildcard` and needs no Certificate of its own, and no
+    # ReferenceGrant either since the secret lives here in kube-system.
+    - name: https-internal-wildcard
+      protocol: HTTPS
+      port: 443
+      hostname: "*.${CLUSTER_DOMAIN}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: wildcard-internal-tls
+            namespace: kube-system
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: https-auth
       protocol: HTTPS
       port: 443

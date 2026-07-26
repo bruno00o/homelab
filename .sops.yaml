@@ -1,8 +1,14 @@
 ---
 creation_rules:
+  # Two recipients. The first is the day-to-day key (~/.config/sops/age/keys.txt); the
+  # second is break-glass and must live off this machine — a password manager and paper,
+  # per docs/age-key-backup.md. One key on one disk is a single point of failure for every
+  # secret in this repo.
   - path_regex: .*\.sops\.yaml$
     encrypted_regex: ^(data|stringData)$
-    age: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    age: >-
+      age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl,
+      age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
 stores:
   yaml:
     indent: 2

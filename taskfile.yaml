@@ -502,24 +502,31 @@ tasks:
       - sops {{.FILE}}
 
   sops:age-show:
-    desc: Print the Age private key for backup (paste into password manager / cold storage)
+    desc: Print an Age private key for backup (KEY=main|breakglass)
     silent: true
+    vars:
+      KEY: '{{.KEY | default "main"}}'
     cmds:
       - |
+        case "{{.KEY}}" in
+          main)       NAME="keys.txt" ;;
+          breakglass) NAME="breakglass.txt" ;;
+          *) echo "KEY must be main or breakglass" >&2; exit 1 ;;
+        esac
         AGE_KEY=""
-        if [ -f "$HOME/Library/Application Support/sops/age/keys.txt" ]; then
-          AGE_KEY="$HOME/Library/Application Support/sops/age/keys.txt"
-        elif [ -f "$HOME/.config/sops/age/keys.txt" ]; then
-          AGE_KEY="$HOME/.config/sops/age/keys.txt"
+        if [ -f "$HOME/Library/Application Support/sops/age/$NAME" ]; then
+          AGE_KEY="$HOME/Library/Application Support/sops/age/$NAME"
+        elif [ -f "$HOME/.config/sops/age/$NAME" ]; then
+          AGE_KEY="$HOME/.config/sops/age/$NAME"
         fi
         if [ -z "$AGE_KEY" ]; then
-          echo "Age key not found in ~/.config/sops/age/keys.txt" >&2
+          echo "Age key '$NAME' not found under ~/.config/sops/age/" >&2
           exit 1
         fi
-        EXPECTED=$(yq '.creation_rules[0].age' .sops.yaml)
+        # .sops.yaml carries two recipients now, so check membership rather than equality.
         ACTUAL=$(grep -oE 'age1[a-z0-9]+' "$AGE_KEY" | tail -1)
-        if [ "$EXPECTED" != "$ACTUAL" ]; then
-          echo "WARNING: public key in $AGE_KEY ($ACTUAL) does not match .sops.yaml ($EXPECTED)" >&2
+        if ! yq '.creation_rules[0].age' .sops.yaml | grep -q "$ACTUAL"; then
+          echo "WARNING: $ACTUAL is not listed as a recipient in .sops.yaml" >&2
           echo "" >&2
         fi
         cat "$AGE_KEY"

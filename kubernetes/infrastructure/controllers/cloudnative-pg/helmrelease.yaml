@@ -23,18 +23,9 @@ spec:
 
   install:
     crds: CreateReplace
-    remediation:
-      retries: 3
 
   upgrade:
     crds: CreateReplace
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-      remediateLastFailure: true
-
-  uninstall:
-    keepHistory: false
 
   values:
     monitoring:

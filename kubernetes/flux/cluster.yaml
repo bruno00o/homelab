@@ -71,6 +71,30 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
+  patches:
+    # HelmRelease defaults, declared once instead of being repeated in every release.
+    # `crds:` is deliberately absent: it is a per-chart decision (spegel and reloader use
+    # Skip because their CRDs are managed elsewhere) and a patch would silently override
+    # it. metadata.name is a placeholder — `target` is what selects.
+    - target:
+        group: helm.toolkit.fluxcd.io
+        kind: HelmRelease
+      patch: |-
+        apiVersion: helm.toolkit.fluxcd.io/v2
+        kind: HelmRelease
+        metadata:
+          name: _
+        spec:
+          install:
+            remediation:
+              retries: 3
+          upgrade:
+            cleanupOnFail: true
+            remediation:
+              retries: 3
+              remediateLastFailure: true
+          uninstall:
+            keepHistory: false
   healthChecks:
     - apiVersion: apps/v1
       kind: DaemonSet
@@ -209,6 +233,30 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
+  patches:
+    # HelmRelease defaults, declared once instead of being repeated in every release.
+    # `crds:` is deliberately absent: it is a per-chart decision (spegel and reloader use
+    # Skip because their CRDs are managed elsewhere) and a patch would silently override
+    # it. metadata.name is a placeholder — `target` is what selects.
+    - target:
+        group: helm.toolkit.fluxcd.io
+        kind: HelmRelease
+      patch: |-
+        apiVersion: helm.toolkit.fluxcd.io/v2
+        kind: HelmRelease
+        metadata:
+          name: _
+        spec:
+          install:
+            remediation:
+              retries: 3
+          upgrade:
+            cleanupOnFail: true
+            remediation:
+              retries: 3
+              remediateLastFailure: true
+          uninstall:
+            keepHistory: false
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment

@@ -14,15 +14,6 @@ spec:
     - name: cloudnative-pg
       namespace: cnpg-system
 
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-      remediateLastFailure: true
-
   values:
     controllers:
       umami:

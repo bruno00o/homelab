@@ -24,17 +24,6 @@ spec:
 
   install:
     crds: Skip
-    remediation:
-      retries: 3
-
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-      remediateLastFailure: true
-
-  uninstall:
-    keepHistory: false
 
   values:
     reloader:

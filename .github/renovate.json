@@ -169,8 +169,8 @@
       "automerge": false
     },
     {
-      "description": "Kubernetes - review manually",
-      "matchPackageNames": ["kubernetes/kubernetes"],
+      "description": "Kubernetes - review manually (kubectl must follow the cluster)",
+      "matchPackageNames": ["kubernetes/kubernetes", "kubectl", "kubernetes/kubectl"],
       "labels": ["kubernetes", "infrastructure"],
       "automerge": false
     },

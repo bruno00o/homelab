@@ -1,0 +1,25 @@
+---
+# Local gates before code reaches main.
+#
+# These matter more here than in most repos: the GitHub ruleset only gates pull requests,
+# so a manual push to main goes straight through with "Bypassed rule violations". For
+# hand-made commits, pre-push is the only check that runs at all.
+#
+# The split is deliberate. pre-commit holds what works with no network, so committing
+# offline is never blocked. kubeconform needs to reach the schema catalogs, so it waits
+# for pre-push. Use `git push --no-verify` to override.
+
+pre-commit:
+  parallel: true
+  commands:
+    yaml:
+      glob: "*.{yaml,yml}"
+      run: task validate:yaml
+    talos:
+      glob: "talos/**"
+      run: task validate:talos
+
+pre-push:
+  commands:
+    validate:
+      run: task validate

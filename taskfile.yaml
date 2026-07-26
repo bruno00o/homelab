@@ -560,6 +560,7 @@ tasks:
         command -v yq >/dev/null || MISSING="$MISSING yq"
         command -v jq >/dev/null || MISSING="$MISSING jq"
         command -v kubeconform >/dev/null || MISSING="$MISSING kubeconform"
+        command -v lefthook >/dev/null || MISSING="$MISSING lefthook"
         if [ -n "$MISSING" ]; then
           echo "Missing:$MISSING"
           echo "Run 'task deps:install'"
@@ -574,7 +575,16 @@ tasks:
         msg: "mise is not installed. See https://mise.jdx.dev/getting-started.html"
     cmds:
       - mise install
+      - task: hooks:install
       - echo "All dependencies installed at the versions pinned in .mise.toml"
+
+  hooks:install:
+    desc: Install the git hooks defined in lefthook.yml
+    preconditions:
+      - sh: command -v lefthook
+        msg: "lefthook not found. Run 'task deps:install'."
+    cmds:
+      - lefthook install
 
   # =============================================================================
   # CNPG - CloudNativePG

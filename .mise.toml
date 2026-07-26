@@ -17,3 +17,5 @@ yq = "4.53.3"
 jq = "1.8.2"
 # Must match the version installed by .github/workflows/ci.yaml
 kubeconform = "0.8.0"
+# Git hooks — run `task hooks:install` after installing
+lefthook = "2.1.10"

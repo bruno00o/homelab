@@ -16,9 +16,11 @@ jobs:
       - name: Install yamllint
         run: pip install yamllint
 
+      # Whole repo, not just kubernetes/ and talos/: taskfile.yaml and .github/ were
+      # never linted, and had been carrying errors unnoticed.
       - name: Lint YAML files
         run: |
-          yamllint -c .yamllint.yaml kubernetes/ talos/
+          yamllint -c .yamllint.yaml .
 
   kubeconform:
     name: Kubernetes Manifests
@@ -26,47 +28,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install kubeconform
+      # Versions come from .mise.toml so this job and `task validate` cannot validate
+      # with different schemas.
+      - name: Install tools
         run: |
-          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | \
-            tar xz -C /usr/local/bin
-
-      - name: Download Flux CRDs
-        run: |
-          mkdir -p /tmp/flux-crds
-          curl -sL https://github.com/fluxcd/flux2/releases/latest/download/crd-schemas.tar.gz | \
-            tar xz -C /tmp/flux-crds
+          KUBECONFORM=$(grep -oP '(?<=^kubeconform = ")[^"]+' .mise.toml)
+          YQ=$(grep -oP '(?<=^yq = ")[^"]+' .mise.toml)
+          curl -sL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM}/kubeconform-linux-amd64.tar.gz" \
+            | tar xz -C /usr/local/bin
+          curl -sL "https://github.com/mikefarah/yq/releases/download/v${YQ}/yq_linux_amd64" \
+            -o /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
 
       - name: Validate Kubernetes manifests
-        run: |
-          find kubernetes -name '*.yaml' -not -name '*.sops.yaml' -print0 | \
-            xargs -0 kubeconform \
-              -strict \
-              -ignore-missing-schemas \
-              -schema-location default \
-              -schema-location '/tmp/flux-crds/{{ .ResourceKind }}{{ .KindSuffix }}.json' \
-              -summary
-
-  flux-validate:
-    name: Flux HelmReleases
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@main
-
-      - name: Validate Flux manifests
-        run: |
-          echo "Validating Kustomizations..."
-          find kubernetes -name 'kustomization.yaml' -exec dirname {} \; | while read dir; do
-            echo "  → $dir"
-            flux build kustomization test \
-              --path="$dir" \
-              --kustomization-file=/dev/null \
-              --dry-run 2>/dev/null || echo "    (skipped - needs cluster context)"
-          done
-          echo "✅ Flux validation complete"
+        run: ./scripts/kubeconform.sh
 
   renovate-validate:
     name: Renovate Config

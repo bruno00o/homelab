@@ -39,3 +39,4 @@ ignore: |
   **/*.sops.yaml
   talos/clusterconfig/
   kubernetes/infrastructure/configs/grafana-dashboards/
+  .claude/

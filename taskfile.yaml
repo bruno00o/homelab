@@ -29,6 +29,44 @@ tasks:
       - task --list
 
   # =============================================================================
+  # Validation - mirrors .github/workflows/ci.yaml
+  # =============================================================================
+  validate:
+    desc: Run the CI checks locally, before pushing
+    cmds:
+      - task: validate:yaml
+      - task: validate:manifests
+      - task: validate:talos
+      - task: validate:renovate
+
+  validate:yaml:
+    desc: Lint YAML (same paths as CI)
+    cmds:
+      - yamllint -c .yamllint.yaml .
+
+  validate:manifests:
+    desc: Schema-validate all manifests, CRDs included
+    preconditions:
+      - sh: command -v kubeconform
+        msg: "kubeconform not found. Run 'task deps:install'."
+    cmds:
+      - ./scripts/kubeconform.sh
+
+  validate:talos:
+    desc: Validate talconfig.yaml
+    dir: "{{.TALOS_DIR}}"
+    cmds:
+      - talhelper validate talconfig talconfig.yaml
+
+  validate:renovate:
+    desc: Validate the Renovate config
+    # npx pulls the whole renovate package, so skip it unless the config changed.
+    sources:
+      - .github/renovate.json
+    cmds:
+      - npx -y -p renovate -- renovate-config-validator .github/renovate.json
+
+  # =============================================================================
   # Talos - Configuration
   # =============================================================================
   talos:genconfig:
@@ -283,7 +321,12 @@ tasks:
       NODE_IP: "{{.NODE_IP | default .NODE_LUFFY}}"
     cmds:
       - echo "Waiting for node {{.NODE_IP}} to be healthy..."
-      - until talosctl health --nodes {{.NODE_LUFFY}} --control-plane-nodes {{.NODE_LUFFY}},{{.NODE_ZORO}},{{.NODE_NAMI}} --worker-nodes {{.NODE_USOPP}},{{.NODE_SANJI}},{{.NODE_CHOPPER}} 2>/dev/null; do sleep 5; done
+      - |
+        until talosctl health --nodes {{.NODE_LUFFY}} \
+          --control-plane-nodes {{.NODE_LUFFY}},{{.NODE_ZORO}},{{.NODE_NAMI}} \
+          --worker-nodes {{.NODE_USOPP}},{{.NODE_SANJI}},{{.NODE_CHOPPER}} 2>/dev/null; do
+          sleep 5
+        done
       - echo "Node {{.NODE_IP}} is healthy"
 
   talos:wait-ready:
@@ -514,6 +557,7 @@ tasks:
         command -v sops >/dev/null || MISSING="$MISSING sops"
         command -v yq >/dev/null || MISSING="$MISSING yq"
         command -v jq >/dev/null || MISSING="$MISSING jq"
+        command -v kubeconform >/dev/null || MISSING="$MISSING kubeconform"
         if [ -n "$MISSING" ]; then
           echo "Missing:$MISSING"
           echo "Run 'task deps:install'"
@@ -550,7 +594,10 @@ tasks:
       - |
         echo "=== Longhorn Backups from NAS ==="
         kubectl get backups.longhorn.io -n longhorn-system -o json | \
-          jq -r '.items[] | select(.status.state == "Completed") | (.status.labels.KubernetesStatus | fromjson) as $k | "\($k.namespace)/\($k.pvcName) | \(.status.volumeSize | tonumber / 1073741824 | floor)GB | \(.status.backupCreatedAt) | \(.metadata.name)"' | \
+          jq -r '.items[]
+                 | select(.status.state == "Completed")
+                 | (.status.labels.KubernetesStatus | fromjson) as $k
+                 | "\($k.namespace)/\($k.pvcName) | \(.status.volumeSize | tonumber / 1073741824 | floor)GB | \(.status.backupCreatedAt) | \(.metadata.name)"' | \
           sort | uniq | column -t -s'|'
         echo ""
         echo "To restore a specific PVC, use:"

@@ -47,6 +47,20 @@ spec:
         memory: 128Mi
 
     webhook:
+      # 2, not 1: failurePolicy is Fail, so while this pod is unavailable every
+      # Certificate/Issuer admission is rejected. See AUDIT.md R9.
+      replicaCount: 2
+      # This chart sets no anti-affinity, so without a spread both replicas could land
+      # on the same node and a single reboot would take the webhook down anyway.
+      # ScheduleAnyway rather than DoNotSchedule: never block scheduling on 3 workers.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: cert-manager
+              app.kubernetes.io/component: webhook
       resources:
         requests:
           cpu: 10m

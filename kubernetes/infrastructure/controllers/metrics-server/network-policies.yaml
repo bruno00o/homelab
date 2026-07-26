@@ -13,8 +13,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: metrics-server
   ingress:
-    # The aggregation layer proxies /apis/metrics.k8s.io calls to this pod.
+    # The aggregation layer proxies /apis/metrics.k8s.io calls to this pod. The
+    # apiserver runs host-network, so Cilium SNATs it to the node cilium_host IP
+    # and the packet arrives as host/remote-node — the kube-apiserver entity only
+    # ever matches the apiserver as a *destination*, never as a source.
     - fromEntities:
+        - host
+        - remote-node
         - kube-apiserver
       toPorts:
         - ports:

@@ -37,6 +37,8 @@ spec:
         app.kubernetes.io/name: adguard-home
         app.kubernetes.io/instance: adguard
     spec:
+      # DNS for the whole house: it must get a node before ordinary apps do.
+      priorityClassName: system-cluster-critical
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

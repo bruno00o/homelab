@@ -90,6 +90,10 @@ spec:
             - name: dashboard
               containerPort: 9119
               protocol: TCP
+          readinessProbe:
+            tcpSocket: { port: 9119 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
           env:
             - name: TZ
               value: ${TIMEZONE}

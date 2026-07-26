@@ -73,6 +73,12 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          # Without this, the Service takes the pod into rotation before nginx is
+          # listening, so a rollout drops requests for a second or two.
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
           volumeMounts:
             - name: config
               mountPath: /app/config.json

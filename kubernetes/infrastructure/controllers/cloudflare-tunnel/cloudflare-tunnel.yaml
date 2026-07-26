@@ -17,6 +17,16 @@ spec:
       labels:
         app.kubernetes.io/name: cloudflare-tunnel
     spec:
+      # Family access from outside goes through this tunnel: keep it schedulable ahead of
+      # ordinary apps, and never put both replicas on one node.
+      priorityClassName: system-cluster-critical
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudflare-tunnel
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

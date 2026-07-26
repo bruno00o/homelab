@@ -181,6 +181,19 @@ spec:
                   {{ .Annotations.description }}
                   {{ end }}
       alertmanagerSpec:
+        # 2, not 1: a single Alertmanager means every alert is lost while its node reboots,
+        # and the failure is silent by nature — nothing alerts about the alerting being
+        # down. The two gossip their state, so a notification is not sent twice.
+        replicas: 2
+        # This chart sets no anti-affinity, so without a spread both replicas can land on
+        # the same node and the second one buys nothing.
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: alertmanager
         resources:
           requests:
             cpu: 10m

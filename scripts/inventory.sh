@@ -44,6 +44,13 @@ kubectl -n cloudflare-tunnel get cm cloudflare-tunnel-config -o jsonpath='{.data
 
 CLUSTER_DOMAIN=$(kubectl -n flux-system get cm cluster-settings -o jsonpath='{.data.CLUSTER_DOMAIN}')
 PUBLIC_DOMAIN=$(kubectl -n flux-system get cm cluster-settings -o jsonpath='{.data.PUBLIC_DOMAIN}')
+PROJECTS_DOMAIN=$(kubectl -n flux-system get cm cluster-settings -o jsonpath='{.data.PROJECTS_DOMAIN}')
+
+# An empty domain would turn its suffix pattern below into `*"."`, matching every hostname
+# and disabling the check without saying so.
+for v in CLUSTER_DOMAIN PUBLIC_DOMAIN PROJECTS_DOMAIN; do
+  [ -n "${!v}" ] || { echo "$v is empty in the cluster-settings ConfigMap." >&2; exit 1; }
+done
 
 # One row per (hostname, route). A route carrying two hostnames is two rows: the hostname is
 # what you look up, so it is the key.
@@ -103,22 +110,24 @@ echo
 echo "CHECKS"
 found=0
 
-# A hostname on neither declared domain is unreachable through the LAN split-horizon and
-# survives a domain migration by being forgotten.
+# A hostname on none of the three declared domains has no owner: nothing manages its DNS
+# and no future domain change would find it. The three are all legitimate — an earlier
+# version of this check knew only two and flagged the seven PROJECTS_DOMAIN hostnames as
+# anomalies, which is how a check teaches you to ignore checks.
 while IFS=$'\t' read -r host _; do
   case "$host" in
-    *".$CLUSTER_DOMAIN"|*".$PUBLIC_DOMAIN") ;;
+    *".$CLUSTER_DOMAIN"|*".$PUBLIC_DOMAIN"|*".$PROJECTS_DOMAIN") ;;
     *) echo "  tunnel hostname on an undeclared domain: $host"; found=1 ;;
   esac
 done < "$WORK/tunnel.tsv"
 
-# A public-domain route with no tunnel entry answers on the LAN only, which is rarely what
-# a public hostname is for.
+# A route on a published domain with no tunnel entry answers on the LAN only, which is
+# rarely what a hostname meant for the internet is for.
 while IFS=$'\t' read -r host _ _ _; do
   case "$host" in
-    *".$PUBLIC_DOMAIN")
+    *".$PUBLIC_DOMAIN"|*".$PROJECTS_DOMAIN")
       cut -f1 "$WORK/tunnel.tsv" | grep -qxF "$host" ||
-        { echo "  public-domain route with no tunnel entry, LAN-only: $host"; found=1; } ;;
+        { echo "  published-domain route with no tunnel entry, LAN-only: $host"; found=1; } ;;
   esac
 done < "$WORK/gateway.tsv"
 

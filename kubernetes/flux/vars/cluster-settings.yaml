@@ -27,5 +27,13 @@ data:
   CLUSTER_ISSUER: "mugiwara-ca-issuer"
   LB_EXTERNAL_GATEWAY: "10.0.20.23"
   NFS_BACKUP_TARGET: "nfs://10.0.10.113:/volume1/backups"
+  # Three domains, on purpose — not a migration in progress.
+  #   CLUSTER_DOMAIN   internal only, LAN, resolved by AdGuard
+  #   PUBLIC_DOMAIN    family and personal apps published on the internet (immich, matrix,
+  #                    home-assistant...), behind Authentik
+  #   PROJECTS_DOMAIN  public projects, open to anyone (portfolio, aroma, doublons...)
+  # Both public ones are served through the Cloudflare tunnel and managed by external-dns.
+  # Beware the naming: PUBLIC_DOMAIN is the *less* open of the two.
   PUBLIC_DOMAIN: "seilliebert.app"
+  PROJECTS_DOMAIN: "seilliebert.dev"
   CF_TUNNEL_HOSTNAME: "e314949b-7ce9-4ae0-aed6-eba2c82a8649.cfargotunnel.com"

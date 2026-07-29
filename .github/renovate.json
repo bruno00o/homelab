@@ -208,6 +208,13 @@
     },
 
     {
+      "description": "Gateway API CRDs - review manually. Every Gateway and HTTPRoute in the cluster depends on their schema, and the first bump after they became visible to Renovate crossed four minors unattended (v1.2.1 to v1.6.1). It happened to work with Cilium 1.19, which is not the same as being safe: the CNI implements a declared range of the API. Unanchored, the depName shows up both bare and owner-prefixed",
+      "matchPackageNames": ["/gateway-api/"],
+      "labels": ["infrastructure", "networking", "review-required"],
+      "automerge": false
+    },
+
+    {
       "description": "Label major updates",
       "matchUpdateTypes": ["major"],
       "labels": ["major"],

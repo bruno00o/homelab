@@ -43,6 +43,26 @@ spec:
       name: sops-age
 
 ---
+# Upstream CRDs, from their own source. Own Kustomization rather than a directory of
+# infrastructure-controllers so a failed fetch blocks the CRDs alone instead of the 40-odd
+# resources next to them. No postBuild: substitution must not run over a foreign repo.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gateway-api
+  namespace: flux-system
+spec:
+  interval: 1h
+  timeout: 5m
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: gateway-api
+  path: ./config/crd/standard
+  prune: true
+  wait: true
+
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -56,10 +76,14 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/infrastructure/controllers
-  prune: true
+  # Temporarily false: the Gateway API CRDs are leaving this inventory, and pruning would
+  # delete them along with every Gateway and HTTPRoute in the cluster. Back to true once
+  # the gateway-api Kustomization has adopted them.
+  prune: false
   wait: true
   dependsOn:
     - name: cluster-vars
+    - name: gateway-api
   decryption:
     provider: sops
     secretRef:

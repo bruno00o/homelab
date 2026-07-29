@@ -184,3 +184,21 @@ metadata:
 spec:
   interval: 1h
   url: https://kubernetes-sigs.github.io/metrics-server/
+---
+# Not a kustomize remote base: fetching the release asset at every reconcile made a GitHub
+# TLS hiccup fail the whole infrastructure-controllers build. source-controller caches the
+# artifact and retries on its own, and Renovate's flux manager can read ref.tag — the
+# release-asset URL was invisible to it, which is why this sat on v1.2.1.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: gateway-api
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://github.com/kubernetes-sigs/gateway-api
+  ref:
+    tag: v1.2.1
+  ignore: |
+    /*
+    !/config/crd/standard/

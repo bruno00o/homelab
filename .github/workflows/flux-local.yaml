@@ -29,6 +29,12 @@ jobs:
         with:
           path: kubernetes/flux
           enable-helm: true
+          # flux-local resolves every Kustomization path inside the local checkout, whatever
+          # its sourceRef, so the gateway-api one — pointing at the upstream repo — looks
+          # like a missing directory. Restricting to our own source excludes it while
+          # keeping path validation strict everywhere else, which
+          # skip-invalid-kustomization-paths would have disabled for the whole repo.
+          sources: flux-system
 
   diff:
     name: Diff
@@ -50,3 +56,5 @@ jobs:
         with:
           path: kubernetes/flux
           live-branch: main
+          # Same reason as the test job above.
+          sources: flux-system

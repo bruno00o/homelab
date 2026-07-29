@@ -78,6 +78,14 @@ tasks:
     cmds:
       - npx -y -p renovate -- renovate-config-validator .github/renovate.json
 
+  inventory:
+    desc: List what is exposed, on which hostname, through which path
+    preconditions:
+      - sh: command -v jq
+        msg: "jq not found. Run 'task deps:install'."
+    cmds:
+      - ./scripts/inventory.sh
+
   # =============================================================================
   # Talos - Configuration
   # =============================================================================

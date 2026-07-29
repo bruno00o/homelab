@@ -168,9 +168,22 @@ spec:
           routes:
             - receiver: "null"
               matchers:
-                - alertname =~ "InfoInhibitor|Watchdog"
+                - alertname = "InfoInhibitor"
+            # Watchdog fires permanently by design. Sent outside the cluster so that its
+            # *silence* is the alert: every Discord notification needs the cluster alive
+            # enough to send it, so nothing in here can report its own death.
+            - receiver: "heartbeat"
+              matchers:
+                - alertname = "Watchdog"
+              group_wait: 0s
+              group_interval: 1m
+              repeat_interval: 1m
         receivers:
           - name: "null"
+          - name: "heartbeat"
+            webhook_configs:
+              - url: ${HEARTBEAT_URL}
+                send_resolved: false
           - name: "discord"
             discord_configs:
               - webhook_url: ${DISCORD_WEBHOOK_URL}

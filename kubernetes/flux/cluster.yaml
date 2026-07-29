@@ -76,10 +76,7 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/infrastructure/controllers
-  # Temporarily false: the Gateway API CRDs are leaving this inventory, and pruning would
-  # delete them along with every Gateway and HTTPRoute in the cluster. Back to true once
-  # the gateway-api Kustomization has adopted them.
-  prune: false
+  prune: true
   wait: true
   dependsOn:
     - name: cluster-vars

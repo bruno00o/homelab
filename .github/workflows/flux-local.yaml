@@ -5,10 +5,14 @@ on:
     branches: [main]
     paths:
       - "kubernetes/**"
+      # A change to the checker must re-run the checker: fixing this workflow did not
+      # trigger it, so the fix could only be confirmed by dispatching it by hand.
+      - ".github/workflows/flux-local.yaml"
   push:
     branches: [main]
     paths:
       - "kubernetes/**"
+      - ".github/workflows/flux-local.yaml"
   workflow_dispatch:
 
 permissions:

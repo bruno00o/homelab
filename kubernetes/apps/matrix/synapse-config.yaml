@@ -5,8 +5,8 @@ metadata:
   namespace: matrix
 data:
   homeserver.yaml: |
-    server_name: "matrix.seilliebert.app"
-    public_baseurl: "https://matrix.seilliebert.app/"
+    server_name: "matrix.${PUBLIC_DOMAIN}"
+    public_baseurl: "https://matrix.${PUBLIC_DOMAIN}/"
     pid_file: /data/homeserver.pid
     signing_key_path: "/data/signing.key"
     report_stats: false

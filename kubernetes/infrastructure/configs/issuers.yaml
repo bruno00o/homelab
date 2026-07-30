@@ -31,8 +31,8 @@ spec:
               key: api-token
         selector:
           dnsZones:
-            - seilliebert.dev
-            - seilliebert.app
+            - ${PROJECTS_DOMAIN}
+            - ${PUBLIC_DOMAIN}
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -52,5 +52,5 @@ spec:
               key: api-token
         selector:
           dnsZones:
-            - seilliebert.dev
-            - seilliebert.app
+            - ${PROJECTS_DOMAIN}
+            - ${PUBLIC_DOMAIN}

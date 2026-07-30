@@ -5,7 +5,7 @@ metadata:
   namespace: doublons
 spec:
   endpoints:
-    - dnsName: doublons.seilliebert.dev
+    - dnsName: doublons.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}

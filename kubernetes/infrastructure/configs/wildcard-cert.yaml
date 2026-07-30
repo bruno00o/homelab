@@ -9,10 +9,10 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
-  commonName: seilliebert.app
+  commonName: ${PUBLIC_DOMAIN}
   dnsNames:
-    - seilliebert.app
-    - "*.seilliebert.app"
+    - ${PUBLIC_DOMAIN}
+    - "*.${PUBLIC_DOMAIN}"
   privateKey:
     algorithm: ECDSA
     size: 256

@@ -5,7 +5,7 @@ metadata:
   namespace: umami
 spec:
   endpoints:
-    - dnsName: umami.seilliebert.dev
+    - dnsName: umami.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}

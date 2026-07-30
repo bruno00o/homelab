@@ -5,7 +5,7 @@ metadata:
   namespace: gaspard
 spec:
   endpoints:
-    - dnsName: gaspard-mcp.seilliebert.dev
+    - dnsName: gaspard-mcp.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}

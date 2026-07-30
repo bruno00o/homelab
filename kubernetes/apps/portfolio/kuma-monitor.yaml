@@ -7,7 +7,7 @@ spec:
   config:
     type: http
     name: Portfolio
-    url: https://bruno.seilliebert.dev
+    url: https://bruno.${PROJECTS_DOMAIN}
     interval: 60
     accepted_statuscodes:
       - "200-299"

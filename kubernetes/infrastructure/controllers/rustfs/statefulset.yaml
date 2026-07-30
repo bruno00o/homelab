@@ -47,7 +47,7 @@ spec:
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-            - auth.merry.home.arpa
+            - auth.${CLUSTER_DOMAIN}
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -121,7 +121,7 @@ spec:
             - name: RUSTFS_IDENTITY_OPENID_ENABLE
               value: "true"
             - name: RUSTFS_IDENTITY_OPENID_CONFIG_URL
-              value: "https://auth.merry.home.arpa/application/o/rustfs/.well-known/openid-configuration"
+              value: "https://auth.${CLUSTER_DOMAIN}/application/o/rustfs/.well-known/openid-configuration"
             - name: RUSTFS_IDENTITY_OPENID_CLIENT_ID
               value: "rustfs"
             - name: RUSTFS_IDENTITY_OPENID_CLIENT_SECRET

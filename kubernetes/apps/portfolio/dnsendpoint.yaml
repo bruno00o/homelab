@@ -5,7 +5,7 @@ metadata:
   namespace: portfolio
 spec:
   endpoints:
-    - dnsName: bruno.seilliebert.dev
+    - dnsName: bruno.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}

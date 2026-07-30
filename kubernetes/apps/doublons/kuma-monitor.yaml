@@ -7,7 +7,7 @@ spec:
   config:
     type: http
     name: Doublons
-    url: https://doublons.seilliebert.dev
+    url: https://doublons.${PROJECTS_DOMAIN}
     interval: 60
     accepted_statuscodes:
       - "200-299"

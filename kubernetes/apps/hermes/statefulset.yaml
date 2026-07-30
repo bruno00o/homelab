@@ -125,9 +125,9 @@ spec:
             - name: MATRIX_HOMESERVER
               value: http://synapse.matrix.svc.cluster.local:8008
             - name: MATRIX_USER_ID
-              value: "@hermes:matrix.seilliebert.app"
+              value: "@hermes:matrix.${PUBLIC_DOMAIN}"
             - name: MATRIX_ALLOWED_USERS
-              value: "@bruno:matrix.seilliebert.app"
+              value: "@bruno:matrix.${PUBLIC_DOMAIN}"
             - name: MATRIX_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:

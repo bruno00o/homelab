@@ -5,7 +5,7 @@ metadata:
   namespace: random-gif
 spec:
   endpoints:
-    - dnsName: random-gif.seilliebert.dev
+    - dnsName: random-gif.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}

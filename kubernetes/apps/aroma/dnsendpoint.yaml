@@ -5,14 +5,14 @@ metadata:
   namespace: aroma
 spec:
   endpoints:
-    - dnsName: aroma.seilliebert.dev
+    - dnsName: aroma.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
           value: "true"
-    - dnsName: pb-aroma.seilliebert.dev
+    - dnsName: pb-aroma.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:
         - ${CF_TUNNEL_HOSTNAME}

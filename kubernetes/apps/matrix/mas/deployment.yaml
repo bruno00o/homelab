@@ -46,7 +46,7 @@ spec:
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-            - auth.seilliebert.app
+            - auth.${PUBLIC_DOMAIN}
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001

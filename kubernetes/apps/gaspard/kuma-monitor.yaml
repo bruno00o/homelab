@@ -8,7 +8,7 @@ spec:
   config:
     type: http
     name: Gaspard MCP
-    url: https://gaspard-mcp.seilliebert.dev/health
+    url: https://gaspard-mcp.${PROJECTS_DOMAIN}/health
     interval: 60
     accepted_statuscodes:
       - "200-299"

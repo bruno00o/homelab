@@ -38,8 +38,8 @@ spec:
     txtPrefix: "_externaldns."
 
     domainFilters:
-      - seilliebert.dev
-      - seilliebert.app
+      - ${PROJECTS_DOMAIN}
+      - ${PUBLIC_DOMAIN}
 
     extraArgs:
       - --cloudflare-proxied

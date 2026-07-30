@@ -1,0 +1,72 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Audit-mode mirrors of the four enforced policies, generated from those very files rather
+# than written out again. An exclusion is a deliberate blind spot, but nothing says what it
+# hides: `reloader` ran for months with an empty container securityContext because
+# kube-system is excluded from disallow-privilege-escalation, and every dashboard was green
+# (AUDIT R20). These mirrors drop the exclusions and report instead of blocking.
+#
+# Patched and not copy-pasted on purpose: a mirror that drifts from the policy it mirrors
+# reports on a rule nobody enforces, which is worse than not having it. Here the rule body
+# has exactly one source.
+resources:
+  - ../base
+
+patches:
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: disallow-latest-tag
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: audit-disallow-latest-tag
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Audit
+      - op: remove
+        path: /spec/rules/0/exclude
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: require-resource-limits
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: audit-require-resource-limits
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Audit
+      - op: remove
+        path: /spec/rules/0/exclude
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: disallow-privilege-escalation
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: audit-disallow-privilege-escalation
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Audit
+      - op: remove
+        path: /spec/rules/0/exclude
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: restrict-registries
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: audit-restrict-registries
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Audit
+      - op: remove
+        path: /spec/rules/0/exclude

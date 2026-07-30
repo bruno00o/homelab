@@ -17,3 +17,10 @@ configMapGenerator:
     namespace: monitoring
     files:
       - dns-leak.sh
+    options:
+      annotations:
+        # Without this the promise above is false: Flux's postBuild substitution reads
+        # `${...}` inside the script too, and it was collapsing `${RESOLVER:-1.1.1.1}` to
+        # `RESOLVER="1.1.1.1"` at build time. The deployed bytes differed from the repo's,
+        # and the documented RESOLVER override did nothing in the CronJob.
+        kustomize.toolkit.fluxcd.io/substitute: disabled

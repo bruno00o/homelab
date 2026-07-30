@@ -15,3 +15,10 @@ configMapGenerator:
     files:
       - policy-drift.sh
       - accepted.txt
+    options:
+      annotations:
+        # Flux's postBuild substitution reads `${...}` everywhere, including inside an
+        # embedded script, and fails in strict mode on `${1%%/*}` — a shell expansion it
+        # takes for an unset variable named `1`. Excluded here so the script keeps ordinary
+        # shell syntax instead of being written around a templating engine.
+        kustomize.toolkit.fluxcd.io/substitute: disabled

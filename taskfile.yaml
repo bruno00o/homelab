@@ -317,6 +317,28 @@ tasks:
   # =============================================================================
   # Talos - Status & Monitoring
   # =============================================================================
+  talos:diff:
+    desc: Show what applying the config would change on a node (NODE=luffy, default all)
+    silent: true
+    deps: [talos:genconfig]
+    vars:
+      NODE: '{{.NODE | default "all"}}'
+    cmds:
+      - |
+        # Hostnames and IPs are read from talconfig.yaml, the file that defines them,
+        # rather than copied into yet another `case` block that would drift the day a
+        # node is renamed. genconfig runs first, so this never diffs a stale file.
+        yq -r '.nodes[] | .hostname + " " + .ipAddress' {{.TALOS_DIR}}/talconfig.yaml \
+        | while read -r NAME IP; do
+            case "{{.NODE}}" in
+              all|"$NAME"|"$IP") ;;
+              *) continue ;;
+            esac
+            echo "=== $NAME ($IP) ==="
+            talosctl apply-config --dry-run --nodes "$IP" \
+              --file {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-$NAME.yaml
+          done
+
   talos:status:
     desc: Show Talos cluster status
     cmds:
@@ -458,6 +480,47 @@ tasks:
       - flux reconcile kustomization infrastructure-controllers --with-source
       - flux reconcile kustomization infrastructure-configs --with-source
       - flux reconcile kustomization apps --with-source
+
+  flux:diff:
+    desc: Preview what local changes would do on the cluster (KS=adguard, default all)
+    silent: true
+    vars:
+      KS: '{{.KS | default "all"}}'
+    cmds:
+      - |
+        # Not `kubectl diff`: the manifests on disk carry ${VAR} placeholders that only
+        # Flux resolves, so it would compare unrendered text. `flux diff` builds each
+        # Kustomization the way Flux does — substitution and SOPS decryption included —
+        # then runs a server-side dry-run.
+        #
+        # Only Kustomizations sourced from this repo: gateway-api points at the upstream
+        # gateway-api repo, whose path does not exist in this checkout (the same reason
+        # flux-local needed `sources: flux-system`).
+        LIST=$(kubectl -n flux-system get kustomizations -o json \
+          | jq -r '.items[]
+                   | select(.spec.sourceRef.name == "flux-system")
+                   | .metadata.name + " " + .spec.path')
+
+        # Without this, a typo in KS matches nothing, prints nothing and exits 0 — which
+        # reads exactly like "no differences".
+        if [ "{{.KS}}" != "all" ] && ! echo "$LIST" | cut -d' ' -f1 | grep -qxF "{{.KS}}"; then
+          echo "No Kustomization named '{{.KS}}' is sourced from this repo. Known:" >&2
+          echo "$LIST" | cut -d' ' -f1 | sort | tr '\n' ' ' >&2; echo >&2
+          exit 1
+        fi
+
+        echo "$LIST" \
+          | while read -r NAME KPATH; do
+              case "{{.KS}}" in
+                all|"$NAME") ;;
+                *) continue ;;
+              esac
+              # Captured in an && / || list because set -e would abort on the exit code
+              # before a plain `RC=$?` could read it. 1 only means "differs", which is the
+              # point of asking; anything above is a real failure and must not be hidden.
+              flux diff kustomization "$NAME" --path "$KPATH" && RC=0 || RC=$?
+              [ "$RC" -le 1 ] || exit "$RC"
+            done
 
   flux:status:
     desc: Show Flux status

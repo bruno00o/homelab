@@ -78,6 +78,15 @@ tasks:
     cmds:
       - npx -y -p renovate -- renovate-config-validator .github/renovate.json
 
+  dns:leak-check:
+    desc: Check that nothing internal resolves publicly
+    preconditions:
+      - sh: command -v jq
+        msg: "jq not found. Run 'task deps:install'."
+    cmds:
+      # Same file the CronJob mounts, so the on-demand and scheduled runs cannot diverge.
+      - ./kubernetes/infrastructure/configs/dns-leak/dns-leak.sh
+
   inventory:
     desc: List what is exposed, on which hostname, through which path
     preconditions:

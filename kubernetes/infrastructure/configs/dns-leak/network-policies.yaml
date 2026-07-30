@@ -1,0 +1,30 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-leak-check-egress
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dns-leak-check
+  policyTypes: [Egress]
+  egress:
+    # The public resolver is the whole point: CoreDNS applies the split-horizon rewrites,
+    # so asking it would return the internal view and the check would never see a leak.
+    - to:
+        - ipBlock:
+            cidr: 1.1.1.1/32
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    # Cluster DNS, to resolve the apiserver Service name.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - ports:
+        - { protocol: TCP, port: 6443 }

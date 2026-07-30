@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - rbac.yaml
+  - cronjob.yaml
+  - network-policies.yaml
+  - alerts.yaml
+
+# No global `namespace:`: rbac.yaml deliberately puts a Role and RoleBinding in
+# cloudflare-tunnel, and the transformer would move them to monitoring.
+
+# The script is embedded from the file next to this one rather than pasted into a ConfigMap
+# literal, so `task dns:leak-check` and the CronJob run the same bytes. The name hash makes
+# a change to the script roll the CronJob's pod template on its own.
+configMapGenerator:
+  - name: dns-leak-script
+    namespace: monitoring
+    files:
+      - dns-leak.sh

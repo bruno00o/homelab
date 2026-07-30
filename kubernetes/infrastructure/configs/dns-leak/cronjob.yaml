@@ -1,0 +1,65 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dns-leak-check
+  namespace: monitoring
+spec:
+  schedule: "17 6 * * *"
+  timeZone: ${TIMEZONE}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  # Kept at 3: the alert watches for a failed Job object, so deleting failures promptly
+  # would clear the alert before anyone read it.
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # A leak is not transient, but a resolver timeout is. Two retries separate the two
+      # without turning a real finding into an hour of retries.
+      backoffLimit: 2
+      template:
+        metadata:
+          # Selected by allow-dns-leak-check-egress; without it the pod falls under the
+          # namespace default-deny and cannot reach the resolver.
+          labels:
+            app.kubernetes.io/name: dns-leak-check
+        spec:
+          restartPolicy: Never
+          serviceAccountName: dns-leak-check
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: check
+              # renovate: datasource=docker depName=alpine/k8s
+              image: docker.io/alpine/k8s:1.34.1
+              command: ["sh", "/opt/dns-leak.sh"]
+              env:
+                # kubectl writes its discovery cache under $HOME.
+                - name: HOME
+                  value: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              volumeMounts:
+                - name: script
+                  mountPath: /opt
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: script
+              configMap:
+                name: dns-leak-script
+            - name: tmp
+              emptyDir: {}

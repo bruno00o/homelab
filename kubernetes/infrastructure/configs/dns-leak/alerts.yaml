@@ -1,0 +1,39 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dns-leak-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: dns-leak
+      rules:
+        # The Job exits non-zero on a leak and on a failed read, so one alert covers both.
+        # Deliberately not distinguished: "the check found something" and "the check could
+        # not run" both mean nobody knows whether something is exposed.
+        - alert: PublicDnsLeakCheckFailed
+          expr: kube_job_status_failed{namespace="monitoring", job_name=~"dns-leak-check.*"} > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Public DNS leak check failed"
+            description: >-
+              Job {{ $labels.job_name }} failed. Either a hostname resolves publicly
+              without a Cloudflare tunnel entry, or a public record answers with a private
+              address, or the check could not read the cluster. Run
+              `task dns:leak-check` for the detail.
+
+        # A CronJob that silently stops running looks exactly like one that keeps finding
+        # nothing. 26 h covers the daily schedule plus a missed slot.
+        - alert: PublicDnsLeakCheckStale
+          expr: time() - kube_cronjob_status_last_schedule_time{namespace="monitoring", cronjob="dns-leak-check"} > 26 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Public DNS leak check has not run"
+            description: "dns-leak-check last ran more than 26 hours ago; nothing is verifying public exposure."

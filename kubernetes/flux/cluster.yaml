@@ -77,6 +77,12 @@ spec:
     name: flux-system
   path: ./kubernetes/infrastructure/controllers
   prune: true
+  # No healthChecks list here, and not by oversight: Flux ignores `.spec.healthChecks`
+  # outright when `wait` is true. The 17 entries that used to sit below gated nothing, and
+  # the proof they were never evaluated sat next to them — infrastructure-configs listed
+  # two `cilium-gateway-*` Deployments that no longer exist (Cilium serves gateways from
+  # the shared cilium-envoy DaemonSet) and its health check still reported success.
+  # `wait: true` is what health-checks the HelmReleases.
   wait: true
   dependsOn:
     - name: cluster-vars
@@ -116,75 +122,6 @@ spec:
               remediateLastFailure: true
           uninstall:
             keepHistory: false
-  healthChecks:
-    - apiVersion: apps/v1
-      kind: DaemonSet
-      name: cilium
-      namespace: kube-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cilium-operator
-      namespace: kube-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cert-manager
-      namespace: cert-manager
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: longhorn-driver-deployer
-      namespace: longhorn-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cloudnative-pg
-      namespace: cnpg-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: valkey
-      namespace: valkey-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: kube-prometheus-stack-grafana
-      namespace: monitoring
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: reloader
-      namespace: kube-system
-    - apiVersion: apps/v1
-      kind: DaemonSet
-      name: spegel
-      namespace: kube-system
-    - apiVersion: apps/v1
-      kind: StatefulSet
-      name: loki
-      namespace: loki-system
-    - apiVersion: apps/v1
-      kind: StatefulSet
-      name: tempo
-      namespace: tempo-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: trivy-operator
-      namespace: trivy-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: kyverno-admission-controller
-      namespace: kyverno-system
-    - apiVersion: apps/v1
-      kind: DaemonSet
-      name: intel-gpu-plugin
-      namespace: kube-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cloudflare-tunnel
-      namespace: cloudflare-tunnel
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: plugin-barman-cloud
-      namespace: cnpg-system
-    - apiVersion: apps/v1
-      kind: StatefulSet
-      name: rustfs
-      namespace: rustfs
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -201,6 +138,7 @@ spec:
     name: flux-system
   path: ./kubernetes/infrastructure/configs
   prune: true
+  # Same as above: no healthChecks, `wait` makes Flux ignore them.
   wait: true
   dependsOn:
     - name: infrastructure-controllers
@@ -215,15 +153,6 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
-  healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cilium-gateway-internal-gateway
-      namespace: kube-system
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cilium-gateway-external-gateway
-      namespace: kube-system
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

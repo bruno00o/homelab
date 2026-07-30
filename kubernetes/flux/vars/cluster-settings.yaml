@@ -25,7 +25,6 @@ data:
   LB_POOL_START: "10.0.20.20"
   LB_POOL_END: "10.0.20.39"
   CLUSTER_ISSUER: "mugiwara-ca-issuer"
-  LB_EXTERNAL_GATEWAY: "10.0.20.23"
   NFS_BACKUP_TARGET: "nfs://10.0.10.113:/volume1/backups"
   # Three domains, on purpose — not a migration in progress.
   #   CLUSTER_DOMAIN   internal only, LAN, resolved by AdGuard

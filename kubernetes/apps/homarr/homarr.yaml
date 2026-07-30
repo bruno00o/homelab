@@ -237,9 +237,6 @@ spec:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-app-wildcard
-    - name: external-gateway
-      namespace: kube-system
-      sectionName: https-internal-wildcard
   hostnames:
     - homarr.${CLUSTER_DOMAIN}
     - homarr.${PUBLIC_DOMAIN}

@@ -131,15 +131,21 @@ while IFS=$'\t' read -r host _ _ _; do
   esac
 done < "$WORK/gateway.tsv"
 
-# A Gateway asking for an address it did not get: Cilium does not propagate
-# io.cilium/lb-ipam-ips from a Gateway to the Service it generates, so the request is
-# dropped in silence and LB-IPAM serves whatever the pool has (AUDIT R19).
+# A Gateway asking for an address it did not get. Both places are read, because they do
+# not behave the same: spec.infrastructure.annotations is propagated onto the generated
+# Service and honoured, while a request written in the Gateway's own metadata.annotations
+# is dropped in silence and LB-IPAM serves whatever the pool has (AUDIT R19). Reading only
+# the working one would stop reporting the mistake this check exists to catch.
 while IFS=$'\t' read -r name ip _; do
   case "$name" in
     kube-system/cilium-gateway-*)
       gw=${name#kube-system/cilium-gateway-}
       want=$(kubectl -n kube-system get gateway "$gw" \
+        -o jsonpath='{.spec.infrastructure.annotations.io\.cilium/lb-ipam-ips}' 2>/dev/null || true)
+      stray=$(kubectl -n kube-system get gateway "$gw" \
         -o jsonpath='{.metadata.annotations.io\.cilium/lb-ipam-ips}' 2>/dev/null || true)
+      [ -n "$stray" ] &&
+        { echo "  gateway $gw requests $stray in metadata.annotations, where Cilium never reads it"; found=1; }
       [ -n "$want" ] && [ "$want" != "$ip" ] &&
         { echo "  gateway $gw requests $want but serves $ip"; found=1; } ;;
   esac

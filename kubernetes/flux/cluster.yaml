@@ -82,7 +82,14 @@ spec:
   # the proof they were never evaluated sat next to them — infrastructure-configs listed
   # two `cilium-gateway-*` Deployments that no longer exist (Cilium serves gateways from
   # the shared cilium-envoy DaemonSet) and its health check still reported success.
-  # `wait: true` is what health-checks the HelmReleases.
+  #
+  # Nor is anything lost by their absence, which is the part worth writing down: they were
+  # redundant, not merely ignored. helm-controller waits for a release's resources to be
+  # ready before reporting Ready, so a HelmRelease already implies its workloads. Measured
+  # 2026-07-30 with a throwaway release pinned to a nonexistent image tag: the objects
+  # applied cleanly and it still failed with `timeout waiting for: [Deployment/... status:
+  # 'InProgress']`. Restoring the list would mean `wait: false`, which trades health checks
+  # on every applied resource for health checks on a hand-written subset.
   wait: true
   dependsOn:
     - name: cluster-vars

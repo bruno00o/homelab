@@ -29,11 +29,22 @@ spec:
 
         # A CronJob that silently stops running looks exactly like one that keeps finding
         # nothing. 26 h covers the daily schedule plus a missed slot.
+        #
+        # Three clauses, because the staleness one alone is blind in the cases that matter
+        # most: kube_cronjob_status_last_schedule_time only exists once the CronJob has run,
+        # so a deleted or suspended CronJob produces no series at all and a single-clause
+        # alert would stay silent forever. Deliberately not using absent() on the schedule
+        # metric — it would fire between deploying this and the first run.
         - alert: PublicDnsLeakCheckStale
-          expr: time() - kube_cronjob_status_last_schedule_time{namespace="monitoring", cronjob="dns-leak-check"} > 26 * 3600
+          expr: >-
+            time() - kube_cronjob_status_last_schedule_time{namespace="monitoring", cronjob="dns-leak-check"} > 26 * 3600
+            or absent(kube_cronjob_info{namespace="monitoring", cronjob="dns-leak-check"})
+            or kube_cronjob_spec_suspend{namespace="monitoring", cronjob="dns-leak-check"} == 1
           for: 1h
           labels:
             severity: warning
           annotations:
-            summary: "Public DNS leak check has not run"
-            description: "dns-leak-check last ran more than 26 hours ago; nothing is verifying public exposure."
+            summary: "Public DNS leak check is not running"
+            description: >-
+              dns-leak-check has not run in over 26 hours, or the CronJob is gone or
+              suspended. Nothing is verifying public exposure.

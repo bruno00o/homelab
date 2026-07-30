@@ -163,6 +163,11 @@ spec:
                   key: AUTH_OIDC_CLIENT_SECRET
             - name: AUTH_OIDC_AUTO_LOGIN
               value: "true"
+            # `groups` is not a standard OIDC scope: it is a custom scope mapping declared
+            # in the Authentik blueprint, and both names below must match it exactly.
+            # Admin rights come from the group *name* matching on both sides, so renaming a
+            # group in Authentik silently demotes every Homarr admin — the login still
+            # works, which is what makes it hard to spot.
             - name: AUTH_OIDC_SCOPE_OVERWRITE
               value: "openid email profile groups"
             - name: AUTH_OIDC_GROUPS_ATTRIBUTE

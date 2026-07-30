@@ -38,7 +38,7 @@ spec:
 
     webhook:
       # 2, not 1: failurePolicy is Fail, so while this pod is unavailable every
-      # Certificate/Issuer admission is rejected. See AUDIT.md R9.
+      # Certificate/Issuer admission is rejected.
       replicaCount: 2
       # This chart sets no anti-affinity, so without a spread both replicas could land
       # on the same node and a single reboot would take the webhook down anyway.

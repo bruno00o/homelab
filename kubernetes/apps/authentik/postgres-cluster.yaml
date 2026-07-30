@@ -16,6 +16,8 @@ spec:
     parameters:
       max_connections: "100"
       shared_buffers: "128MB"
+      # Do not remove: an inactive replication slot makes Postgres retain WAL forever, which
+      # filled the volume and crashlooped the instance. This drops the slot, not the cluster.
       max_slot_wal_keep_size: "2GB"
 
   bootstrap:

@@ -62,6 +62,12 @@ metadata:
   name: external-gateway
   namespace: kube-system
   annotations:
+    # Measured 2026-07-30: this does not work. Cilium does not copy the annotation onto the
+    # Service it generates for a Gateway — `cilium-gateway-external-gateway` carries no
+    # annotations at all — so LB-IPAM ignores the request and serves the next free address
+    # from the pool. The Service holds 10.0.20.21 while this asks for .23. Harmless today
+    # (the tunnel targets ClusterIPs and LAN DNS points at the internal gateway), but do
+    # not trust this address: `task inventory` reports the mismatch.
     io.cilium/lb-ipam-ips: ${LB_EXTERNAL_GATEWAY}
 spec:
   gatewayClassName: cilium

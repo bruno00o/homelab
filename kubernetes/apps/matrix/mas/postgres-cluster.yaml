@@ -18,6 +18,8 @@ spec:
       shared_buffers: "128MB"
       # Cap WAL retained for a lagging replication slot so a stuck replica
       # can never fill the volume again (see WAL-disk-full incident 2026-06-17)
+      # Do not remove: an inactive replication slot makes Postgres retain WAL forever, which
+      # filled the volume and crashlooped the instance. This drops the slot, not the cluster.
       max_slot_wal_keep_size: "2GB"
 
   bootstrap:

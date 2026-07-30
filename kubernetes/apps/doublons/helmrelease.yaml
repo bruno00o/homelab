@@ -19,6 +19,9 @@ spec:
         containers:
           app:
             image:
+              # No `# renovate:` comment here, on purpose: zot is a LAN-only registry that
+              # Renovate cannot reach, so a datasource annotation would only produce
+              # failing lookups. Images here are bumped by whatever pushes to zot.
               repository: zot.merry.home.arpa/doublons
               tag: "0.0.3"
             env:

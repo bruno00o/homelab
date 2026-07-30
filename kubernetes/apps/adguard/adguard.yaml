@@ -27,6 +27,13 @@ spec:
   replicas: 1
   strategy:
     type: Recreate
+    # `rollingUpdate: null` is not decoration. Switching an existing Deployment from
+    # RollingUpdate to Recreate fails while the old `rollingUpdate` block is still on the
+    # object — the API server rejects it as invalid for the Recreate strategy, and neither
+    # Helm nor server-side apply removes a field the new manifest simply omits. Declaring
+    # it null is what clears it. On a Deployment that already drifted, patch it by hand
+    # first: `kubectl patch deploy X --type=json -p '[{"op":"remove",
+    # "path":"/spec/strategy/rollingUpdate"}]'`.
     rollingUpdate: null
   selector:
     matchLabels:

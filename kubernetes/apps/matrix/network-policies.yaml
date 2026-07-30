@@ -139,6 +139,10 @@ kind: NetworkPolicy
 metadata:
   name: allow-synapse-egress-https
   namespace: matrix
+# Federation is not the only reason this exists: without egress to the public internet,
+# mobile push notifications time out. Synapse pushes through matrix.org's sygnal, which
+# reaches APNs/FCM — so removing this rule breaks iPhone notifications while the server
+# itself keeps working, and nothing points at the network policy.
 spec:
   podSelector:
     matchLabels:

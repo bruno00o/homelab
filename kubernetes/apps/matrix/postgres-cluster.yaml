@@ -16,6 +16,10 @@ spec:
     parameters:
       max_connections: "100"
       shared_buffers: "128MB"
+      # Do not remove. An inactive replication slot makes Postgres retain WAL forever: it
+      # filled the volume, the instance crashlooped, and the cause looked like a Longhorn
+      # capacity problem for a long while. This caps the retention instead, dropping the
+      # slot rather than the cluster.
       max_slot_wal_keep_size: "2GB"
 
   bootstrap:

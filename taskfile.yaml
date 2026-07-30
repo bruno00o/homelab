@@ -250,6 +250,103 @@ tasks:
       - echo "Boot each node from Talos USB, then run the bootstrap tasks."
 
   # =============================================================================
+  # Talos - Graceful shutdown
+  # =============================================================================
+  talos:etcd-snapshot:
+    desc: Save an etcd snapshot outside the repo (before a shutdown or an upgrade)
+    silent: true
+    vars:
+      CP_NODE:
+        sh: yq -r '[.nodes[] | select(.controlPlane)][0].ipAddress' {{.TALOS_DIR}}/talconfig.yaml
+      SNAPSHOT_DIR:
+        sh: echo "${TALOS_SNAPSHOT_DIR:-$HOME/talos-etcd-snapshots}"
+    cmds:
+      - |
+        # Written outside the repo on purpose, rather than in it behind a .gitignore rule:
+        # an etcd snapshot contains every Kubernetes Secret in cleartext and this repo is
+        # public, so a path under $HOME cannot be committed by accident.
+        mkdir -p "{{.SNAPSHOT_DIR}}"
+        FILE="{{.SNAPSHOT_DIR}}/etcd-$(date +%Y%m%d-%H%M%S).snapshot"
+        talosctl etcd snapshot "$FILE" --nodes {{.CP_NODE}}
+
+        # Checked rather than trusted: a 0-byte file sitting in a backup directory reads
+        # as a backup.
+        [ -s "$FILE" ] || { echo "Snapshot $FILE is empty." >&2; rm -f "$FILE"; exit 1; }
+
+        # ~540 MB each (the snapshot copies the whole etcd file, free pages included), so
+        # keep the 5 most recent and drop the rest.
+        ls -1t "{{.SNAPSHOT_DIR}}"/etcd-*.snapshot 2>/dev/null | tail -n +6 \
+        | while read -r OLD; do rm -f "$OLD"; done
+
+  talos:shutdown-all:
+    desc: Gracefully shut down the whole cluster (etcd snapshot, then workers, then control planes)
+    silent: true
+    prompt: "Shut down ALL 6 nodes? They do not power back on by themselves — the button has to be pressed on each machine."
+    cmds:
+      - task: talos:etcd-snapshot
+      - |
+        # Roles are read from talconfig.yaml, the file that defines them.
+        WORKERS=$(yq -r '[.nodes[] | select(.controlPlane | not) | .ipAddress] | join(",")' \
+          {{.TALOS_DIR}}/talconfig.yaml)
+        CP_LIST=$(yq -r '.nodes[] | select(.controlPlane) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml)
+
+        # One control plane is both the endpoint every request is proxied through and the
+        # last machine to stop. talosctl dispatches through a single endpoint, so putting
+        # that endpoint in the same batch as its targets risks cutting the connection
+        # before the other requests are sent.
+        LAST_CP=$(echo "$CP_LIST" | tail -1)
+        OTHER_CPS=$(echo "$CP_LIST" | grep -vx "$LAST_CP" | paste -sd,)
+
+        # Watching ICMP rather than relying on `talosctl shutdown --wait`: that tracker
+        # follows the API sequence, and what makes it safe to cut the power is the machine
+        # being off. A node stops answering pings only when its network stack goes down,
+        # at the end of the sequence. Three lost packets in a row, so one dropped packet
+        # does not read as "off".
+        wait_down() {
+          DEADLINE=$(( $(date +%s) + 300 ))
+          for IP in $(echo "$1" | tr ',' ' '); do
+            while ping -c3 -W1 "$IP" >/dev/null 2>&1; do
+              # Bounded: a node that will not stop has to say so rather than hang here
+              # forever, all the more once a UPS is driving this on a battery timer.
+              [ "$(date +%s)" -lt "$DEADLINE" ] || {
+                echo "$IP still answers after 5 min — not powered off." >&2
+                exit 1
+              }
+              sleep 5
+            done
+            echo "    $IP down"
+          done
+        }
+
+        # --force skips the Kubernetes cordon and drain, and both halves of that matter.
+        # The drain deadlocks on Longhorn instance-manager pods, the same reason
+        # talos:upgrade passes --drain=false; and once the control planes start stopping
+        # there is no API server left to cordon against anyway. Pods are still stopped
+        # gracefully without it: Talos enables kubelet GracefulNodeShutdown, so each node
+        # sends SIGTERM and waits shutdownGracePeriod (30 s here) before unmounting.
+        # Cordoning would in fact be wrong — the flag survives the reboot, and nothing
+        # would be schedulable when the cluster comes back.
+        #
+        # The three workers stop in a single call rather than one after another so that
+        # Longhorn does not start rebuilding replicas onto machines that are about to stop
+        # too, and so pods are not rescheduled on their way out.
+        echo "==> Workers ($WORKERS)"
+        talosctl -e "$LAST_CP" -n "$WORKERS" shutdown --force --wait=false
+        wait_down "$WORKERS"
+
+        echo "==> Control planes ($OTHER_CPS)"
+        talosctl -e "$LAST_CP" -n "$OTHER_CPS" shutdown --force --wait=false
+        wait_down "$OTHER_CPS"
+
+        # etcd has lost quorum by now, which this last call does not need: it goes to apid
+        # on the node itself, not through the Kubernetes API.
+        echo "==> Last control plane ($LAST_CP)"
+        talosctl -e "$LAST_CP" -n "$LAST_CP" shutdown --force --wait=false
+        wait_down "$LAST_CP"
+
+        echo "All 6 nodes are down — safe to cut power."
+
+  # =============================================================================
   # Talos - Upgrades
   # =============================================================================
   talos:upgrade:

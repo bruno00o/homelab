@@ -1,0 +1,57 @@
+# Violations of the four policies that we have looked at and accepted.
+#
+# This is the list the `exclude:` blocks in the enforced policies used to keep implicit.
+# Each line is `<namespace> <Kind>/<name> <policy>` and may use shell globs. Anything the
+# audit mirrors report and that does not match a line here fails the check.
+#
+# A line belongs here when the workload is upstream and cannot comply. It does not belong
+# here to silence something of ours: `reloader` sat in this exact blind spot for months
+# with an empty securityContext and no limits, and that was a bug, not a constraint.
+
+# Cilium — a CNI programs the datapath, mounts the host and loads BPF. cilium-envoy takes
+# whatever memory its listeners need, and the chart sets no limit.
+kube-system DaemonSet/cilium audit-disallow-privilege-escalation
+kube-system DaemonSet/cilium-envoy audit-disallow-privilege-escalation
+kube-system DaemonSet/cilium-envoy audit-require-resource-limits
+kube-system Deployment/hubble-ui audit-require-resource-limits
+
+# Static control-plane pods. Owned by the Node because Talos writes their manifests, so
+# they are not ours to patch: apiserver, scheduler and controller-manager.
+kube-system Node/luffy audit-require-resource-limits
+kube-system Node/nami audit-require-resource-limits
+kube-system Node/zoro audit-require-resource-limits
+
+# Kyverno ships from reg.kyverno.io, which is not in the allowed registry list. Adding it
+# there would widen the rule for the whole cluster to serve one namespace.
+kyverno-system Deployment/kyverno-* audit-restrict-registries
+kyverno-system Job/kyverno-* audit-restrict-registries
+
+# Longhorn — CSI plugins mount host paths and manage block devices; the engine images and
+# instance managers are launched by longhorn-manager, not by a chart we can patch. Their
+# names carry a hash that changes at every Longhorn upgrade, hence the globs.
+longhorn-system CronJob/backup-daily audit-*
+longhorn-system CronJob/snapshot-hourly audit-*
+longhorn-system DaemonSet/engine-image-* audit-*
+longhorn-system DaemonSet/longhorn-csi-plugin audit-*
+longhorn-system DaemonSet/longhorn-manager audit-*
+longhorn-system Deployment/csi-attacher audit-*
+longhorn-system Deployment/csi-provisioner audit-*
+longhorn-system Deployment/csi-resizer audit-*
+longhorn-system Deployment/csi-snapshotter audit-*
+longhorn-system Deployment/longhorn-driver-deployer audit-*
+longhorn-system Deployment/longhorn-ui audit-*
+longhorn-system InstanceManager/instance-manager-* audit-*
+
+# node-exporter reads the host's /proc and /sys. The two StatefulSets fail on the
+# config-reloader sidecar that prometheus-operator injects, which carries no limit.
+monitoring DaemonSet/kube-prometheus-stack-prometheus-node-exporter audit-disallow-privilege-escalation
+monitoring DaemonSet/kube-prometheus-stack-prometheus-node-exporter audit-require-resource-limits
+monitoring StatefulSet/alertmanager-kube-prometheus-stack-alertmanager audit-require-resource-limits
+monitoring StatefulSet/prometheus-kube-prometheus-stack-prometheus audit-require-resource-limits
+
+# Trivy ships from mirror.gcr.io, same reasoning as Kyverno. trivy-server needs a writable
+# root for its vulnerability database.
+trivy-system Deployment/trivy-operator audit-require-resource-limits
+trivy-system Deployment/trivy-operator audit-restrict-registries
+trivy-system StatefulSet/trivy-server audit-disallow-privilege-escalation
+trivy-system StatefulSet/trivy-server audit-restrict-registries

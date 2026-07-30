@@ -11,3 +11,4 @@ resources:
   - coredns
   - prometheus-rules
   - dns-leak
+  - policy-drift

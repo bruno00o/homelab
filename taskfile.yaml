@@ -87,6 +87,14 @@ tasks:
       # Same file the CronJob mounts, so the on-demand and scheduled runs cannot diverge.
       - ./kubernetes/infrastructure/configs/dns-leak/dns-leak.sh
 
+  policy:drift:
+    desc: Show what the Kyverno exclusions are hiding, minus what we accepted
+    preconditions:
+      - sh: command -v jq
+        msg: "jq not found. Run 'task deps:install'."
+    cmds:
+      - ./kubernetes/infrastructure/configs/policy-drift/policy-drift.sh
+
   inventory:
     desc: List what is exposed, on which hostname, through which path
     preconditions:

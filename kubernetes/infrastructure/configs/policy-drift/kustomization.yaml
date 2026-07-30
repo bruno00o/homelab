@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - rbac.yaml
+  - cronjob.yaml
+  - network-policies.yaml
+  - alerts.yaml
+
+# Script and accepted list embedded from the files next to this one rather than pasted into
+# a literal, so `task policy:drift` and the CronJob run the same bytes and read the same
+# list. The name hash makes an edit to either roll the CronJob's pod template on its own.
+configMapGenerator:
+  - name: policy-drift-script
+    files:
+      - policy-drift.sh
+      - accepted.txt

@@ -1,0 +1,46 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: policy-drift-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: policy-drift
+      rules:
+        # The Job exits non-zero on an unaccepted violation and on a failed read, so one
+        # alert covers both. Deliberately not distinguished: "something violates a policy
+        # nobody enforces there" and "the check could not run" both mean the exclusions are
+        # back to hiding whatever they hide.
+        - alert: PolicyDriftCheckFailed
+          expr: kube_job_status_failed{namespace="monitoring", job_name=~"policy-drift-check.*"} > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Kyverno policy drift check failed"
+            description: >-
+              Job {{ $labels.job_name }} failed. Either a workload violates one of the four
+              policies in a namespace excluded from it and is not in accepted.txt, or the
+              check could not read the cluster. Run `task policy:drift` for the detail.
+
+        # Same reasoning as the DNS leak check: a CronJob that silently stops running looks
+        # exactly like one that keeps finding nothing. Three clauses, because the staleness
+        # one alone is blind where it matters most — the schedule metric only exists once
+        # the CronJob has run, so a deleted or suspended CronJob produces no series at all.
+        - alert: PolicyDriftCheckStale
+          expr: >-
+            time() - kube_cronjob_status_last_schedule_time{namespace="monitoring", cronjob="policy-drift-check"} > 26 * 3600
+            or absent(kube_cronjob_info{namespace="monitoring", cronjob="policy-drift-check"})
+            or kube_cronjob_spec_suspend{namespace="monitoring", cronjob="policy-drift-check"} == 1
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Kyverno policy drift check is not running"
+            description: >-
+              policy-drift-check has not run in over 26 hours, or the CronJob is gone or
+              suspended. Nothing is looking behind the Kyverno exclusions.

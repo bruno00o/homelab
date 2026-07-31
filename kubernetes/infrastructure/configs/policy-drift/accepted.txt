@@ -13,7 +13,9 @@
 kube-system DaemonSet/cilium audit-disallow-privilege-escalation
 kube-system DaemonSet/cilium-envoy audit-disallow-privilege-escalation
 kube-system DaemonSet/cilium-envoy audit-require-resource-limits
-kube-system Deployment/hubble-ui audit-require-resource-limits
+# hubble-ui is deliberately absent: it was here because its resources were written under
+# `hubble.ui`, a key the chart does not read. It is a UI, not the datapath — it had no claim
+# to an exception, only a bug that looked like one.
 
 # Static control-plane pods. Owned by the Node because Talos writes their manifests, so
 # they are not ours to patch: apiserver, scheduler and controller-manager.

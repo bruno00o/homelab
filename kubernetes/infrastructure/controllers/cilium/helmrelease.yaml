@@ -119,9 +119,23 @@ spec:
             memory: 256Mi
       ui:
         enabled: true
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            memory: 128Mi
+        # Per container and not under `ui` directly: the chart has no `hubble.ui.resources`,
+        # only `frontend` and `backend`. Written one level up it was accepted in silence and
+        # both containers ran with `resources: {}`. `hubble.relay.resources` just above does
+        # exist, which is what made the mistake look like it worked.
+        frontend:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+        backend:
+          # Higher than the frontend: it holds the flows it pulls from relay while a service
+          # map is open, where the frontend is only an nginx serving static assets.
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi

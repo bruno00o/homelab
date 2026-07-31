@@ -39,6 +39,7 @@ tasks:
       - task: validate:talos
       - task: validate:workflows
       - task: validate:renovate
+      - task: validate:helm-values
 
   validate:yaml:
     desc: Lint YAML (same paths as CI)
@@ -69,6 +70,22 @@ tasks:
       - .github/workflows/*.yaml
     cmds:
       - pipx run zizmor==1.28.0 --format plain --offline .github/workflows/
+
+  validate:helm-values:
+    desc: Check that every HelmRelease value exists in its chart
+    preconditions:
+      - sh: command -v helm
+        msg: "helm not found. Run 'task deps:install'."
+      - sh: command -v jq
+        msg: "jq not found. Run 'task deps:install'."
+    # Pulls every chart, so only worth redoing when a release or a source changed.
+    sources:
+      - kubernetes/**/helmrelease*.yaml
+      - kubernetes/**/*.yaml
+      - kubernetes/flux/repositories.yaml
+      - scripts/helm-values-check.sh
+    cmds:
+      - ./scripts/helm-values-check.sh
 
   validate:renovate:
     desc: Validate the Renovate config

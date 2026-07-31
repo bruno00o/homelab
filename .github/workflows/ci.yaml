@@ -53,6 +53,29 @@ jobs:
       - name: Validate Kubernetes manifests
         run: ./scripts/kubeconform.sh
 
+  helm-values:
+    name: Helm Values
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Same source of versions as the job above, for the same reason.
+      - name: Install tools
+        run: |
+          HELM=$(grep -oP '(?<=^helm = ")[^"]+' .mise.toml)
+          YQ=$(grep -oP '(?<=^yq = ")[^"]+' .mise.toml)
+          curl -sL "https://get.helm.sh/helm-v${HELM}-linux-amd64.tar.gz" \
+            | tar xz -C /tmp --strip-components=1 linux-amd64/helm
+          install -m 0755 /tmp/helm /usr/local/bin/helm
+          curl -sL "https://github.com/mikefarah/yq/releases/download/v${YQ}/yq_linux_amd64" \
+            -o /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
+      - name: Check HelmRelease values against their charts
+        run: ./scripts/helm-values-check.sh
+
   renovate-validate:
     name: Renovate Config
     runs-on: ubuntu-latest
@@ -138,13 +161,14 @@ jobs:
   status-check:
     name: Status Check
     runs-on: ubuntu-latest
-    needs: [yaml-lint, kubeconform, renovate-validate, trivy, zizmor]
+    needs: [yaml-lint, kubeconform, helm-values, renovate-validate, trivy, zizmor]
     if: always()
     steps:
       - name: Check all jobs
         run: |
           if [[ "${{ needs.yaml-lint.result }}" == "failure" ]] || \
              [[ "${{ needs.kubeconform.result }}" == "failure" ]] || \
+             [[ "${{ needs.helm-values.result }}" == "failure" ]] || \
              [[ "${{ needs.renovate-validate.result }}" == "failure" ]] || \
              [[ "${{ needs.zizmor.result }}" == "failure" ]] || \
              [[ "${{ needs.trivy.result }}" == "failure" ]]; then

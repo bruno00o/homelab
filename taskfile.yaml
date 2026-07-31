@@ -40,6 +40,7 @@ tasks:
       - task: validate:workflows
       - task: validate:renovate
       - task: validate:helm-values
+      - task: validate:flate
 
   validate:yaml:
     desc: Lint YAML (same paths as CI)
@@ -86,6 +87,14 @@ tasks:
       - scripts/helm-values-check.sh
     cmds:
       - ./scripts/helm-values-check.sh
+
+  validate:flate:
+    desc: Render every Kustomization and HelmRelease offline, as CI does
+    preconditions:
+      - sh: command -v flate
+        msg: "flate not found. Run 'task deps:install'."
+    cmds:
+      - flate test all --path ./kubernetes --no-progress
 
   validate:renovate:
     desc: Validate the Renovate config
@@ -625,8 +634,7 @@ tasks:
         # then runs a server-side dry-run.
         #
         # Only Kustomizations sourced from this repo: gateway-api points at the upstream
-        # gateway-api repo, whose path does not exist in this checkout (the same reason
-        # flux-local needed `sources: flux-system`).
+        # gateway-api repo, whose path does not exist in this checkout.
         LIST=$(kubectl -n flux-system get kustomizations -o json \
           | jq -r '.items[]
                    | select(.spec.sourceRef.name == "flux-system")

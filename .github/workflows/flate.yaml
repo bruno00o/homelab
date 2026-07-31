@@ -34,6 +34,12 @@ jobs:
           persist-credentials: false
 
       - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # 0.4.12
+        with:
+          # The action exports FLATE_BASE from this input, defaulting to the default branch,
+          # and a base makes `test` run in changed-only mode. Cleared on purpose: this job
+          # validates the whole tree. Left at its default it also fails outright on a PR,
+          # where a depth-1 checkout has no local `main` to resolve.
+          base: ""
 
       # No equivalent of flux-local's `sources: flux-system` and none needed: that option
       # existed because flux-local resolved every Kustomization path inside the local
@@ -58,6 +64,10 @@ jobs:
           fetch-depth: 0
 
       - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # 0.4.12
+        with:
+          # Cleared here too, and the baseline passed on the command line instead, so the
+          # rev this job compares against is written where it is read.
+          base: ""
 
       # `all` and not `hr`: it covers both the Flux objects a Kustomization produces and the
       # manifests the charts render, which is what makes a version bump readable — the point

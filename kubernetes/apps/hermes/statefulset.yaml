@@ -38,14 +38,10 @@ spec:
       labels:
         app.kubernetes.io/name: hermes
     spec:
-      # Root here, and only here: the image runs on s6-overlay, whose preinit chowns /run
-      # before dropping to uid 10000 via suexec. Pinned to 10000 from the start it cannot
-      # do that and refuses to boot ("/run belongs to uid 0 ... we're lacking the
-      # privileges to fix it"). The hermes process still ends up non-root — s6 lowers it.
       securityContext:
-        runAsNonRoot: false
-        runAsUser: 0
-        runAsGroup: 0
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
         fsGroup: 10000
         seccompProfile:
           type: RuntimeDefault
@@ -54,19 +50,13 @@ spec:
         # own/modify it at runtime (the PVC is the source of truth for its state).
         - name: seed-config
           # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
-          image: docker.io/nousresearch/hermes-agent:v2026.7.30
+          image: docker.io/nousresearch/hermes-agent:sha-bec2250d2c8349fc85201bcd1aa39bcaa766a555
           imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
             - test -f /opt/data/config.yaml || cp /config-seed/config.yaml /opt/data/config.yaml
-          # Explicitly 10000, against the root the pod now defaults to: this container
-          # creates config.yaml in the PVC, and root would leave it unwritable by the
-          # hermes process that owns it at runtime.
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 10000
-            runAsGroup: 10000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
@@ -85,7 +75,7 @@ spec:
       containers:
         - name: hermes
           # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
-          image: docker.io/nousresearch/hermes-agent:v2026.7.30
+          image: docker.io/nousresearch/hermes-agent:sha-bec2250d2c8349fc85201bcd1aa39bcaa766a555
           imagePullPolicy: IfNotPresent
           args: ["gateway", "run"]
           securityContext:
@@ -93,10 +83,6 @@ spec:
             readOnlyRootFilesystem: false
             capabilities:
               drop: ["ALL"]
-              # The two s6 needs to hand the process over to uid 10000: without them
-              # s6-applyuidgid fails on setgroups ("Operation not permitted") and the
-              # container loops. They are what makes the drop possible, not a privilege.
-              add: ["SETUID", "SETGID"]
           ports:
             - name: api
               containerPort: 8642

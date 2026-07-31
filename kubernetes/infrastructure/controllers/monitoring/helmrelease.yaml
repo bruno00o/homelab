@@ -224,6 +224,11 @@ spec:
 
     nodeExporter:
       enabled: true
+
+    # The parent chart's `nodeExporter` key only turns the subchart on; anything else has to
+    # be addressed to the subchart by name. The resources below used to sit under
+    # `nodeExporter` and were dropped, which is why the DaemonSet ran unbounded.
+    prometheus-node-exporter:
       resources:
         requests:
           cpu: 10m

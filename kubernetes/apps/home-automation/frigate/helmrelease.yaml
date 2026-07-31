@@ -72,15 +72,14 @@ spec:
         enabled: true
         failureThreshold: 30
         periodSeconds: 10
+      # No periodSeconds on liveness or readiness: the chart reads one only for startup.
       liveness:
         enabled: true
         initialDelaySeconds: 30
-        periodSeconds: 15
         failureThreshold: 5
       readiness:
         enabled: true
         initialDelaySeconds: 30
-        periodSeconds: 10
         failureThreshold: 3
 
     config: |

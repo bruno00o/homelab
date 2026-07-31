@@ -40,6 +40,8 @@ longhorn-system Deployment/csi-attacher audit-*
 longhorn-system Deployment/csi-provisioner audit-*
 longhorn-system Deployment/csi-resizer audit-*
 longhorn-system Deployment/csi-snapshotter audit-*
+# The driver deployer and the UI are here for a second reason: the chart exposes resources
+# for longhornManager only, so there is no key through which to give these two a limit.
 longhorn-system Deployment/longhorn-driver-deployer audit-*
 longhorn-system Deployment/longhorn-ui audit-*
 longhorn-system InstanceManager/instance-manager-* audit-*
@@ -47,7 +49,8 @@ longhorn-system InstanceManager/instance-manager-* audit-*
 # node-exporter reads the host's /proc and /sys. The two StatefulSets fail on the
 # config-reloader sidecar that prometheus-operator injects, which carries no limit.
 monitoring DaemonSet/kube-prometheus-stack-prometheus-node-exporter audit-disallow-privilege-escalation
-monitoring DaemonSet/kube-prometheus-stack-prometheus-node-exporter audit-require-resource-limits
+# Its missing limits are gone from this list: they were our values addressed to the parent
+# chart's `nodeExporter` key instead of to the subchart, not a constraint of the DaemonSet.
 monitoring StatefulSet/alertmanager-kube-prometheus-stack-alertmanager audit-require-resource-limits
 monitoring StatefulSet/prometheus-kube-prometheus-stack-prometheus audit-require-resource-limits
 

@@ -28,12 +28,11 @@ spec:
     crds: CreateReplace
 
   values:
-    # Disable node-collector - incompatible with Talos (no systemd)
-    nodeCollector:
-      enabled: false
-
     operator:
-      # Disable node scanning (incompatible with Talos)
+      # This is what disables the node-collector, which Talos cannot run (no systemd). The
+      # chart has no `nodeCollector.enabled`; a block by that name used to sit above and did
+      # nothing — verified on the cluster, OPERATOR_CONCURRENT_NODE_COLLECTOR_LIMIT is 0 and
+      # no node-collector job has ever run.
       scanNodeCollectorLimit: 0
       builtInTrivyServer: true
       vulnerabilityScannerScanOnlyCurrentRevisions: true

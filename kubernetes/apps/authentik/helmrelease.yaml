@@ -138,9 +138,9 @@ spec:
 
     server:
       replicas: 1
-      annotations:
+      deploymentAnnotations:
         reloader.stakater.com/auto: "true"
-      podSecurityContext:
+      securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
@@ -156,12 +156,18 @@ spec:
           memory: 768Mi
         limits:
           memory: 2Gi
+      # Per component, which is where this chart puts the metrics service and its
+      # ServiceMonitor.
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
 
     worker:
       replicas: 1
-      annotations:
+      deploymentAnnotations:
         reloader.stakater.com/auto: "true"
-      podSecurityContext:
+      securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
@@ -177,16 +183,17 @@ spec:
           memory: 1Gi
         limits:
           memory: 2Gi
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
 
     postgresql:
       enabled: false
 
-    redis:
-      enabled: false
-
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-      prometheusRule:
+    # Not a top-level `metrics:` block, and not `redis: {enabled: false}` either: neither is
+    # a key of this chart. The first created no ServiceMonitor and no PrometheusRule, so
+    # authentik was never scraped; the second disabled a subchart that does not exist.
+    prometheus:
+      rules:
         enabled: true

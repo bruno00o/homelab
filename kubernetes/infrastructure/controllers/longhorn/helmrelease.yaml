@@ -40,14 +40,22 @@ spec:
       replicaSoftAntiAffinity: ignored
       replicaZoneSoftAntiAffinity: ignored
       replicaDiskSoftAntiAffinity: ignored
-      backupTarget: ${NFS_BACKUP_TARGET}
       backupCompressionMethod: lz4
       snapshotDataIntegrity: ignored
       freezeFilesystemForSnapshot: ignored
-      restoreVolumeRecurringJob: ignored
+      restoreVolumeRecurringJobs: ignored
       offlineReplicaRebuilding: ignored
       backupConcurrentLimit: 2
-      backupstorePollInterval: 300
+
+    # The backup target is no longer a default setting: the chart moved it to its own block,
+    # which renders the BackupTarget resource instead of a line in the settings ConfigMap.
+    # Written under defaultSettings it was dropped, and the target survived only as cluster
+    # state left by an older chart — a rebuilt cluster would have come up with no backup
+    # destination at all.
+    defaultBackupStore:
+      backupTarget: ${NFS_BACKUP_TARGET}
+      pollInterval: 300
+
     persistence:
       defaultClass: true
       defaultClassReplicaCount: 2
@@ -62,21 +70,9 @@ spec:
         limits:
           memory: 512Mi
 
-    longhornDriver:
-      resources:
-        requests:
-          cpu: 25m
-          memory: 64Mi
-        limits:
-          memory: 256Mi
-
-    longhornUI:
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          memory: 128Mi
+    # No longhornDriver.resources or longhornUI.resources: longhornManager above is the only
+    # component whose resources the chart exposes. Both blocks used to sit here and were
+    # ignored, which is why the two Deployments show up unbounded in `task policy:drift`.
 
     metrics:
       serviceMonitor:

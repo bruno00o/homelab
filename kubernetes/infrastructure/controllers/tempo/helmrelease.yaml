@@ -26,8 +26,9 @@ spec:
 
   values:
     tempo:
-      usage_reporting:
-        reporting_enabled: false
+      # The chart's own key, not the `usage_reporting.reporting_enabled` block Tempo uses in
+      # its config file — written that way it never reached the rendered config.
+      reportingEnabled: false
       storage:
         trace:
           backend: local
@@ -70,9 +71,6 @@ spec:
       enabled: true
       storageClassName: ${DEFAULT_STORAGE_CLASS}
       size: 10Gi
-
-    gateway:
-      enabled: false
 
     tempoQuery:
       enabled: false

@@ -50,7 +50,7 @@ spec:
 
     spegel:
       containerdRegistryConfigPath: /etc/cri/conf.d/hosts
-      registries:
+      mirroredRegistries:
         - https://registry.k8s.io
         - https://ghcr.io
         - https://docker.io

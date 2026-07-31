@@ -29,13 +29,21 @@ spec:
       # happens on each node reboot.
       # The chart already sets a preferred podAntiAffinity, so both replicas spread.
       replicas: 2
-      resources:
-        requests:
-          cpu: 25m
-          memory: 128Mi
-        limits:
-          memory: 512Mi
+      # Under `container`, unlike the three controllers below which take `resources`
+      # directly — this one is the exception in the chart. Written flat it was ignored and
+      # the pod ran on the chart's own defaults.
+      container:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+      serviceMonitor:
+        enabled: true
 
+    # A ServiceMonitor per controller: the chart has no global `serviceMonitor` key, so the
+    # single one written here used to create nothing and Kyverno was not scraped at all.
     backgroundController:
       resources:
         requests:
@@ -43,6 +51,8 @@ spec:
           memory: 64Mi
         limits:
           memory: 256Mi
+      serviceMonitor:
+        enabled: true
 
     cleanupController:
       resources:
@@ -51,6 +61,8 @@ spec:
           memory: 64Mi
         limits:
           memory: 256Mi
+      serviceMonitor:
+        enabled: true
 
     reportsController:
       resources:
@@ -59,6 +71,5 @@ spec:
           memory: 64Mi
         limits:
           memory: 256Mi
-
-    serviceMonitor:
-      enabled: true
+      serviceMonitor:
+        enabled: true

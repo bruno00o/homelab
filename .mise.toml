@@ -18,7 +18,7 @@ jq = "1.8.2"
 # Must match the version installed by .github/workflows/ci.yaml
 kubeconform = "0.8.0"
 # Renders the Flux tree offline; replaces the archived flux-local. Not in mise's registry,
-# hence the ubi backend. Must match .github/workflows/flate.yaml.
+# hence the ubi backend. Must match the version in .github/workflows/ci.yaml.
 "ubi:home-operations/flate" = "0.4.12"
 # Git hooks — run `task hooks:install` after installing
 lefthook = "2.1.10"

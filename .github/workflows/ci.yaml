@@ -6,7 +6,8 @@ on:
   push:
     branches: [main]
 
-# Read-only for every job: nothing here writes to the repository. Combined with
+# Read-only by default, and every job keeps it except flate-diff, which raises
+# pull-requests: write for itself alone to post its comment. Combined with
 # persist-credentials: false on each checkout, a compromised action cannot reach the
 # git token.
 permissions:
@@ -75,6 +76,92 @@ jobs:
 
       - name: Check HelmRelease values against their charts
         run: ./scripts/helm-values-check.sh
+
+  flate:
+    name: Flate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # 0.4.12
+        with:
+          # The action exports FLATE_BASE from this input, defaulting to the default branch,
+          # and a base makes `test` run in changed-only mode. Cleared on purpose: this job
+          # validates the whole tree. Left at its default it also fails outright on a PR,
+          # where a depth-1 checkout has no local `main` to resolve.
+          base: ""
+
+      # Renders the whole Flux tree offline — Kustomizations, postBuild substitution, and a
+      # real `helm template` of every HelmRelease. The only check here that runs Helm at all:
+      # kubeconform validates files against Kubernetes schemas and never sees what a chart
+      # produces. Replaces flux-local, archived upstream in favour of this tool.
+      #
+      # No equivalent of flux-local's `sources: flux-system` and none needed: that option
+      # existed because flux-local resolved every Kustomization path inside the local
+      # checkout, so the gateway-api one pointing upstream looked like a missing directory.
+      # flate fetches the source instead, and validates it like the others.
+      - name: Render and validate every Kustomization and HelmRelease
+        run: flate test all --path ./kubernetes --no-progress
+
+  flate-diff:
+    name: Flate Diff
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    # Deliberately absent from status-check below: this job only reports. A rendering error
+    # is already a failure of the job above, and a merge should not hinge on whether a
+    # comment could be posted.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The baseline is a git rev flate materializes itself, so the history has to be here.
+          fetch-depth: 0
+
+      - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # 0.4.12
+        with:
+          # Cleared here too, and the baseline passed on the command line instead, so the
+          # rev this job compares against is written where it is read.
+          base: ""
+
+      # `all` and not `hr`: it covers both the Flux objects a Kustomization produces and the
+      # manifests the charts render, which is what makes a version bump readable — the point
+      # is to see the Deployment that changes, not the tag that changed.
+      - name: Render the diff against main
+        run: |
+          flate diff all --path ./kubernetes --base origin/main -o github --no-progress \
+            > diff.md 2>diff.err || { cat diff.err; exit 1; }
+
+      - name: Comment the diff on the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # A comment caps at 65536 characters, and a rejected comment would fail the job
+          # over a formatting detail rather than over the cluster.
+          LIMIT=60000
+          {
+            echo "### Flate — rendered diff against \`main\`"
+            echo
+            if [ ! -s diff.md ]; then
+              echo "No change to any rendered manifest."
+            else
+              echo '```diff'
+              head -c "$LIMIT" diff.md
+              echo '```'
+              if [ "$(wc -c < diff.md)" -gt "$LIMIT" ]; then
+                echo
+                echo "_Truncated — see the job log for the whole diff._"
+              fi
+            fi
+          } > comment.md
+          # Edited in place so a branch pushed ten times leaves one comment, not ten.
+          gh pr comment "$PR" --body-file comment.md --edit-last --create-if-none
 
   renovate-validate:
     name: Renovate Config
@@ -161,7 +248,7 @@ jobs:
   status-check:
     name: Status Check
     runs-on: ubuntu-latest
-    needs: [yaml-lint, kubeconform, helm-values, renovate-validate, trivy, zizmor]
+    needs: [yaml-lint, kubeconform, helm-values, flate, renovate-validate, trivy, zizmor]
     if: always()
     steps:
       - name: Check all jobs
@@ -169,6 +256,7 @@ jobs:
           if [[ "${{ needs.yaml-lint.result }}" == "failure" ]] || \
              [[ "${{ needs.kubeconform.result }}" == "failure" ]] || \
              [[ "${{ needs.helm-values.result }}" == "failure" ]] || \
+             [[ "${{ needs.flate.result }}" == "failure" ]] || \
              [[ "${{ needs.renovate-validate.result }}" == "failure" ]] || \
              [[ "${{ needs.zizmor.result }}" == "failure" ]] || \
              [[ "${{ needs.trivy.result }}" == "failure" ]]; then

@@ -126,6 +126,25 @@ consumed() {  # chartdir path
   return 1
 }
 
+# Top-level keys a chart's own values.schema.json does not declare.
+#
+# For a chart routed through a library loader the walk below is impossible, but the schema is
+# still an authority on the first level. Helm will not use it there: app-template and cilium
+# both declare root `properties` and leave `additionalProperties` unset, which JSON Schema
+# reads as "anything goes", so a bogus key at the root of a HelmRelease is accepted by Helm,
+# ignored by flate, and skipped by the walk. This closes that.
+schema_root_unknown() {  # chartdir ours-json
+  file="$1/values.schema.json"
+  [ -f "$file" ] || return 0
+  # The key is bound before the test: inside `$p | has(.)` the dot would refer to $p, not to
+  # the key, and every lookup would succeed silently.
+  jq -r --argjson ours "$2" '
+    (.properties // {}) as $p
+    | if ($p | length) == 0 then empty
+      else ($ours | keys_unsorted[]) as $k | select($p | has($k) | not) | $k
+      end' "$file" 2>/dev/null || true
+}
+
 # Keys we write that the chart's defaults do not define.
 #
 # The walk stops descending as soon as the defaults stop describing a structure: an empty
@@ -152,6 +171,7 @@ found=0
 checked=0
 skipped=""
 library=""
+unchecked=""
 
 for f in $(grep -rl "kind: HelmRelease" kubernetes --include="*.yaml" | sort); do
   # One file can hold several documents; gotk-components.yaml matches the grep on a CRD.
@@ -201,8 +221,19 @@ for f in $(grep -rl "kind: HelmRelease" kubernetes --include="*.yaml" | sort); d
     # than dropped quietly, so the gap stays visible.
     if find "$dir/charts" -maxdepth 2 -name Chart.yaml 2>/dev/null |
        xargs -r grep -lq '^type: library' 2>/dev/null; then
-      library="$library $name"
       checked=$((checked - 1))
+      # Split by what can still be said about it: with a schema the first level is checked,
+      # without one nothing is. Lumping the two together would claim a coverage that does
+      # not exist for immich, the only chart here in the second group.
+      if [ -f "$dir/values.schema.json" ]; then
+        library="$library $name"
+        for path in $(schema_root_unknown "$dir" "$ours"); do
+          echo "  $name: values.$path is not read by the chart"
+          found=1
+        done
+      else
+        unchecked="$unchecked $name"
+      fi
       continue
     fi
 
@@ -220,12 +251,14 @@ done
 
 echo
 echo "$checked chart(s) checked."
-[ -n "$library" ] && echo "Not checkable, values routed through a library chart:$library"
+[ -n "$library" ] && echo "Root level only, values routed through a library chart:$library"
+[ -n "$unchecked" ] && echo "Not checked at all, library-routed and no values.schema.json:$unchecked"
 [ -n "$skipped" ] && echo "Could not resolve a chart for:$skipped" >&2
 
 if [ "$found" -eq 1 ]; then
-  echo "Each line above is a setting that has no effect. Check it against the chart's values.yaml:"
+  echo "Each line above is a setting that has no effect. Check it against the chart:"
   echo "  helm show values <chart> --version <version>"
+  echo "  for a library-routed chart, its values.schema.json lists the valid top-level keys"
   exit 1
 fi
 exit 0

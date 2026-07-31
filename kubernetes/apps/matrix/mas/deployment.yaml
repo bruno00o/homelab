@@ -60,7 +60,7 @@ spec:
         # section does not support password_file, so we inline the password
         # here (file stays inside the pod's emptyDir).
         - name: render-db-config
-          image: docker.io/library/busybox:1.38
+          image: docker.io/library/busybox:1.38.0
           command:
             - sh
             - -c
@@ -79,7 +79,7 @@ spec:
             - { name: rendered-config, mountPath: /rendered }
         - name: oidc-proxy
           # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
-          image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine
+          image: docker.io/nginxinc/nginx-unprivileged:1.31.3-alpine
           restartPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false

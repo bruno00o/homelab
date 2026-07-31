@@ -104,6 +104,12 @@
 
   "packageRules": [
     {
+      "description": "llama.cpp tags carry no version, only a build number behind a variant prefix. Default docker versioning finds nothing to compare, so the tag never moved: the pod ran a May build until 2026-07-31. The build number is read as a patch so the update automerges, and the monthly schedule is what keeps that bearable - upstream ships several builds a day",
+      "matchPackageNames": ["ghcr.io/ggml-org/llama.cpp"],
+      "versioning": "regex:^server-vulkan-b(?<patch>\\d+)$",
+      "schedule": ["* 0-6 1 * *"]
+    },
+    {
       "description": "Automerge non-major updates",
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^v?0/",

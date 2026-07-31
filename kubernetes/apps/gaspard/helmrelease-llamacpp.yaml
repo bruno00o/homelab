@@ -22,7 +22,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/ggml-org/llama.cpp
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-vulkan
+              tag: server-vulkan-b10200
             args:
               - --hf-repo
               - Qwen/Qwen3-Embedding-0.6B-GGUF

@@ -93,6 +93,10 @@ spec:
             readOnlyRootFilesystem: false
             capabilities:
               drop: ["ALL"]
+              # The two s6 needs to hand the process over to uid 10000: without them
+              # s6-applyuidgid fails on setgroups ("Operation not permitted") and the
+              # container loops. They are what makes the drop possible, not a privilege.
+              add: ["SETUID", "SETGID"]
           ports:
             - name: api
               containerPort: 8642

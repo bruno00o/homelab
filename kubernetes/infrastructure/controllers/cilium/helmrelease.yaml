@@ -37,8 +37,6 @@ spec:
     l2podAnnouncements:
       enabled: true
       interfacePattern: enp.*
-    externalIPs:
-      enabled: true
     devices: enp+
     bpf:
       vlanBypass:
@@ -73,8 +71,9 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-        # Tells the chart the Prometheus Operator CRDs are present at runtime.
-        # Required for flux-local (CI rendering without a real cluster).
+        # Tells the chart the Prometheus Operator CRDs are present, for rendering without a
+        # cluster in CI. It exists here only: the operator and hubble ServiceMonitors below
+        # have no such key, and copies written there did nothing.
         trustCRDsExist: true
 
     operator:
@@ -82,7 +81,6 @@ spec:
         enabled: true
         serviceMonitor:
           enabled: true
-          trustCRDsExist: true
       resources:
         requests:
           cpu: 25m
@@ -108,7 +106,6 @@ spec:
           - http
         serviceMonitor:
           enabled: true
-          trustCRDsExist: true
       relay:
         enabled: true
         resources:

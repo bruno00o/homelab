@@ -96,10 +96,9 @@ spec:
         enabled: false
         grafanaAgent:
           installOperator: false
-      lokiCanary:
-        enabled: false
 
-    # Loki canary DaemonSet configuration
+    # Loki canary DaemonSet configuration. Top level, which is where the chart reads it — a
+    # second copy under `monitoring` above did nothing.
     lokiCanary:
       enabled: false
       resources:

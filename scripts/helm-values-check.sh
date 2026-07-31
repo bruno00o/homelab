@@ -8,9 +8,17 @@
 # was written where the cilium chart only defines `hubble.ui.frontend` and
 # `hubble.ui.backend`, so both containers ran with `resources: {}` (item 20).
 #
-# Charts shipping a values.schema.json are already protected: Helm validates against it and
-# refuses unknown keys, and `flux-local test` renders every HelmRelease in CI. Those are
-# reported as covered and skipped — this script exists for the charts without one.
+# A values.schema.json is not the protection it looks like. Every chart here that ships one
+# still accepts an unknown key at the root — app-template rejects `bogus` under
+# `/controllers/main/containers/main` but takes it at the top level, and cilium's schema
+# refuses nothing at all. Skipping schema-bearing charts is what hid `cilium.externalIPs`
+# from this script until `flate` reported it, so no chart is exempt.
+#
+# `flate test` warns on the same class of defect and is worth keeping: it reads the chart
+# through Helm's own loader rather than by grepping templates. It stops at the top level
+# though — measured on the tree before these were fixed, it found 2 of the 20, both
+# top-level keys. The nested ones (`hubble.ui.resources`, `admissionController.resources`,
+# `defaultSettings.backupTarget`) are what this walk is for.
 #
 # Fails the build when it finds anything, because the repo is at zero: the twenty dead
 # values this found on its first run are fixed. The case that will trip it in practice is a
@@ -141,7 +149,6 @@ walk($ours; $defs; [])'
 
 # ---------------------------------------------------------------------------
 found=0
-covered=0
 checked=0
 skipped=""
 library=""
@@ -184,10 +191,6 @@ for f in $(grep -rl "kind: HelmRelease" kubernetes --include="*.yaml" | sort); d
 
     dir=$(fetch "$url" "$version" "${repo:-}") || { skipped="$skipped $name"; continue; }
 
-    if [ -f "$dir/values.schema.json" ]; then
-      covered=$((covered + 1))
-      continue
-    fi
     checked=$((checked + 1))
 
     # A chart built on a library chart is out of reach for this technique. immich is the
@@ -203,27 +206,11 @@ for f in $(grep -rl "kind: HelmRelease" kubernetes --include="*.yaml" | sort); d
       continue
     fi
 
-    # A parent without a schema can still have subcharts that carry one. Helm validates
-    # each subchart's slice of the values against its own schema, so those subtrees are
-    # already covered and walking them would only add noise.
-    schema_subcharts=""
-    for sub in "$dir"/charts/*/; do
-      [ -f "$sub/values.schema.json" ] || continue
-      subname=$(yq -r '.name' "$sub/Chart.yaml" 2>/dev/null || true)
-      subalias=$(yq -r --arg n "$subname" \
-        '.dependencies[]? | select(.name == $n) | .alias // ""' "$dir/Chart.yaml" 2>/dev/null || true)
-      [ -n "$subalias" ] && [ "$subalias" != "null" ] && subname=$subalias
-      schema_subcharts="$schema_subcharts $subname"
-    done
-
     defs=$(defaults "$dir")
     unknown=$(jq -r --argjson ours "$ours" --argjson defs "$defs" "$UNKNOWN_JQ" <<<'null')
     [ -n "$unknown" ] || continue
 
     for path in $unknown; do
-      case " $schema_subcharts " in
-        *" ${path%%.*} "*) continue ;;   # subtree owned by a subchart Helm validates itself
-      esac
       consumed "$dir" "$path" && continue
       echo "  $name: values.$path is not read by the chart"
       found=1
@@ -232,7 +219,7 @@ for f in $(grep -rl "kind: HelmRelease" kubernetes --include="*.yaml" | sort); d
 done
 
 echo
-echo "$checked chart(s) checked, $covered already validated by their own values.schema.json."
+echo "$checked chart(s) checked."
 [ -n "$library" ] && echo "Not checkable, values routed through a library chart:$library"
 [ -n "$skipped" ] && echo "Could not resolve a chart for:$skipped" >&2
 

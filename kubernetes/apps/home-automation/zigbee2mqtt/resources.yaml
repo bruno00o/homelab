@@ -76,6 +76,12 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           command: ["sh", "-c", "cp /config/configuration.yaml /data/configuration.yaml"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
           volumeMounts:
             - name: config
               mountPath: /config

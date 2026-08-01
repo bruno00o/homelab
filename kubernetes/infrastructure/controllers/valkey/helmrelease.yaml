@@ -56,6 +56,14 @@ spec:
         memory: 128Mi
       limits:
         memory: 512Mi
+    # Separate key: `resources` above reaches the valkey container only, and the chart's
+    # init container renders with `resources: {}` otherwise.
+    initResources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        memory: 64Mi
     metrics:
       enabled: true
       exporter:

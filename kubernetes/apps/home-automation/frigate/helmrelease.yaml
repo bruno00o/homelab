@@ -29,6 +29,35 @@ spec:
   upgrade:
     crds: CreateReplace
 
+  # The chart hardcodes its `copyconfig` init container with neither securityContext nor
+  # resources, and exposes no value for either - `securityContext` below reaches the main
+  # container only. Merged by container name, not list index: `extraInitContainers` renders
+  # ahead of this one.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: frigate
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: frigate
+              spec:
+                template:
+                  spec:
+                    initContainers:
+                      - name: copyconfig
+                        securityContext:
+                          allowPrivilegeEscalation: false
+                        resources:
+                          requests:
+                            cpu: 10m
+                            memory: 32Mi
+                          limits:
+                            memory: 128Mi
+
   values:
     image:
       # renovate: datasource=docker depName=ghcr.io/blakeblackshear/frigate

@@ -28,6 +28,33 @@ spec:
   upgrade:
     crds: CreateReplace
 
+  # The chart renders no `resources:` for its config init container and exposes no value for
+  # it, so there is nowhere in `values` to put this. Merged by container name rather than by
+  # list index: the chart puts `.Values.initContainers` ahead of this one, so an index would
+  # move the day that list stops being empty.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: StatefulSet
+              name: home-assistant
+            patch: |
+              apiVersion: apps/v1
+              kind: StatefulSet
+              metadata:
+                name: home-assistant
+              spec:
+                template:
+                  spec:
+                    initContainers:
+                      - name: setup-config
+                        resources:
+                          requests:
+                            cpu: 10m
+                            memory: 32Mi
+                          limits:
+                            memory: 128Mi
+
   values:
     image:
       # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
@@ -128,6 +155,11 @@ spec:
             admin: "homelab-admins"
             user: "homelab-users"
       initContainer:
+        # The chart default is the bare `mikefarah/yq:4`, which restrict-registries rejects
+        # once the policy covers initContainers - no registry prefix to match on - and which
+        # is a rolling major tag Renovate can never move.
+        # renovate: datasource=docker depName=docker.io/mikefarah/yq
+        image: docker.io/mikefarah/yq:4.53.3
         securityContext:
           # /config PVC is owned by root because the main HA container runs as
           # image-default (root). A non-root init container cannot merge

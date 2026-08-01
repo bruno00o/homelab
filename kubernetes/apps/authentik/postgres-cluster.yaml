@@ -50,6 +50,15 @@ metadata:
   namespace: authentik
 spec:
   retentionPolicy: "30d"
+  # The operator injects the barman sidecar with no resources of its own, and
+  # require-resource-limits now covers initContainers. Measured: 20-45Mi, 126m CPU at peak.
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
   configuration:
     destinationPath: s3://cnpg-authentik/
     endpointURL: http://rustfs.rustfs.svc.cluster.local:9000

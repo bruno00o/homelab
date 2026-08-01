@@ -157,10 +157,11 @@
     },
 
     {
-      "description": "Group Cilium - unanchored: depNames carry a registry prefix (quay.io/cilium/charts/cilium), so ^cilium matched only the plain Helm release and split every bump across two PRs",
+      "description": "Group Cilium - unanchored: depNames carry a registry prefix (quay.io/cilium/charts/cilium), so ^cilium matched only the plain Helm release and split every bump across two PRs. Never automerged, for the same reason as Longhorn: it is the CNI, every node loses its datapath in turn, and a bad one cannot be fixed over a network that is down. The v1.20.0 bump landed the bootstrap file and the taskfile on their own while the Flux source stayed on 1.19.6 - the cluster was untouched only because the chart tag was still pending, not by design",
       "matchPackageNames": ["/cilium/"],
       "groupName": "Cilium",
-      "labels": ["infrastructure", "networking"]
+      "automerge": false,
+      "labels": ["infrastructure", "networking", "review-required"]
     },
     {
       "description": "Group cert-manager",

@@ -48,7 +48,7 @@ spec:
       cpu: 100m
       memory: 256Mi
     limits:
-      memory: 1Gi
+      memory: 512Mi
 ---
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore

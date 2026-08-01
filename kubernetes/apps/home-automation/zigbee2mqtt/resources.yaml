@@ -123,7 +123,7 @@ spec:
               cpu: 10m
               memory: 128Mi
             limits:
-              memory: 384Mi
+              memory: 256Mi
           volumeMounts:
             - name: data
               mountPath: /app/data

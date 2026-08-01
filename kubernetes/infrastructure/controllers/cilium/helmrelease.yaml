@@ -124,7 +124,7 @@ spec:
             cpu: 10m
             memory: 64Mi
           limits:
-            memory: 256Mi
+            memory: 128Mi
       ui:
         enabled: true
         # Per container and not under `ui` directly: the chart has no `hubble.ui.resources`,

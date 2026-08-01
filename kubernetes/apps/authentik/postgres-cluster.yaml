@@ -58,7 +58,7 @@ spec:
         cpu: 10m
         memory: 64Mi
       limits:
-        memory: 256Mi
+        memory: 384Mi
   configuration:
     destinationPath: s3://cnpg-authentik/
     endpointURL: http://rustfs.rustfs.svc.cluster.local:9000

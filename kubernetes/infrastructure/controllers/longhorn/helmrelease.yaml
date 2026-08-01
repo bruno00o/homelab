@@ -80,7 +80,10 @@ spec:
           cpu: 50m
           memory: 128Mi
         limits:
-          memory: 512Mi
+          # Two of the three replicas peaked at 494Mi and 495Mi against 512Mi — 97%. This is
+          # the component that drives every volume attach and replica rebuild; killing it
+          # under memory pressure is the worst moment to lose it.
+          memory: 1Gi
 
     # No longhornDriver.resources or longhornUI.resources: longhornManager above is the only
     # component whose resources the chart exposes. Both blocks used to sit here and were

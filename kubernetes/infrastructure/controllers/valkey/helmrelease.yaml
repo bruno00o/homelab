@@ -55,7 +55,9 @@ spec:
         cpu: 100m
         memory: 128Mi
       limits:
-        memory: 512Mi
+        # 415Mi peak against 512Mi. A cache has no natural ceiling other than the one set
+        # here, so the headroom is deliberate rather than generous.
+        memory: 768Mi
     # Separate key: `resources` above reaches the valkey container only, and the chart's
     # init container renders with `resources: {}` otherwise.
     initResources:

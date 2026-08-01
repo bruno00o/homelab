@@ -38,7 +38,7 @@ spec:
             cpu: 25m
             memory: 128Mi
           limits:
-            memory: 512Mi
+            memory: 256Mi
       serviceMonitor:
         enabled: true
 
@@ -70,6 +70,8 @@ spec:
           cpu: 10m
           memory: 64Mi
         limits:
-          memory: 256Mi
+          # Twice its peak, which is higher than the other three: this one holds a report per
+          # workload, so it grows with the cluster rather than with traffic.
+          memory: 512Mi
       serviceMonitor:
         enabled: true

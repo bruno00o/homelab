@@ -38,7 +38,7 @@ spec:
           cpu: 25m
           memory: 128Mi
         limits:
-          memory: 512Mi
+          memory: 256Mi
 
     grafana:
       enabled: true
@@ -66,7 +66,9 @@ spec:
           cpu: 50m
           memory: 256Mi
         limits:
-          memory: 512Mi
+          # Was 512Mi and peaked at 497Mi over 7 days — 97% of its own limit, one dashboard
+          # render away from being killed.
+          memory: 1Gi
 
       # Its own key: `resources` above is the grafana container only, and the chown init
       # container renders with `resources: {}`. Invisible until the audit mirrors started
@@ -116,7 +118,9 @@ spec:
             cpu: 10m
             memory: 64Mi
           limits:
-            memory: 128Mi
+            # Both sidecars sat at 71% and 76% of 128Mi; they load every matching ConfigMap
+            # in the cluster, so they grow with the number of dashboards.
+            memory: 256Mi
         dashboards:
           enabled: true
           label: grafana_dashboard
@@ -173,7 +177,10 @@ spec:
             cpu: 100m
             memory: 512Mi
           limits:
-            memory: 2Gi
+            # Peaked at 1988Mi against a 2Gi limit — 97%. Go sizes its heap to the limit, so
+            # this was not "using what it needs" but "running as close to the wall as it
+            # dared". Prometheus memory tracks active series, which only grows here.
+            memory: 3Gi
         storageSpec:
           volumeClaimTemplate:
             spec:

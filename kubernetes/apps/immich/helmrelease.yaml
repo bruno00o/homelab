@@ -114,7 +114,7 @@ spec:
                   memory: 1Gi
                   gpu.intel.com/i915: "1"
                 limits:
-                  memory: 4Gi
+                  memory: 3Gi
                   gpu.intel.com/i915: "1"
       defaultPodOptions:
         securityContext:
@@ -184,7 +184,7 @@ spec:
                   memory: 1Gi
                   gpu.intel.com/i915: "1"
                 limits:
-                  memory: 4Gi
+                  memory: 1Gi
                   gpu.intel.com/i915: "1"
       defaultPodOptions:
         securityContext:

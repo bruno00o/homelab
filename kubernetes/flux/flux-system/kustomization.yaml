@@ -13,3 +13,40 @@ patches:
     patch: |-
       - op: remove
         path: /spec/template/spec/containers/0/resources/limits/cpu
+
+  # Same reason, for memory: the generated file gives all four controllers 1Gi, and over 7
+  # days they peaked at 82Mi to 257Mi. Sized here at roughly three times each one's own peak
+  # rather than one number for all four - helm-controller renders whole charts in memory and
+  # notification-controller forwards events, they do not belong in the same bracket.
+  - target:
+      kind: Deployment
+      namespace: flux-system
+      name: helm-controller
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 768Mi
+  - target:
+      kind: Deployment
+      namespace: flux-system
+      name: source-controller
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+  - target:
+      kind: Deployment
+      namespace: flux-system
+      name: kustomize-controller
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+  - target:
+      kind: Deployment
+      namespace: flux-system
+      name: notification-controller
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 256Mi

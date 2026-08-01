@@ -64,7 +64,7 @@ spec:
             cpu: 10m
             memory: 32Mi
           limits:
-            memory: 128Mi
+            memory: 256Mi
 
       # podMonitor and not serviceMonitor: the chart deprecates the latter and it needs a
       # Service this release does not create. reloader-allow-prometheus-scrape already

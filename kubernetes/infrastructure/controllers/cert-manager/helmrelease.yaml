@@ -56,7 +56,9 @@ spec:
           cpu: 10m
           memory: 32Mi
         limits:
-          memory: 64Mi
+          # Was 64Mi and peaked at 53Mi — 83%. With failurePolicy Fail, an OOM here rejects
+          # every Certificate and Issuer admission in the cluster, so it gets real headroom.
+          memory: 128Mi
 
     cainjector:
       resources:

@@ -12,6 +12,7 @@ resources:
   - home-automation/ks.yaml
   - immich/ks.yaml
   - matrix/ks.yaml
+  - ntp/ks.yaml
   - portfolio/ks.yaml
   - qdrant/ks.yaml
   - random-gif/ks.yaml

@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chrony-config
+  namespace: ntp
+data:
+  chrony.conf: |
+    # One `pool` line resolves to several distinct servers, so chrony has enough
+    # opinions to outvote a wrong one. The French pool rather than the global one:
+    # closer means lower and more symmetric round-trip, which is the whole basis of
+    # an NTP offset measurement.
+    pool fr.pool.ntp.org iburst maxsources 4
+
+    # 10123, not 123: a port below 1024 would need NET_BIND_SERVICE and this pod holds
+    # no capability at all. The LoadBalancer Service maps 123 onto it, so clients still
+    # talk to the standard port. Every NetworkPolicy here must name 10123 — Cilium
+    # matches ingress after DNAT.
+    port 10123
+
+    # Serve the LAN. chronyd runs with -x and never disciplines a clock: the one it
+    # would set belongs to the Talos node, which is already synced by Talos itself.
+    # It still tracks its offset against the pool and applies it to what it serves.
+    allow all
+
+    # No `ratelimit`: the Service SNATs client addresses to the node's, so chrony would
+    # see the whole house as two or three sources and throttle them as one.
+
+    driftfile /var/lib/chrony/chrony.drift
+    bindcmdaddress /run/chrony/chronyd.sock

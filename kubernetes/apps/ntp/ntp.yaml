@@ -1,0 +1,119 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chrony
+  namespace: ntp
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chrony
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chrony
+        app.kubernetes.io/instance: ntp
+    spec:
+      # Same reasoning as AdGuard: something the whole house depends on should get a
+      # node before ordinary apps do.
+      priorityClassName: system-cluster-critical
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: chrony
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: chrony
+          # renovate: datasource=docker depName=dockurr/chrony
+          image: docker.io/dockurr/chrony:4.8
+          # The image's own entrypoint generates a chrony.conf from environment
+          # variables and runs it as root so it can chown its state directories. The
+          # config is ten lines and belongs in git, so only the binary is used here.
+          command:
+            - /usr/sbin/chronyd
+          args:
+            - -d                        # foreground, log to stderr
+            - -x                        # never touch the system clock
+            - -U                        # running unprivileged is deliberate
+            - -f
+            - /etc/chrony/chrony.conf
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: ntp
+              containerPort: 10123
+              protocol: UDP
+          livenessProbe:
+            exec:
+              command: ["chronyc", "-n", "tracking"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Readiness on the leap status, not on the process: a chronyd that has lost
+          # its upstream answers clients with "unsynchronised" and they discard it.
+          # Failing readiness instead takes the pod out of the Service, so the other
+          # replica gets the traffic rather than both of them answering uselessly.
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - chronyc -n tracking | grep -q '^Leap status.*Normal'
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: config
+              mountPath: /etc/chrony
+            - name: run
+              mountPath: /run/chrony
+            - name: state
+              mountPath: /var/lib/chrony
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: config
+          configMap:
+            name: chrony-config
+        - name: run
+          emptyDir: {}
+        - name: state
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ntp
+  namespace: ntp
+spec:
+  type: LoadBalancer
+  loadBalancerIP: ${LB_NTP}
+  selector:
+    app.kubernetes.io/name: chrony
+  ports:
+    - name: ntp
+      port: 123
+      targetPort: 10123
+      protocol: UDP

@@ -1,0 +1,36 @@
+---
+# No `from`: this serves the whole house, and the clients are spread over every LAN
+# subnet plus whatever DHCP hands out next. Port 10123 rather than 123 — Cilium matches
+# ingress against the pod's targetPort, after the Service has translated it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ntp-ingress
+  namespace: ntp
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: chrony
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: UDP
+          port: 10123
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-upstream-ntp-egress
+  namespace: ntp
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: chrony
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: UDP
+          port: 123

@@ -93,8 +93,14 @@ spec:
             summary: "PVC stuck in Pending state"
             description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} has been in Pending state for more than 15 minutes."
 
+        # `> 0` is deliberate and stays: a drop is not normal here, and this rule earned its
+        # keep on 2026-08-01 by surfacing two real faults that nothing else saw - CNPG
+        # replicas refused on the instance status port, and uptime-kuma unable to reach any
+        # backend through the gateway. POLICY_DENIED fell from 3.9 to 0.03 packets/s once
+        # both were fixed. The only exclusion is IPv6 router solicitation on an IPv4-only
+        # cluster: the nodes emit it, nothing consumes it, and no policy can make it stop.
         - alert: CiliumDroppedPackets
-          expr: sum(rate(hubble_drop_total[5m])) by (reason) > 0
+          expr: sum(rate(hubble_drop_total{reason!="UNSUPPORTED_L3_PROTOCOL"}[5m])) by (reason) > 0
           for: 10m
           labels:
             severity: warning

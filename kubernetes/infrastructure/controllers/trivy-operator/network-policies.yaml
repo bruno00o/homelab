@@ -17,6 +17,32 @@ spec:
           port: 443
 
 ---
+# The scan jobs pull the two first-party images straight from the zot Service. Going through
+# zot.merry.home.arpa instead would mean the internal gateway, whose L7 proxy drops requests
+# from any pod that is under a network policy - see the comment on registry.mirror in
+# helmrelease.yaml.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-zot-egress
+  namespace: trivy-system
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: zot
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: zot
+      ports:
+        - protocol: TCP
+          port: 5000
+
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

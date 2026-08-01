@@ -68,6 +68,22 @@ spec:
         limits:
           memory: 512Mi
 
+      # Its own key: `resources` above is the grafana container only, and the chown init
+      # container renders with `resources: {}`. Invisible until the audit mirrors started
+      # looking at init containers.
+      initChownData:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        securityContext:
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+          runAsUser: 0
+          allowPrivilegeEscalation: false
+
       envValueFrom:
         GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
           secretKeyRef:

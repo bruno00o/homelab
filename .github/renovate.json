@@ -169,10 +169,11 @@
       "labels": ["infrastructure", "security"]
     },
     {
-      "description": "Group Longhorn",
+      "description": "Group Longhorn. Never automerged: since concurrentAutomaticEngineUpgradePerNodeLimit is 1, a chart bump also live-migrates every attached volume's engine, and reverting the chart no longer restores the previous data path - engine images cannot be downgraded. That is the one upgrade in this cluster that has to happen while someone is watching",
       "matchPackageNames": ["/longhorn/"],
       "groupName": "Longhorn",
-      "labels": ["infrastructure", "storage"]
+      "automerge": false,
+      "labels": ["infrastructure", "storage", "review-required"]
     },
     {
       "description": "Group monitoring stack",

@@ -36,21 +36,30 @@ spec:
       defaultReplicaCount: 2
       defaultDataPath: /var/mnt/longhorn
       createDefaultDiskLabeledNodes: true
-      replicaAutoBalance: ignored
-      replicaSoftAntiAffinity: ignored
-      replicaZoneSoftAntiAffinity: ignored
-      replicaDiskSoftAntiAffinity: ignored
+      # `ignored` is a per-volume value; as a global setting longhorn-manager rejects it
+      # (`value ignored is not a valid choice`) and silently keeps its own default. Written
+      # here since the bootstrap, these eight lines configured nothing. Below is what the
+      # cluster was actually running, stated instead of implied. The two soft-anti-affinity
+      # ones stay true deliberately: no zone topology and one disk per node, so false would
+      # leave replicas unschedulable. Note that `task validate` cannot catch this — it checks
+      # that a key exists in the chart, never that the value is one the component accepts.
+      replicaAutoBalance: disabled
+      replicaSoftAntiAffinity: false
+      replicaZoneSoftAntiAffinity: true
+      replicaDiskSoftAntiAffinity: true
       backupCompressionMethod: lz4
-      snapshotDataIntegrity: ignored
-      freezeFilesystemForSnapshot: ignored
-      restoreVolumeRecurringJobs: ignored
-      offlineReplicaRebuilding: ignored
+      snapshotDataIntegrity: fast-check
+      freezeFilesystemForSnapshot: false
+      restoreVolumeRecurringJobs: false
+      offlineReplicaRebuilding: false
       backupConcurrentLimit: 2
       # Longhorn ships this at 0, which means volumes never leave the engine image they
       # were created with. Each Longhorn upgrade then adds an engine DaemonSet and keeps
       # every older one alive: v1.11.0, v1.11.1 and v1.11.2 were still serving 31 of 38
       # volumes under a v1.12.0 cluster, three privileged DaemonSets carrying CVEs that
       # no image bump could reach. 1 = one volume per node at a time, live upgrade.
+      # It does not make the pileup impossible: only healthy attached volumes migrate, so a
+      # volume left degraded keeps its engine image alive along with its DaemonSet.
       concurrentAutomaticEngineUpgradePerNodeLimit: 1
 
     # The backup target is no longer a default setting: the chart moved it to its own block,

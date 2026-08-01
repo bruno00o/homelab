@@ -144,10 +144,7 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/infrastructure/configs
-  # Temporarily false: the ClusterIssuers are moving to infrastructure-controllers, and
-  # pruning would delete them out from under their new owner. Back to true once the move
-  # has landed.
-  prune: false
+  prune: true
   # Same as above: no healthChecks, `wait` makes Flux ignore them.
   wait: true
   dependsOn:

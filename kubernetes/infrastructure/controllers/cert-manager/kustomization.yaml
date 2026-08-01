@@ -3,6 +3,9 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helmrelease.yaml
+  # issuers.yaml is deliberately not listed here: `namespace:` below would stamp
+  # cert-manager onto four cluster-scoped ClusterIssuers. It is pulled in one level up, by
+  # controllers/kustomization.yaml, which applies no namespace transformer.
   - mugiwara-ca-secret.sops.yaml
   - cloudflare-api-token.sops.yaml
   - network-policies.yaml

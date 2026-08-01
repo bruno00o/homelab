@@ -3,6 +3,13 @@ kind: Kustomization
 resources:
   - cilium
   - cert-manager
+  # The ClusterIssuers belong to this layer, not to configs/: everything they need
+  # (cert-manager, mugiwara-ca-secret, cloudflare-api-token) is already here. Under configs/
+  # they were created one Kustomization too late for rustfs, whose Certificate is issued in
+  # this layer - a fresh bootstrap deadlocked, controllers waiting on a secret only configs
+  # could produce and configs waiting on controllers. Listed as a file and not through
+  # cert-manager/ so its `namespace:` does not stamp a namespace on a cluster-scoped object.
+  - cert-manager/issuers.yaml
   - longhorn
   - monitoring
   - cloudnative-pg

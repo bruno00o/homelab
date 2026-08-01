@@ -113,6 +113,9 @@ spec:
               cnpg.io/cluster: umami-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+        # The instance manager status port. The instances poll each other on it and were
+        # denied since these policies were written - one dropped SYN per probe, for months.
+        - { protocol: TCP, port: 8000 }
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -142,6 +145,9 @@ spec:
               cnpg.io/cluster: umami-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+        # The instance manager status port. The instances poll each other on it and were
+        # denied since these policies were written - one dropped SYN per probe, for months.
+        - { protocol: TCP, port: 8000 }
     # S3 backups to RustFS
     - to:
         - namespaceSelector:

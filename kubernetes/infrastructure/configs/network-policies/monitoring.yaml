@@ -58,6 +58,13 @@ spec:
           port: 3200 # Tempo
         - protocol: TCP
           port: 2000 # cloudflared metrics
+        - protocol: TCP
+          port: 6333 # qdrant
+        - protocol: TCP
+          port: 7979 # external-dns
+    # A ServiceMonitor whose port is missing from this list is green and scrapes nothing:
+    # qdrant's had `max_over_time(up[7d]) == 0`, never scraped since it was created. Add the
+    # port here at the same time as the ServiceMonitor, and check `up` afterwards.
     # Kubernetes API for service discovery: the CiliumNetworkPolicy at the end of this
     # file. Ports with no `to:` read as "to anywhere", so this block allowed the internet.
 ---

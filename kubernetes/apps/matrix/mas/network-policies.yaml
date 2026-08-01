@@ -144,6 +144,9 @@ spec:
               cnpg.io/cluster: mas-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+        # The instance manager status port. The instances poll each other on it and were
+        # denied since these policies were written - one dropped SYN per probe, for months.
+        - { protocol: TCP, port: 8000 }
     - from:
         - namespaceSelector:
             matchLabels:
@@ -185,6 +188,9 @@ spec:
               cnpg.io/cluster: mas-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+        # The instance manager status port. The instances poll each other on it and were
+        # denied since these policies were written - one dropped SYN per probe, for months.
+        - { protocol: TCP, port: 8000 }
     - to:
         - namespaceSelector:
             matchLabels:

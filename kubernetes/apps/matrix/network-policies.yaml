@@ -184,6 +184,9 @@ spec:
               cnpg.io/cluster: synapse-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+        # The instance manager status port. The instances poll each other on it and were
+        # denied since these policies were written - one dropped SYN per probe, for months.
+        - { protocol: TCP, port: 8000 }
 
 ---
 # CNPG operator (cnpg-system) reaches the instance manager (8000) for status
@@ -235,6 +238,9 @@ spec:
               cnpg.io/cluster: synapse-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+        # The instance manager status port. The instances poll each other on it and were
+        # denied since these policies were written - one dropped SYN per probe, for months.
+        - { protocol: TCP, port: 8000 }
     # Barman sidecar → RustFS S3 for backups/WAL archiving.
     - to:
         - namespaceSelector:

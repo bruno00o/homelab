@@ -45,6 +45,16 @@ spec:
               period: 24h
       limits_config:
         retention_period: 168h  # 7 days
+      # retention_period above is only a declaration: Loki deletes nothing unless the
+      # compactor is told to enforce it, and the chart ships `compactor: {}`. It was inert
+      # from the start - the PVC held 133 days of logs under a 7-day policy and was on
+      # course to fill, at which point Loki stops accepting pushes and logging stops.
+      # delete_request_store is required as soon as retention_enabled is true.
+      compactor:
+        working_directory: /var/loki/compactor
+        retention_enabled: true
+        delete_request_store: filesystem
+        retention_delete_delay: 2h
 
     singleBinary:
       replicas: 1

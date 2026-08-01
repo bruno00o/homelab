@@ -38,10 +38,14 @@ spec:
       labels:
         app.kubernetes.io/name: hermes
     spec:
+      # Root at start, and only at start: the image runs on s6-overlay v3, whose init hook
+      # remaps the uid, chowns /run and /opt/data, then hands the gateway to uid 10000 via
+      # s6-setuidgid. Pinned to 10000 from the outset it cannot do any of that and refuses
+      # to boot ("/run belongs to uid 0 ... we're lacking the privileges to fix it").
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 10000
-        runAsGroup: 10000
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
         fsGroup: 10000
         seccompProfile:
           type: RuntimeDefault
@@ -50,13 +54,18 @@ spec:
         # own/modify it at runtime (the PVC is the source of truth for its state).
         - name: seed-config
           # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
-          image: docker.io/nousresearch/hermes-agent:sha-bec2250d2c8349fc85201bcd1aa39bcaa766a555
+          image: docker.io/nousresearch/hermes-agent:v2026.7.30
           imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
             - test -f /opt/data/config.yaml || cp /config-seed/config.yaml /opt/data/config.yaml
+          # Explicitly 10000, against the root the pod now defaults to: the file written
+          # here belongs to the hermes process at runtime, and root would leave it unwritable.
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
@@ -75,7 +84,7 @@ spec:
       containers:
         - name: hermes
           # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
-          image: docker.io/nousresearch/hermes-agent:sha-bec2250d2c8349fc85201bcd1aa39bcaa766a555
+          image: docker.io/nousresearch/hermes-agent:v2026.7.30
           imagePullPolicy: IfNotPresent
           args: ["gateway", "run"]
           securityContext:
@@ -83,6 +92,11 @@ spec:
             readOnlyRootFilesystem: false
             capabilities:
               drop: ["ALL"]
+              # What the s6 init hook needs to give the volume away and step down:
+              # CHOWN/FOWNER/DAC_OVERRIDE to fix ownership of /run and /opt/data,
+              # SETUID/SETGID for the s6-setuidgid that follows. Without them root is
+              # root with no rights at all and the container loops on setgroups.
+              add: ["CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID"]
           ports:
             - name: api
               containerPort: 8642

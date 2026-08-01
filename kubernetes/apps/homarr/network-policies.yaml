@@ -40,10 +40,14 @@ spec:
           port: 3000
 
 ---
+# Renamed from allow-api-egress, which is what it was not: ports with no `to:` read as "to
+# anywhere", so this has always been egress to the internet - which homarr does need, for
+# widget integrations and icons. 6443 is gone, that port only ever meant the apiserver, and
+# it is now named as such in the CiliumNetworkPolicy at the end of this file.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-api-egress
+  name: allow-external-https-egress
   namespace: homarr
 spec:
   podSelector:
@@ -55,8 +59,6 @@ spec:
     - ports:
         - protocol: TCP
           port: 443
-        - protocol: TCP
-          port: 6443
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -138,3 +140,20 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
+
+---
+# Homarr's Kubernetes integration lists workloads through the apiserver. Named as an entity
+# because the apiserver is reached through a ClusterIP that DNATs to host-network endpoints,
+# which no ipBlock can express.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: homarr
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homarr
+  egress:
+    - toEntities:
+        - kube-apiserver

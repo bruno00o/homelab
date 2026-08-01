@@ -160,12 +160,10 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # API server access
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
+    # Apiserver egress used to be a `ports: 443, 6443` block here. Ports with no `to:` read
+    # as "to anywhere", so it allowed the database pods out to the whole internet. It is now
+    # the CiliumNetworkPolicy at the end of this file.
+    #
     # Inter-replica replication
     - to:
         - podSelector:
@@ -208,6 +206,9 @@ spec:
           port: 6379
 
 ---
+# Genuine egress to the internet: external OAuth sources, the GeoIP feed, avatars. Kept,
+# but 6443 is gone - that port only ever meant the apiserver, which is now named as such in
+# the CiliumNetworkPolicy at the end of this file.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -223,8 +224,6 @@ spec:
     - ports:
         - protocol: TCP
           port: 443
-        - protocol: TCP
-          port: 6443
 
 ---
 # SMTP egress for email notifications (Resend on STARTTLS:587 + SSL:465)
@@ -401,3 +400,20 @@ spec:
       ports:
         - protocol: TCP
           port: 9001
+
+---
+# Apiserver egress for both workloads in this namespace: authentik manages its outposts
+# through the API, and the CNPG instances do leader election and watch their own CR. Named
+# as an entity because the apiserver is reached through a ClusterIP that DNATs to
+# host-network endpoints, which no ipBlock can express. Replaces the two `ports: 443, 6443`
+# blocks above, which had no destination and therefore allowed the whole internet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: authentik
+spec:
+  endpointSelector: {}
+  egress:
+    - toEntities:
+        - kube-apiserver

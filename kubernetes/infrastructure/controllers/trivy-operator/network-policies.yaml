@@ -1,21 +1,7 @@
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-api-egress
-  namespace: trivy-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
-
----
+# Vulnerability database and image manifests, both on 443. Apiserver egress comes from the
+# shared apiserver-egress component; the allow-api-egress policy that used to sit here
+# duplicated this rule under a name that suggested it stayed inside the cluster.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

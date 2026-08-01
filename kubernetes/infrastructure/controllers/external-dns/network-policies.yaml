@@ -1,9 +1,11 @@
 ---
-# Egress to k8s API + Cloudflare API (both on 443/6443)
+# Apiserver egress comes from the shared apiserver-egress component. What is left is the
+# Cloudflare API, which is a genuine egress to the internet on 443 - the policy this
+# replaces bundled the two under one name and read as if neither left the cluster.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-api-egress
+  name: allow-cloudflare-api-egress
   namespace: external-dns
 spec:
   podSelector: {}
@@ -13,5 +15,3 @@ spec:
     - ports:
         - protocol: TCP
           port: 443
-        - protocol: TCP
-          port: 6443

@@ -1,0 +1,23 @@
+---
+# Egress to the kube-apiserver, and to nothing else.
+#
+# This replaces the `allow-api-egress` NetworkPolicy that had been copy-pasted into nine
+# namespaces. That policy opened TCP 443 and 6443 with no `to:` selector, which a standard
+# NetworkPolicy reads as "to anywhere" — so what the manifests called API access was in fact
+# unrestricted HTTPS to the internet from every pod in those namespaces.
+#
+# A CiliumNetworkPolicy rather than a NetworkPolicy because only Cilium can name the
+# apiserver: it is reached through a ClusterIP that DNATs to host-network endpoints, which
+# no ipBlock can express. `toEntities` also makes the rule survive the apiserver moving
+# port or address.
+#
+# Carries no namespace: the adopting kustomization's `namespace:` supplies it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+spec:
+  endpointSelector: {}
+  egress:
+    - toEntities:
+        - kube-apiserver

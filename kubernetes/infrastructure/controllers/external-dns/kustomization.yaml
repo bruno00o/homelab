@@ -7,4 +7,5 @@ resources:
   - network-policies.yaml
 components:
   - ../../../components/network-policies/base
+  - ../../../components/network-policies/apiserver-egress
 namespace: external-dns

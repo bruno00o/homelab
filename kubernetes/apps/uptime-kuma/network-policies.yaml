@@ -47,6 +47,25 @@ spec:
         - ipBlock: { cidr: 0.0.0.0/0 }
 
 ---
+# The monitors call `https://<app>.${CLUSTER_DOMAIN}`, which resolves to the gateway. Cilium
+# evaluates this pod's egress against the **backend the gateway forwards to**, not against
+# the gateway, and an ipBlock never selects an in-cluster endpoint - so the rule above,
+# despite naming the whole internet, matched none of them and the gateway proxy answered
+# `403 Access denied` for every internal hostname. Twelve monitors accept 400-499 and were
+# reporting those services UP on that 403.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-monitor-cluster-egress
+  namespace: uptime-kuma
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: uptime-kuma
+  egress:
+    - toEntities: [cluster]
+
+---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

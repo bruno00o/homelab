@@ -772,4 +772,3 @@ data:
 
             - !Find [authentik_providers_proxy.proxyprovider, [name, Frigate Proxy]]
             - !Find [authentik_providers_proxy.proxyprovider, [name, Zigbee2MQTT Proxy]]
-            - !Find [authentik_providers_proxy.proxyprovider, [name, Hermes Proxy]]

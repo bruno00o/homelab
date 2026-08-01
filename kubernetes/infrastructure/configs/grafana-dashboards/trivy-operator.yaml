@@ -809,6 +809,228 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
+            "y": 3
+          },
+          "id": 40,
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Distinct CVEs, not findings. The panels above count one per (image, package, CVE): a single unpatched perl CVE is four Debian binary packages across every image that ships them.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": null
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 0,
+                "y": 4
+              },
+              "id": 41,
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "9.3.1",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{severity=\"Critical\"}))",
+                  "instant": true,
+                  "range": false,
+                  "refId": "A"
+                }
+              ],
+              "title": "Critical CVEs (distinct)",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Of the CVEs on the left, those an upstream release actually fixes. The rest have no patch anywhere yet, so no image bump makes them go away.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 6,
+                "y": 4
+              },
+              "id": 42,
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "9.3.1",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{severity=\"Critical\", fixed_version!=\"\"}))",
+                  "instant": true,
+                  "range": false,
+                  "refId": "A"
+                }
+              ],
+              "title": "Critical CVEs with a fix",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Every Critical/High finding that a version bump would clear, with the version to bump to.",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": "auto",
+                    "displayMode": "auto"
+                  },
+                  "mappings": []
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 14,
+                "w": 24,
+                "x": 0,
+                "y": 9
+              },
+              "id": 43,
+              "options": {
+                "footer": {
+                  "enablePagination": true,
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "Image"
+                  }
+                ]
+              },
+              "pluginVersion": "9.3.1",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "max by (severity, image_repository, image_tag, resource, installed_version, fixed_version, vuln_id) (trivy_vulnerability_id{fixed_version!=\"\"})",
+                  "format": "table",
+                  "instant": true,
+                  "range": false,
+                  "refId": "A"
+                }
+              ],
+              "title": "Fixable findings",
+              "transformations": [
+                {
+                  "id": "organize",
+                  "options": {
+                    "excludeByName": {
+                      "Time": true,
+                      "Value": true
+                    },
+                    "indexByName": {},
+                    "renameByName": {
+                      "fixed_version": "Fixed in",
+                      "image_repository": "Image",
+                      "image_tag": "Tag",
+                      "installed_version": "Installed",
+                      "resource": "Package",
+                      "severity": "Severity",
+                      "vuln_id": "CVE"
+                    }
+                  }
+                }
+              ],
+              "type": "table"
+            }
+          ],
+          "title": "Actionable (deduplicated by CVE)",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
             "y": 2
           },
           "id": 4,

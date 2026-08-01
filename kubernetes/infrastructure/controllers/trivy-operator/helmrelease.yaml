@@ -37,6 +37,11 @@ spec:
       builtInTrivyServer: true
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true
+      # One series per (image, package, CVE), carrying a `fixed_version` label. This is
+      # what splits "vulnerable" from "actionable" without touching the scan itself:
+      # trivy.ignoreUnfixed would give the same split by deleting the unfixed findings
+      # from the reports, and there is then no way back to the full picture.
+      metricsVulnIdEnabled: true
 
     trivy:
       resources:
@@ -48,3 +53,16 @@ spec:
 
     serviceMonitor:
       enabled: true
+      endpointAdditionalProperties:
+        metricRelabelings:
+          # metricsVulnIdEnabled above is all-or-nothing: 21k series cluster-wide, of
+          # which only the 2.6k Critical/High ones get looked at. Dropped at ingest,
+          # not at query time — Prometheus pays for a series it stores either way.
+          - sourceLabels: [__name__, severity]
+            regex: trivy_vulnerability_id;(Low|Medium|Unknown|None)
+            action: drop
+          # Free-text and redundant labels on that same metric. vuln_title is a full
+          # sentence; the dates and pkg_path are never queried. Nothing else exposes
+          # them, so dropping them cluster-wide is safe.
+          - regex: vuln_title|pkg_path|target|class|published_date|last_modified_date
+            action: labeldrop

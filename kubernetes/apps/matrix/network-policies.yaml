@@ -226,9 +226,9 @@ spec:
       ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
-    - ports:
-        - { protocol: TCP, port: 443 }
-        - { protocol: TCP, port: 6443 }
+    # Apiserver egress used to be a `ports: 443, 6443` block here. Ports with no `to:` read
+    # as "to anywhere", so it allowed the database pods out to the whole internet. It is now
+    # the CiliumNetworkPolicy at the end of this file.
     - to:
         - podSelector:
             matchLabels:
@@ -282,3 +282,20 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 80 }
+
+---
+# Leader election and watching its own CR, i.e. the apiserver and nothing else. Named as an
+# entity because the apiserver is reached through a ClusterIP that DNATs to host-network
+# endpoints, which no ipBlock can express.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-synapse-postgres-apiserver-egress
+  namespace: matrix
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: synapse-postgres
+  egress:
+    - toEntities:
+        - kube-apiserver

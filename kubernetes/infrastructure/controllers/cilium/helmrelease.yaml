@@ -67,6 +67,17 @@ spec:
       limits:
         memory: 1Gi
 
+    # `resources` above is the agent container only; the chart's four init containers
+    # (config, apply-sysctl-overwrites, mount-bpf-fs, clean-cilium-state) render with
+    # `resources: {}` and take this key instead. clean-cilium-state is the heavy one -
+    # it unmounts BPF maps on a node that has been running a while.
+    initResources:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        memory: 256Mi
+
     prometheus:
       enabled: true
       serviceMonitor:

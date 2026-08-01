@@ -62,14 +62,11 @@ spec:
       # volume left degraded keeps its engine image alive along with its DaemonSet.
       concurrentAutomaticEngineUpgradePerNodeLimit: 1
 
-    # The backup target is no longer a default setting: the chart moved it to its own block,
-    # which renders the BackupTarget resource instead of a line in the settings ConfigMap.
-    # Written under defaultSettings it was dropped, and the target survived only as cluster
-    # state left by an older chart — a rebuilt cluster would have come up with no backup
-    # destination at all.
-    defaultBackupStore:
-      backupTarget: ${NFS_BACKUP_TARGET}
-      pollInterval: 300
+    # No defaultBackupStore here. It renders neither a setting nor a BackupTarget, only
+    # ConfigMap/longhorn-default-resource, which longhorn-manager reads once to seed objects
+    # that do not exist yet — dead on a running cluster. The live BackupTarget/default is
+    # kubernetes/infrastructure/configs/longhorn/backup-target.yaml, re-applied by Flux every
+    # ten minutes; a pollInterval changed here would have been overwritten and never noticed.
 
     persistence:
       defaultClass: true

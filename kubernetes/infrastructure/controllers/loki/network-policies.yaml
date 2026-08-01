@@ -59,40 +59,36 @@ spec:
           port: 3100
 
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+# Both were NetworkPolicies naming ports 443 and 6443 with no `to:`, which reads as "to
+# anywhere" - the whole internet, not the apiserver. Only Cilium can name the apiserver: it
+# is reached through a ClusterIP that DNATs to host-network endpoints, which no ipBlock can
+# express.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
-  name: allow-promtail-api-egress
+  name: allow-promtail-apiserver-egress
   namespace: loki-system
 spec:
-  podSelector:
+  endpointSelector:
     matchLabels:
       app.kubernetes.io/name: promtail
-  policyTypes:
-    - Egress
   egress:
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
+    - toEntities:
+        - kube-apiserver
 
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
   name: allow-loki-apiserver-egress
   namespace: loki-system
 spec:
-  podSelector:
+  endpointSelector:
     matchLabels:
       app.kubernetes.io/name: loki
-  policyTypes:
-    - Egress
   egress:
-    - ports:
-        - protocol: TCP
-          port: 6443
+    - toEntities:
+        - kube-apiserver
 
 ---
 apiVersion: networking.k8s.io/v1

@@ -76,5 +76,9 @@ spec:
       limits:
         memory: 128Mi
 
+    # external-dns is the sole writer of the public records, and it fails silently: an
+    # expired Cloudflare token leaves the pod Running and Ready while every reconcile
+    # errors, so hostnames drift with nothing to say so. Scraped like every other
+    # controller, external_dns_registry_errors_total can carry an alert.
     serviceMonitor:
-      enabled: false
+      enabled: true

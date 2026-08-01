@@ -18,6 +18,21 @@ spec:
       ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
-    # The apiserver, the only thing this check reads.
-    - ports:
-        - { protocol: TCP, port: 6443 }
+    # The apiserver, the only thing this check reads - named as an entity in the
+    # CiliumNetworkPolicy below. A bare `port: 6443` has no destination, so it meant every
+    # host on the internet that happens to listen there.
+
+---
+# Reads PolicyReports, pods, replicasets and jobs.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-policy-drift-apiserver-egress
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: policy-drift
+  egress:
+    - toEntities:
+        - kube-apiserver

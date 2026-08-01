@@ -44,6 +44,24 @@ spec:
       metricsVulnIdEnabled: true
 
     trivy:
+      # Scans of the two first-party images produced no report at all. Two blockers, both
+      # measured: the scan pods carry no CA for zot's mugiwara certificate, and - the real
+      # one - a pod under a network policy cannot reach the internal gateway. Cilium
+      # redirects it to the gateway's L7 proxy, which drops the HTTP request and answers
+      # `403 Access denied` without ever forwarding to zot (hubble: `http-request DROPPED`).
+      # An unpoliced namespace reaches the same URL fine, which is what made this look like
+      # a registry problem. rustfs, MAS and hermes each work around it with an in-pod nginx
+      # sidecar and a hostAlias to 127.0.0.1; that is not available here, because the scan
+      # Jobs are built by the operator, not by us.
+      #
+      # So the scanner is pointed at the Service instead, which stays inside the cluster and
+      # needs neither the gateway nor TLS. The credentials still come from the workload's
+      # own imagePullSecret, which trivy-operator resolves from the image reference.
+      registry:
+        mirror:
+          "zot.merry.home.arpa": zot.zot.svc.cluster.local:5000
+      nonSslRegistries:
+        zot: zot.zot.svc.cluster.local:5000
       resources:
         requests:
           cpu: 25m

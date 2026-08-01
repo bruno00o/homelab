@@ -210,6 +210,12 @@ data:
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
           client_type: public
           client_id: hermes-dashboard
+          # Explicit: a provider created by blueprint gets an empty grant_types, not
+          # the defaults the UI fills in, and every authorization is then rejected
+          # with "Invalid grant_type for provider".
+          grant_types:
+            - authorization_code
+            - refresh_token
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           redirect_uris:
             - matching_mode: strict

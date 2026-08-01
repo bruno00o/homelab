@@ -4,8 +4,6 @@ kind: HelmRelease
 metadata:
   name: kube-prometheus-stack
   namespace: monitoring
-  annotations:
-    reloader.stakater.com/search: "true"
 spec:
   interval: 30m
   timeout: 20m
@@ -45,6 +43,14 @@ spec:
     grafana:
       enabled: true
       assertNoLeakedSecrets: false
+      # On the Deployment, which is what Reloader watches. The same annotation used to sit
+      # on the HelmRelease, an object Reloader has never looked at, and the chart does not
+      # copy HelmRelease annotations onto what it renders - so it did nothing. The OAuth
+      # client secret is injected through envValueFrom and resolved once at pod start:
+      # rotating it in Authentik left Grafana on the stale value, and with the login form
+      # disabled that locks everyone out until a manual rollout restart.
+      annotations:
+        reloader.stakater.com/auto: "true"
       deploymentStrategy:
         type: Recreate
       admin:
@@ -101,6 +107,12 @@ spec:
           labelValue: "1"
           folderAnnotation: grafana_folder
           searchNamespace: ALL
+          # folderAnnotation only tells the sidecar which subdirectory to write into; the
+          # Grafana file provisioner ignores subdirectories unless this is on. Without it
+          # the annotation carried by every repo dashboard did nothing and all five landed
+          # in General among the thirty the chart ships.
+          provider:
+            foldersFromFilesStructure: true
         datasources:
           enabled: true
           label: grafana_datasource
@@ -110,13 +122,20 @@ spec:
       defaultDashboardsTimezone: Europe/Paris
 
       additionalDataSources:
+        # Both need an explicit uid. Without one Grafana generates a random one at
+        # provisioning, and the Tempo -> Loki correlation below pointed at a datasource
+        # called `loki` that did not exist: "Logs for this span" answered `Datasource loki
+        # was not found`. The chart's own Prometheus and Alertmanager entries set a uid,
+        # which is what made the cross-reference look like it resolved.
         - name: Loki
           type: loki
+          uid: loki
           url: http://loki.loki-system.svc:3100
           access: proxy
           isDefault: false
         - name: Tempo
           type: tempo
+          uid: tempo
           url: http://tempo.tempo-system.svc:3200
           access: proxy
           isDefault: false

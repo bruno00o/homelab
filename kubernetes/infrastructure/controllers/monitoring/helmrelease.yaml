@@ -51,16 +51,6 @@ spec:
       # disabled that locks everyone out until a manual rollout restart.
       annotations:
         reloader.stakater.com/auto: "true"
-
-      # Temporary, for one reconcile: Grafana provisioning matches an existing datasource by
-      # name and keeps whatever uid it already has, so declaring `uid: loki` below does not
-      # move a datasource created before it. Deleting first is the only way through. Removed
-      # again once the uids are correct - a fresh install has nothing to delete.
-      deleteDatasources:
-        - name: Loki
-          orgId: 1
-        - name: Tempo
-          orgId: 1
       deploymentStrategy:
         type: Recreate
       admin:

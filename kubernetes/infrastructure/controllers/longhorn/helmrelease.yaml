@@ -46,6 +46,12 @@ spec:
       restoreVolumeRecurringJobs: ignored
       offlineReplicaRebuilding: ignored
       backupConcurrentLimit: 2
+      # Longhorn ships this at 0, which means volumes never leave the engine image they
+      # were created with. Each Longhorn upgrade then adds an engine DaemonSet and keeps
+      # every older one alive: v1.11.0, v1.11.1 and v1.11.2 were still serving 31 of 38
+      # volumes under a v1.12.0 cluster, three privileged DaemonSets carrying CVEs that
+      # no image bump could reach. 1 = one volume per node at a time, live upgrade.
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
 
     # The backup target is no longer a default setting: the chart moved it to its own block,
     # which renders the BackupTarget resource instead of a line in the settings ConfigMap.

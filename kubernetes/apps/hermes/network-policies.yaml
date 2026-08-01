@@ -1,5 +1,5 @@
 ---
-# API (8642) reachable directly from the gateway on the LAN.
+# API (8642) and dashboard (9119), both reachable from the gateway on the LAN.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -15,9 +15,10 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 8642 }
+        - { protocol: TCP, port: 9119 }
 
 ---
-# Cross-node envoy proxy traffic (Cilium ingress identity) for the API route.
+# Cross-node envoy proxy traffic (Cilium ingress identity) for both routes.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -32,26 +33,28 @@ spec:
       toPorts:
         - ports:
             - { port: "8642", protocol: TCP }
+            - { port: "9119", protocol: TCP }
 
 ---
-# Dashboard (9119) reached by the Authentik embedded outpost (proxy mode).
+# OIDC backchannel: the sidecar proxies to Authentik, hermes itself only talks to
+# it over loopback (hostAlias), which no policy governs.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ingress-from-authentik
+  name: allow-egress-to-authentik
   namespace: hermes
 spec:
   podSelector:
     matchLabels:
       app.kubernetes.io/name: hermes
-  policyTypes: [Ingress]
-  ingress:
-    - from:
+  policyTypes: [Egress]
+  egress:
+    - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: authentik
       ports:
-        - { protocol: TCP, port: 9119 }
+        - { protocol: TCP, port: 80 }
 
 ---
 # Outbound to the internet for the LLM provider (OpenRouter, 443) and web tools.

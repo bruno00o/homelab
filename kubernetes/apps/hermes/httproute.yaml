@@ -1,5 +1,7 @@
 ---
-# Dashboard (9119) — routed through Authentik proxy (SSO, homelab-admins only)
+# Dashboard (9119) — direct to the pod: the dashboard runs its own OIDC client
+# against Authentik, so the proxy outpost is no longer in the path. Access is still
+# admins-only, enforced by the policy bound to the Authentik application.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -18,9 +20,8 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: authentik-server
-          namespace: authentik
-          port: 80
+        - name: hermes
+          port: 9119
 ---
 # API (8642) — direct to the pod, protected by API_SERVER_KEY (no Authentik)
 apiVersion: gateway.networking.k8s.io/v1

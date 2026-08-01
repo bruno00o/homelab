@@ -5,6 +5,7 @@ resources:
   - configmap.yaml
   - hermes-secrets.sops.yaml
   - hermes-matrix.sops.yaml
+  - oidc-proxy.yaml
   - statefulset.yaml
   - httproute.yaml
   - network-policies.yaml

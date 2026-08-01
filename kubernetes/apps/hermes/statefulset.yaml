@@ -38,6 +38,12 @@ spec:
       labels:
         app.kubernetes.io/name: hermes
     spec:
+      # The OIDC backchannel resolves to the sidecar below, never to the Cilium
+      # LB-gateway: hairpinning back in through it does not work from a pod.
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - auth.${CLUSTER_DOMAIN}
       # Root at start, and only at start: the image runs on s6-overlay v3, whose init hook
       # remaps the uid, chowns /run and /opt/data, then hands the gateway to uid 10000 via
       # s6-setuidgid. Pinned to 10000 from the outset it cannot do any of that and refuses
@@ -50,6 +56,45 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       initContainers:
+        # Native sidecar (k8s 1.29+): passes its startupProbe before hermes starts,
+        # so the dashboard's OIDC discovery at boot cannot race an unready nginx —
+        # it refuses to bind at all when the provider fails to load. Config in
+        # oidc-proxy.yaml.
+        - name: oidc-proxy
+          # renovate: datasource=docker depName=docker.io/nginxinc/nginx-unprivileged
+          image: docker.io/nginxinc/nginx-unprivileged:1.31.3-alpine
+          restartPolicy: Always
+          # Explicitly 101 (the image's own user), against the root the pod defaults to.
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 101
+            runAsGroup: 101
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
+          ports:
+            - name: oidc-tls
+              containerPort: 443
+              protocol: TCP
+          startupProbe:
+            tcpSocket: { port: 443 }
+            periodSeconds: 1
+            failureThreshold: 30
+          volumeMounts:
+            - name: oidc-proxy-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: oidc-proxy-tls
+              mountPath: /tls
+              readOnly: true
+            # nginx.conf points pid + temp paths here; needed under readOnlyRootFilesystem.
+            - name: oidc-proxy-tmp
+              mountPath: /tmp
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { memory: 64Mi }
         # Seed config.yaml into the PVC only if absent, so Hermes can still
         # own/modify it at runtime (the PVC is the source of truth for its state).
         - name: seed-config
@@ -130,6 +175,20 @@ spec:
               value: 0.0.0.0
             - name: HERMES_DASHBOARD_PORT
               value: "9119"
+            # Since v2026.7.30 the dashboard refuses to bind anywhere but loopback
+            # without an auth provider of its own — Authentik in front is no longer
+            # enough. `self-hosted` is its built-in generic OIDC client: a public
+            # PKCE client, no secret, everything else read from the issuer's
+            # discovery document. PUBLIC_URL is what the callback is built from,
+            # the forwarded headers alone would give the sidecar's view.
+            - name: HERMES_DASHBOARD_OIDC_ISSUER
+              value: https://auth.${CLUSTER_DOMAIN}/application/o/hermes/
+            - name: HERMES_DASHBOARD_OIDC_CLIENT_ID
+              value: hermes-dashboard
+            - name: HERMES_DASHBOARD_PUBLIC_URL
+              value: https://hermes.${CLUSTER_DOMAIN}
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/mugiwara/ca.crt
             - name: OPENROUTER_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -161,6 +220,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/data
+            - name: mugiwara-ca
+              mountPath: /etc/ssl/mugiwara
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -171,6 +233,21 @@ spec:
         - name: config-seed
           configMap:
             name: hermes-config
+        - name: oidc-proxy-conf
+          configMap:
+            name: hermes-oidc-proxy
+        - name: oidc-proxy-tmp
+          emptyDir: {}
+        - name: oidc-proxy-tls
+          secret:
+            secretName: auth-oidc-tls
+        # ca.crt of the auth-oidc-tls secret = the mugiwara CA (see SSL_CERT_FILE).
+        - name: mugiwara-ca
+          secret:
+            secretName: auth-oidc-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
   volumeClaimTemplates:
     - metadata:
         name: data

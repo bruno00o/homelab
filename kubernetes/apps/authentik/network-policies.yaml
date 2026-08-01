@@ -401,10 +401,3 @@ spec:
       ports:
         - protocol: TCP
           port: 9001
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: hermes
-      ports:
-        - protocol: TCP
-          port: 9119

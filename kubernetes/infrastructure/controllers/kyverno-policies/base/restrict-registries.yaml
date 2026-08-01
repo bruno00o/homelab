@@ -29,3 +29,8 @@ spec:
           spec:
             containers:
               - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/* | longhornio/* | zot.merry.home.arpa/*"
+            # `=()` validates only when the key is present: most pods have no init containers.
+            # home-assistant's ran on the bare `mikefarah/yq:4` - no registry prefix, so no
+            # rule could ever match it - until this block existed to reject it.
+            =(initContainers):
+              - image: "ghcr.io/* | docker.io/* | quay.io/* | registry.k8s.io/* | gcr.io/* | lscr.io/* | longhornio/* | zot.merry.home.arpa/*"

@@ -28,3 +28,6 @@ spec:
           spec:
             containers:
               - image: "!*:latest"
+            # `=()` validates only when the key is present: most pods have no init containers.
+            =(initContainers):
+              - image: "!*:latest"

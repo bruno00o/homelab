@@ -34,3 +34,13 @@ spec:
             containers:
               - securityContext:
                   allowPrivilegeEscalation: false
+            # `=()` is Kyverno's "validate only if present" anchor - most pods have no init
+            # containers, and a bare `initContainers:` would reject every one of them. Without
+            # this block the rule saw `containers` alone: frigate's copyconfig ran with an
+            # unset allowPrivilegeEscalation under an Enforce policy, and the audit mirror,
+            # sharing the same pattern, reported the cluster clean.
+            # ephemeralContainers is deliberately not covered: it would break `kubectl debug`,
+            # which is a human action on an already-running pod, not a deployed workload.
+            =(initContainers):
+              - securityContext:
+                  allowPrivilegeEscalation: false

@@ -44,3 +44,15 @@ spec:
                   requests:
                     cpu: "?*"
                     memory: "?*"
+            # `=()` validates only when the key is present: most pods have no init containers.
+            # An init container is short-lived but not free - it can still drive a node into
+            # OOM while it runs. Two charts hardcode one with no resources and expose no value
+            # for it (frigate, home-assistant); both are given resources by a postRenderer on
+            # their HelmRelease rather than exempted here.
+            =(initContainers):
+              - resources:
+                  limits:
+                    memory: "?*"
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"

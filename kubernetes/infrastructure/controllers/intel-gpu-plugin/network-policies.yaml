@@ -33,20 +33,18 @@ spec:
         - protocol: TCP
           port: 53
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+# Label-scoped because kube-system is shared, so the apiserver-egress component (which
+# selects every pod in its namespace) does not apply. The plugin talks to the apiserver and
+# to nothing else; its predecessor opened 443 to the whole internet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
-  name: intel-gpu-plugin-allow-api-egress
+  name: intel-gpu-plugin-allow-apiserver-egress
   namespace: kube-system
 spec:
-  podSelector:
+  endpointSelector:
     matchLabels:
       app.kubernetes.io/name: intel-gpu-plugin
-  policyTypes:
-    - Egress
   egress:
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
+    - toEntities:
+        - kube-apiserver

@@ -1,9 +1,12 @@
 ---
-# Cert-manager needs Kubernetes API access
+# Apiserver egress comes from the shared apiserver-egress component. What is left here is
+# the part that genuinely leaves the cluster: ACME on Let's Encrypt and the Cloudflare API
+# for the DNS-01 solver, both on 443. Named for what it is - the policy it replaces was
+# called allow-api-egress and opened exactly the same thing without saying so.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-api-egress
+  name: allow-acme-egress
   namespace: cert-manager
 spec:
   podSelector: {}
@@ -13,8 +16,6 @@ spec:
     - ports:
         - protocol: TCP
           port: 443
-        - protocol: TCP
-          port: 6443
 
 ---
 # DNS-01 self-check: query authoritative nameservers (e.g. Cloudflare DNS)

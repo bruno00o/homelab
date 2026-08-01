@@ -58,12 +58,8 @@ spec:
           port: 3200 # Tempo
         - protocol: TCP
           port: 2000 # cloudflared metrics
-    # Kubernetes API for service discovery
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
+    # Kubernetes API for service discovery: the CiliumNetworkPolicy at the end of this
+    # file. Ports with no `to:` read as "to anywhere", so this block allowed the internet.
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -119,11 +115,10 @@ spec:
           port: 9000
         - protocol: TCP
           port: 9443
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
+    # The apiserver - what the dashboard and datasource sidecars watch - is at the end of
+    # this file. It used to be a `ports: 443, 6443` block with no destination, i.e. the
+    # internet. Grafana needs nothing outside the cluster: its OAuth back-channel calls go
+    # to authentik above, and no plugin is installed at runtime.
     - to:
         - namespaceSelector:
             matchLabels:
@@ -181,42 +176,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ksm-api-access
-  namespace: monitoring
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: kube-state-metrics
-  policyTypes:
-    - Egress
-  egress:
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-operator-api-access
-  namespace: monitoring
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
-  policyTypes:
-    - Egress
-  egress:
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-operator-webhook-ingress
   namespace: monitoring
 spec:
@@ -229,24 +188,6 @@ spec:
     - ports:
         - protocol: TCP
           port: 10250
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-helm-hooks-api-access
-  namespace: monitoring
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/managed-by: Helm
-  policyTypes:
-    - Egress
-  egress:
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -264,3 +205,21 @@ spec:
         - ports:
             - port: "3000"
               protocol: TCP
+---
+# Apiserver egress for everything in this namespace that talks to it: Prometheus for
+# service discovery, kube-state-metrics for its whole dataset, the operator for the CRs it
+# reconciles, Grafana's sidecars for the dashboard and datasource ConfigMaps, and the
+# chart's Helm hook Jobs. Five NetworkPolicies used to say this with `ports: 443, 6443` and
+# no `to:` - which is not the apiserver, it is every host on the internet. Only Cilium can
+# name it: the apiserver is reached through a ClusterIP that DNATs to host-network
+# endpoints, which no ipBlock can express.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: monitoring
+spec:
+  endpointSelector: {}
+  egress:
+    - toEntities:
+        - kube-apiserver

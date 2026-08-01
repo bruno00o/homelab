@@ -38,12 +38,8 @@ spec:
           port: 5432
         - protocol: TCP
           port: 8000
-    # API Server
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
+    # The apiserver is the CiliumNetworkPolicy at the end of this file. Ports with no `to:`
+    # read as "to anywhere", so this block allowed the operator out to the internet.
     # Barman cloud plugin (gRPC)
     - to:
         - podSelector:
@@ -212,3 +208,19 @@ spec:
         - ports:
             - port: "6379"
               protocol: TCP
+---
+# The CNPG operator watches its CRs and manages the instance pods through the apiserver.
+# Named as an entity because the apiserver is reached through a ClusterIP that DNATs to
+# host-network endpoints, which no ipBlock can express.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-cnpg-operator-apiserver-egress
+  namespace: cnpg-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+  egress:
+    - toEntities:
+        - kube-apiserver

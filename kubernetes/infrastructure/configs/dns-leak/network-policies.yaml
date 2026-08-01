@@ -26,5 +26,20 @@ spec:
       ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
-    - ports:
-        - { protocol: TCP, port: 6443 }
+    # The apiserver is the CiliumNetworkPolicy below: a bare `port: 6443` has no
+    # destination, so it means every host on the internet that happens to listen there.
+
+---
+# Reads the DNSEndpoints and HTTPRoutes it checks.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns-leak-check-apiserver-egress
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: dns-leak-check
+  egress:
+    - toEntities:
+        - kube-apiserver

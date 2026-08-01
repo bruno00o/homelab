@@ -53,8 +53,10 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: authentik
+      # 9000, the pod targetPort behind the service's port 80: Cilium matches egress
+      # after DNAT, and written as 80 this rule lets nothing through (504 on discovery).
       ports:
-        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 9000 }
 
 ---
 # Outbound to the internet for the LLM provider (OpenRouter, 443) and web tools.

@@ -129,6 +129,20 @@ tasks:
     cmds:
       - ./scripts/inventory.sh
 
+  drift:
+    desc: Show how far behind upstream each running image is, and whether Renovate sees it
+    preconditions:
+      - sh: command -v jq
+        msg: "jq not found. Run 'task deps:install'."
+      - sh: command -v curl
+        msg: "curl not found."
+    cmds:
+      # Queries one registry per distinct image, so it takes a couple of minutes and needs
+      # outbound HTTPS. Deliberately not a CronJob, unlike policy:drift and dns:leak-check:
+      # being behind upstream is not an incident, and an alert that fires on every release
+      # published anywhere would be noise within a week.
+      - ./scripts/drift.sh
+
   # =============================================================================
   # Talos - Configuration
   # =============================================================================

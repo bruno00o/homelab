@@ -179,8 +179,10 @@ spec:
           limits:
             # Peaked at 1988Mi against a 2Gi limit — 97%. Go sizes its heap to the limit, so
             # this was not "using what it needs" but "running as close to the wall as it
-            # dared". Prometheus memory tracks active series, which only grows here.
-            memory: 3Gi
+            # dared": raised to 3Gi it immediately settled at 2378Mi, which is what it
+            # actually wanted. 4Gi is that figure with the same headroom every other limit
+            # here gets. Prometheus memory tracks active series, which only grows.
+            memory: 4Gi
         storageSpec:
           volumeClaimTemplate:
             spec:

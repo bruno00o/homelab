@@ -44,6 +44,16 @@ spec:
       metricsVulnIdEnabled: true
 
     trivy:
+      # zot serves a mugiwara-signed certificate and the scan pods carry no CA, so every
+      # scan of a first-party image died on `x509: certificate signed by unknown authority`
+      # and produced no report at all. Of 158 VulnerabilityReports, none covered a zot image
+      # - the two applications built here, the only ones whose CVEs nobody else publishes,
+      # were the two nothing looked at, and the dashboards read that as "no findings".
+      # Skipping verification rather than mounting the CA: the chart offers no way to get a
+      # certificate into a scan job, and this matches what talconfig.yaml already does for
+      # the kubelet on the same LAN-only registry.
+      insecureRegistries:
+        zot: zot.merry.home.arpa
       resources:
         requests:
           cpu: 25m

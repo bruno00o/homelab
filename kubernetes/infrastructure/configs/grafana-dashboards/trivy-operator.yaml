@@ -98,7 +98,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "description": "Total number by type of security issues identified in the cluster",
+              "description": "Only what can be acted on: Critical and High, CVEs counted once each rather than once per package and per workload. Unfixed CVEs are excluded from the first tile — no image bump clears them. Thresholds are calibrated per tile against the cluster's normal standing level, so a tile only turns red on a real regression. Raw totals are in the panel below.",
               "fieldConfig": {
                 "defaults": {
                   "mappings": [],
@@ -109,8 +109,12 @@ data:
                         "color": "green"
                       },
                       {
+                        "color": "orange",
+                        "value": 20
+                      },
+                      {
                         "color": "red",
-                        "value": 1
+                        "value": 40
                       }
                     ]
                   },
@@ -120,14 +124,26 @@ data:
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Critical"
+                      "options": "Misconfig (Crit+High)"
                     },
                     "properties": [
                       {
-                        "id": "color",
+                        "id": "thresholds",
                         "value": {
-                          "fixedColor": "red",
-                          "mode": "fixed"
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 250
+                            },
+                            {
+                              "color": "red",
+                              "value": 400
+                            }
+                          ]
                         }
                       }
                     ]
@@ -135,14 +151,26 @@ data:
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "High"
+                      "options": "Secrets (Crit+High)"
                     },
                     "properties": [
                       {
-                        "id": "color",
+                        "id": "thresholds",
                         "value": {
-                          "fixedColor": "orange",
-                          "mode": "fixed"
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 15
+                            },
+                            {
+                              "color": "red",
+                              "value": 30
+                            }
+                          ]
                         }
                       }
                     ]
@@ -150,43 +178,26 @@ data:
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Medium"
+                      "options": "RBAC (Crit+High)"
                     },
                     "properties": [
                       {
-                        "id": "color",
+                        "id": "thresholds",
                         "value": {
-                          "fixedColor": "dark-yellow",
-                          "mode": "fixed"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Low"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "fixedColor": "green",
-                          "mode": "fixed"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Unknown"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed"
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 100
+                            },
+                            {
+                              "color": "red",
+                              "value": 200
+                            }
+                          ]
                         }
                       }
                     ]
@@ -202,6 +213,105 @@ data:
               "id": 21,
               "options": {
                 "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "9.3.1",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{severity=\"Critical\", fixed_version!=\"\"}))",
+                  "instant": true,
+                  "legendFormat": "Fixable critical CVEs",
+                  "range": false,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(trivy_resource_configaudits{severity=~\"Critical|High\"})",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "Misconfig (Crit+High)",
+                  "range": false,
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(trivy_image_exposedsecrets{severity=~\"Critical|High\"})",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "Secrets (Crit+High)",
+                  "range": false,
+                  "refId": "C"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(trivy_clusterrole_clusterrbacassessments{severity=~\"Critical|High\"})",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "RBAC (Crit+High)",
+                  "range": false,
+                  "refId": "D"
+                }
+              ],
+              "title": "Actionable — Critical/High only, CVEs deduplicated",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Raw finding counts, every severity included and nothing deduplicated. Trivy counts one finding per (image, package, CVE) and once per workload, so a single unpatched perl CVE in a shared base image is worth dozens here. Kept for reference — the row above is what to act on. Deliberately uncoloured: these numbers have no good or bad value.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "text",
+                    "mode": "fixed"
+                  },
+                  "mappings": [],
+                  "unit": "none"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 5,
+                "w": 24,
+                "x": 0,
+                "y": 10
+              },
+              "id": 44,
+              "options": {
+                "colorMode": "value",
                 "graphMode": "none",
                 "justifyMode": "center",
                 "orientation": "auto",
@@ -272,7 +382,7 @@ data:
                   "refId": "D"
                 }
               ],
-              "title": "Number and Type of Security Issues",
+              "title": "Raw finding counts (reference only)",
               "type": "stat"
             }
           ],

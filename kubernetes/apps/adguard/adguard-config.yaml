@@ -59,6 +59,9 @@ data:
         - domain: 'valkey.${CLUSTER_DOMAIN}'
           answer: ${LB_VALKEY}
           enabled: true
+        - domain: 'ntp.${CLUSTER_DOMAIN}'
+          answer: ${LB_NTP}
+          enabled: true
         - domain: '*.${CLUSTER_DOMAIN}'
           answer: ${LB_GATEWAY}
           enabled: true

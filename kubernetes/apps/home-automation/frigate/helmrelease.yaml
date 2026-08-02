@@ -68,6 +68,41 @@ spec:
     podAnnotations:
       reloader.stakater.com/auto: "true"
 
+    # The detection weights travel as an OCI image rather than as a file someone copied into
+    # a volume: the kubelet pulls it, so this needs no NetworkPolicy, no registry credentials
+    # inside the pod and no trust in the internal CA — the three things an oras sidecar would
+    # have needed. No `# renovate:` comment: zot is LAN-only and Renovate cannot reach it.
+    imagePullSecrets:
+      - name: zot-pull
+
+    extraInitContainers:
+      - name: fetch-model
+        image: zot.merry.home.arpa/frigate-models/yolov9-s-320:1.0.0
+        command: ["cp", "/src/yolov9-s-320.onnx", "/models/yolov9-s-320.onnx"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        volumeMounts:
+          - name: models
+            mountPath: /models
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+
+    extraVolumes:
+      - name: models
+        emptyDir: {}
+
+    extraVolumeMounts:
+      - name: models
+        mountPath: /models
+        readOnly: true
+
     securityContext:
       allowPrivilegeEscalation: false
       # intel_gpu_top reads the i915 PMU through perf_event_open, which is refused twice
@@ -163,17 +198,17 @@ spec:
       # the default. Setting it would silently swap the red and blue channels — the model
       # still runs and still returns boxes, just worse ones.
       #
-      # The .onnx is NOT in git: it is 29 MB of weights sitting on the config PVC, exported
-      # from the upstream yolov9-s checkpoint (see the Frigate docs, "Downloading YOLO
-      # Models"). Restore that PVC from a backup taken before 2026-08-02 and this path is
-      # empty, which stops Frigate at startup rather than falling back.
+      # The weights ship as an OCI image from zot and land on an emptyDir, so /models is
+      # rebuilt from the registry on every start and holds no state. Deliberately not the
+      # config PVC: a restore from a backup older than the model would leave this path empty
+      # and stop Frigate at startup.
       model:
         model_type: yolo-generic
         width: 320
         height: 320
         input_tensor: nchw
         input_dtype: float
-        path: /config/model_cache/yolov9-s-320.onnx
+        path: /models/yolov9-s-320.onnx
         labelmap_path: /labelmap/coco-80.txt
 
       go2rtc:

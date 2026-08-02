@@ -61,6 +61,29 @@ spec:
   path: ./config/crd/standard
   prune: true
   wait: true
+  # Gateway API v1.6.1 graduated TLSRoute to v1 and stopped serving v1alpha2. Cilium 1.19.6
+  # still asks the apiserver for `gateway.networking.k8s.io/v1alpha2, Kind=TLSRoute` when it
+  # builds its Gateway API field indexer, so with v1alpha2 unserved cilium-operator refuses
+  # to start at all: "no matches for kind TLSRoute". Nothing broke when the bump landed on
+  # 2026-07-29 — a running operator keeps its open informers — and it only surfaced when the
+  # nodes rebooted five days later, taking the operator down cluster-wide.
+  # Re-serving the version costs nothing: all three share one schema, Gateway API declares
+  # no conversion webhook, and v1 stays the storage version. This is a stopgap until Cilium
+  # moves to 1.20, which reads TLSRoute at v1 — remove it then, not before.
+  patches:
+    - target:
+        kind: CustomResourceDefinition
+        name: tlsroutes.gateway.networking.k8s.io
+      # The `test` op is the guard: a JSON6902 path is an index, and if upstream ever
+      # reorders the versions this fails the Kustomization instead of quietly flipping
+      # `served` on whichever version happens to sit at 1.
+      patch: |
+        - op: test
+          path: /spec/versions/1/name
+          value: v1alpha2
+        - op: replace
+          path: /spec/versions/1/served
+          value: true
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1

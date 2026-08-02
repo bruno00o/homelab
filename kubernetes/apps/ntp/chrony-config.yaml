@@ -26,4 +26,11 @@ data:
     # see the whole house as two or three sources and throttle them as one.
 
     driftfile /var/lib/chrony/chrony.drift
+
+    # chronyd refuses to put its command socket in a world-writable directory, and an
+    # emptyDir is always 0777 — fsGroup adds the group bit, it never takes the others
+    # away. So it logs "Wrong permissions on /run/chrony" once and disables the socket.
+    # Nothing is lost: chronyc falls back to the command port on 127.0.0.1, which is
+    # what the probes use. Making it clean would need a root initContainer to chmod the
+    # volume, for a monitoring channel that already works.
     bindcmdaddress /run/chrony/chronyd.sock

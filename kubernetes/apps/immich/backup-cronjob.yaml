@@ -74,13 +74,16 @@ spec:
                 - -c
                 - |
                   set -eu
-                  cible="/backup/immich-$(date +%Y%m%d-%H%M%S).sql.gz"
+                  # A subdirectory, and -maxdepth 1 on it: the share root also holds
+                  # Longhorn's backupstore, and a recursive find walks its entire block
+                  # tree over NFS. Measured on 2026-08-02 - the dump took 30 seconds, the
+                  # unscoped find was still running four minutes later.
+                  mkdir -p /backup/immich
+                  cible="/backup/immich/immich-$(date +%Y%m%d-%H%M%S).sql.gz"
                   pg_dump --format=plain --no-owner --clean --if-exists \
                     | gzip -6 > "$cible"
                   echo "écrit $cible ($(stat -c %s "$cible") octets)"
-                  # Sept jours de rétention. Le dump ne sert à rien s'il remplit le partage
-                  # que Longhorn utilise aussi pour ses propres sauvegardes.
-                  find /backup -name 'immich-*.sql.gz' -mtime +7 -print -delete
+                  find /backup/immich -maxdepth 1 -name 'immich-*.sql.gz' -mtime +7 -print -delete
               env:
                 - name: PGHOST
                   value: immich-postgres.immich.svc.cluster.local

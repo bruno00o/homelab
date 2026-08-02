@@ -226,6 +226,10 @@ spec:
           camera_2:
             - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/103#video=copy"
             - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/101#audio=copy"
+          # The Tapo needs no such split: stream1 is already H.264, so one source carries
+          # both video and audio.
+          camera_3:
+            - "ffmpeg:rtsp://insidecam:${FRIGATE_CAM3_PASSWORD}@10.0.30.4:554/stream1#video=copy#audio=copy"
 
       ffmpeg:
         hwaccel_args: preset-vaapi
@@ -301,6 +305,48 @@ spec:
             #     - person
             #   required_zones:
             #     - zone_name
+
+        # Indoor camera, and the only one that films the family rather than the garden. It
+        # ships with `detect` and `record` off: the streams are connected, nothing is
+        # analysed or written. `switch.camera_3_detect` and `switch.camera_3_recordings`
+        # are what the holiday mode turns on, so the camera is blind for the rest of the
+        # year without anyone having to remember it.
+        # Beware that these two switches are runtime state: a Frigate restart re-reads this
+        # block and turns them back off, mid-holiday included.
+        # No continuous recording either - three days of a living room is neither useful
+        # nor wanted, and events alone answer the only question this camera is here for.
+        # Detection runs off stream2 at 640x360, which would be far too coarse for a garden
+        # but is not indoors, where a person fills a large part of the frame.
+        camera_3:
+          enabled: true
+          ffmpeg:
+            inputs:
+              - path: rtsp://insidecam:${FRIGATE_CAM3_PASSWORD}@10.0.30.4:554/stream2
+                roles:
+                  - detect
+              - path: rtsp://insidecam:${FRIGATE_CAM3_PASSWORD}@10.0.30.4:554/stream1
+                roles:
+                  - record
+          detect:
+            enabled: false
+            width: 640
+            height: 360
+            fps: 5
+          record:
+            enabled: false
+            continuous:
+              days: 0
+            alerts:
+              retain:
+                days: 7
+            detections:
+              retain:
+                days: 7
+          snapshots:
+            enabled: false
+          objects:
+            track:
+              - person
 
       # Written in the 0.17 schema rather than the pre-0.16 `retain`/`events` one, which
       # Frigate migrates on every start and whose meaning changed underneath us: the old

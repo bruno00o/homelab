@@ -6,10 +6,17 @@ repositories:
     url: https://prometheus-community.github.io/helm-charts
 
 releases:
+  # Must never lead the OCIRepository tag in kubernetes/flux/repositories.yaml. This chart
+  # installs the CNI before Flux exists; Flux then adopts the release, so a version here
+  # that is ahead makes a fresh bootstrap *downgrade* its own CNI on the first reconcile —
+  # worse than an upgrade, since engine and datapath state do not go backwards cleanly.
+  # That is what PR #377 left behind: it bumped this file to 1.20.0 on its own while the
+  # OCIRepository stayed on 1.19.6, and nothing showed it because the cluster was already
+  # bootstrapped. Bump the two together, this one last.
   - name: cilium
     namespace: kube-system
     chart: cilium/cilium
-    version: 1.20.0
+    version: 1.19.6
     values:
       - cilium-values.yaml
     wait: true

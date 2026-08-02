@@ -144,17 +144,27 @@ spec:
           type: openvino
           device: GPU
 
-      # YOLOv9-t at 320, which Frigate lists as its recommended model for an Intel GPU.
-      # It replaces the bundled SSDLite MobileNet v2: same input resolution, far better on
-      # partially hidden and distant people, and measured at 10.4 ms on this iGPU against
-      # 8.4 ms for SSDLite — the detector runs at 8% of capacity, so the difference is free.
+      # YOLOv9-s at 320, replacing the bundled SSDLite MobileNet v2. The size matters and
+      # was chosen on measurement, not on the parameter count: scored against real snapshots
+      # from these two cameras, on the exact motion region Frigate feeds the detector,
+      #
+      #                       ssdlite   yolov9-t   yolov9-s
+      #   camera_2, night       0.93      0.202      0.727
+      #   camera_1, day         0.90      0.891      0.896
+      #   camera_1, day         0.88      0.933      0.936
+      #   camera_1, day         0.99      0.900      0.926
+      #
+      # yolov9-t is the size Frigate's own docs reach for first, and on that night frame it
+      # lands under the 0.5 min_score — it would have dropped a person SSDLite saw at 0.93.
+      # The -s costs 16.3 ms against 10.0 ms on this iGPU, and the detector sits near 13% of
+      # capacity, so the trade is one-sided. Re-measure before changing size again.
       #
       # No input_pixel_format here: SSDLite wanted bgr, YOLOv9 was trained on rgb, which is
       # the default. Setting it would silently swap the red and blue channels — the model
       # still runs and still returns boxes, just worse ones.
       #
-      # The .onnx is NOT in git: it is 9 MB of weights sitting on the config PVC, exported
-      # from the upstream yolov9-t checkpoint (see the Frigate docs, "Downloading YOLO
+      # The .onnx is NOT in git: it is 29 MB of weights sitting on the config PVC, exported
+      # from the upstream yolov9-s checkpoint (see the Frigate docs, "Downloading YOLO
       # Models"). Restore that PVC from a backup taken before 2026-08-02 and this path is
       # empty, which stops Frigate at startup rather than falling back.
       model:
@@ -163,7 +173,7 @@ spec:
         height: 320
         input_tensor: nchw
         input_dtype: float
-        path: /config/model_cache/yolov9-t-320.onnx
+        path: /config/model_cache/yolov9-s-320.onnx
         labelmap_path: /labelmap/coco-80.txt
 
       go2rtc:

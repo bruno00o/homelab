@@ -144,13 +144,27 @@ spec:
           type: openvino
           device: GPU
 
+      # YOLOv9-t at 320, which Frigate lists as its recommended model for an Intel GPU.
+      # It replaces the bundled SSDLite MobileNet v2: same input resolution, far better on
+      # partially hidden and distant people, and measured at 10.4 ms on this iGPU against
+      # 8.4 ms for SSDLite — the detector runs at 8% of capacity, so the difference is free.
+      #
+      # No input_pixel_format here: SSDLite wanted bgr, YOLOv9 was trained on rgb, which is
+      # the default. Setting it would silently swap the red and blue channels — the model
+      # still runs and still returns boxes, just worse ones.
+      #
+      # The .onnx is NOT in git: it is 9 MB of weights sitting on the config PVC, exported
+      # from the upstream yolov9-t checkpoint (see the Frigate docs, "Downloading YOLO
+      # Models"). Restore that PVC from a backup taken before 2026-08-02 and this path is
+      # empty, which stops Frigate at startup rather than falling back.
       model:
-        width: 300
-        height: 300
-        input_tensor: nhwc
-        input_pixel_format: bgr
-        path: /openvino-model/ssdlite_mobilenet_v2.xml
-        labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+        model_type: yolo-generic
+        width: 320
+        height: 320
+        input_tensor: nchw
+        input_dtype: float
+        path: /config/model_cache/yolov9-t-320.onnx
+        labelmap_path: /labelmap/coco-80.txt
 
       go2rtc:
         rtsp:

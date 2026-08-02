@@ -122,6 +122,50 @@ patches:
           "zot.merry.home.arpa":
             tls:
               insecureSkipVerify: true
+  - |-
+    machine:
+      files:
+        # Trust the internal CA at the node level so containerd can verify zot over TLS.
+        # The `insecureSkipVerify` above no longer reaches containerd: Spegel owns
+        # /etc/cri/conf.d/hosts, and on startup it moves every host config it does not
+        # mirror into hosts/_backup/ — zot among them, since it is not in Spegel's
+        # mirroredRegistries. The setting stays in this file and is silently inert, which
+        # is why an image that is not already cached on the node fails to pull with
+        # `x509: certificate signed by unknown authority`. Measured on all six nodes.
+        - path: /etc/ssl/certs/ca-certificates.crt
+          op: append
+          content: |
+            -----BEGIN CERTIFICATE-----
+            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
+            f+wtCEB5RIvFrJsUD4MdtLMQIxPUN8ALwrw4+xY=
+            -----END CERTIFICATE-----
 
 # =============================================================================
 # Control Plane patches

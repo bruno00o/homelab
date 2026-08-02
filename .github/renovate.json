@@ -216,7 +216,7 @@
     },
 
     {
-      "description": "Gateway API CRDs - review manually. Every Gateway and HTTPRoute in the cluster depends on their schema, and the first bump after they became visible to Renovate crossed four minors unattended (v1.2.1 to v1.6.1). It happened to work with Cilium 1.19, which is not the same as being safe: the CNI implements a declared range of the API. Unanchored, the depName shows up both bare and owner-prefixed",
+      "description": "Gateway API CRDs - review manually. Every Gateway and HTTPRoute in the cluster depends on their schema, and the first bump after they became visible to Renovate crossed four minors unattended (v1.2.1 to v1.6.1). That bump did not work with Cilium 1.19.6, contrary to what this note claimed for four days: v1.6.1 stops serving TLSRoute at v1alpha2, which the operator asks for by name when it builds its Gateway API indexer. Nothing failed on merge because a running operator keeps its open informers - it surfaced on 2026-08-02, when a node reboot restarted it and both replicas crashlooped cluster-wide. Read that as the rule for this whole class: a CRD bundle breaks its consumer at the consumer's next restart, not at merge, so a green cluster after merging proves nothing. Unanchored, the depName shows up both bare and owner-prefixed",
       "matchPackageNames": ["/gateway-api/"],
       "labels": ["infrastructure", "networking", "review-required"],
       "automerge": false

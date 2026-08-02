@@ -197,3 +197,59 @@ spec:
       ports:
         - { protocol: TCP, port: 443 }
         - { protocol: TCP, port: 80 }
+---
+# The backup CronJob needs the database and the NFS server, nothing else. Egress only: it
+# is never contacted.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-backup-egress
+  namespace: immich
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: immich-postgres-backup
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich-postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - ipBlock:
+            cidr: 10.0.10.113/32
+      ports:
+        - protocol: TCP
+          port: 2049
+        - protocol: UDP
+          port: 2049
+        - protocol: TCP
+          port: 111
+        - protocol: UDP
+          port: 111
+---
+# Egress alone is not enough: the database carries its own default-deny ingress, and
+# allow-postgres-ingress-from-server selects the server only.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-ingress-from-backup
+  namespace: immich
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: immich-postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich-postgres-backup
+      ports:
+        - protocol: TCP
+          port: 5432

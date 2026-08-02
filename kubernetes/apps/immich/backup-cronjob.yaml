@@ -1,0 +1,123 @@
+---
+# Immich is the only database in the cluster that is not a CNPG cluster, so it is the only
+# one with no ScheduledBackup. Until it moves - blocked on TensorChord publishing a
+# cloudnative-vectorchord image for PostgreSQL 18, they stop at 17.5 - this CronJob is what
+# stands between a corrupt volume and the family photo library's metadata.
+# Longhorn already snapshots the PVC hourly, but a snapshot of a running PostgreSQL is
+# crash-consistent, not a backup: it recovers most of the time rather than by construction.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-backup-nfs
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 10.0.10.113
+    path: /volume1/backups
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-backup-nfs
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: immich-backup-nfs
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: immich-postgres-backup
+  namespace: immich
+spec:
+  schedule: "35 3 * * *"
+  timeZone: ${TIMEZONE}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          # Selected by allow-postgres-backup-egress; without the label the pod falls under
+          # the namespace default-deny and reaches neither the database nor the NFS server.
+          labels:
+            app.kubernetes.io/name: immich-postgres-backup
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: dump
+              # The very image the server runs, and not a plain postgres: pg_dump refuses a
+              # server newer than itself, and this database is PostgreSQL 18 while most
+              # images still ship 17. Keep the two tags in step on upgrade.
+              image: ghcr.io/immich-app/postgres:18-vectorchord0.5.3
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  cible="/backup/immich-$(date +%Y%m%d-%H%M%S).sql.gz"
+                  pg_dump --format=plain --no-owner --clean --if-exists \
+                    | gzip -6 > "$cible"
+                  echo "écrit $cible ($(stat -c %s "$cible") octets)"
+                  # Sept jours de rétention. Le dump ne sert à rien s'il remplit le partage
+                  # que Longhorn utilise aussi pour ses propres sauvegardes.
+                  find /backup -name 'immich-*.sql.gz' -mtime +7 -print -delete
+              env:
+                - name: PGHOST
+                  value: immich-postgres.immich.svc.cluster.local
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-postgres-credentials
+                      key: username
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-postgres-credentials
+                      key: password
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-postgres-credentials
+                      key: database
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: immich-backup-nfs
+            - name: tmp
+              emptyDir: {}

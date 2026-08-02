@@ -302,15 +302,29 @@ spec:
             #   required_zones:
             #     - zone_name
 
+      # Written in the 0.17 schema rather than the pre-0.16 `retain`/`events` one, which
+      # Frigate migrates on every start and whose meaning changed underneath us: the old
+      # `retain: {days: 7, mode: motion}` became `motion: {days: 7}` and the recordings went
+      # from 3 GB to 77 GB a day on 2026-07-26, with no commit touching this block.
+      # Continuous rather than motion because measurement leaves little between them: on
+      # these two garden cameras something moves 73% of the time, so motion saves 27% and
+      # costs gaps when scrubbing. A better detector does not help here - Frigate's motion
+      # detection is pixel-based and never consults it. Events, in contrast, run at 3.5% of
+      # the time, which is why a month of clips costs about 1 GB per camera per day.
+      # Measured at 2.6 Mbit/s per camera since the main stream moved to H.265: roughly
+      # 230 GB for two cameras, 343 GB for three.
       record:
         enabled: true
-        retain:
-          days: 7
-          mode: motion
-        events:
+        continuous:
+          days: 3
+        motion:
+          days: 0
+        alerts:
           retain:
-            default: 14
-            mode: active_objects
+            days: 30
+        detections:
+          retain:
+            days: 14
 
       snapshots:
         enabled: true

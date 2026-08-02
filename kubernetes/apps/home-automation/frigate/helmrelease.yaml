@@ -332,8 +332,14 @@ spec:
             width: 640
             height: 360
             fps: 5
+          # `record.enabled` must stay true: Frigate refuses to turn recordings on over MQTT
+          # if the config disabled them - "Recordings must be enabled in the config to be
+          # turned on via MQTT" - unlike `detect` and `snapshots`, which do toggle at
+          # runtime. Nothing is written for all that: with `continuous.days: 0` recording
+          # only happens on events, and events only exist while detection runs. The
+          # guarantee rests on `detect.enabled: false` above, not on this.
           record:
-            enabled: false
+            enabled: true
             continuous:
               days: 0
             alerts:

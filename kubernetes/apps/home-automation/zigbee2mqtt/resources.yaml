@@ -5,9 +5,25 @@ metadata:
   name: zigbee2mqtt-config
   namespace: home-automation
 data:
+  # The init container copies this over /app/data/configuration.yaml on every pod start, so
+  # anything Zigbee2MQTT writes back into that file is lost at the next restart. It writes
+  # two things there by default, and both were being erased: the `devices:` block holding
+  # every friendly_name — eleven devices sat at their raw IEEE address because each rename
+  # made in the frontend survived only until the next restart — and the `version:` marker,
+  # whose loss made Z2M replay its four config migrations at every boot.
+  # `devices:`/`groups:` as filenames move that mutable state to files on the PVC that the
+  # init container never touches, which is upstream's own answer to this. Keep them, and
+  # keep `version:` in sync when a migration bumps it (compare with the running
+  # /app/data/configuration.yaml after an upgrade).
+  # Nothing else Z2M persists lives here: the network key and PAN id come from
+  # coordinator_backup.json, so the wipe never touched the network identity.
   configuration.yaml: |
-    homeassistant: true
+    version: 5
+    devices: devices.yaml
+    groups: groups.yaml
     permit_join: false
+    homeassistant:
+      enabled: true
     mqtt:
       base_topic: zigbee2mqtt
       server: mqtt://mosquitto.home-automation.svc.cluster.local:1883
@@ -17,6 +33,7 @@ data:
       port: tcp://10.0.20.17:20108
       adapter: ember
     frontend:
+      enabled: true
       port: 8080
     advanced:
       log_level: info

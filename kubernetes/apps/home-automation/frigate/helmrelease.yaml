@@ -214,13 +214,15 @@ spec:
       go2rtc:
         rtsp:
           listen: ":8554"
+        # Channel 103 rather than the main one: go2rtc feeds the HomeKit bridge, which only
+        # accepts H.264, and both main streams are now H.265 - leaving them here left the
+        # garden cameras blank in the Home app. Audio comes from 101 because the third
+        # stream is configured video-only. Both connections open on demand, only while a
+        # client is watching.
         streams:
           camera_1:
-            - "ffmpeg:rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/H264/ch1/main/av_stream#video=copy#audio=copy"
-          # Le canal 103 plutôt que le principal : go2rtc alimente le pont HomeKit, qui
-          # n'accepte que du H.264, et le principal est passé en H.265. L'audio est repris
-          # du 101, le troisième flux étant configuré en vidéo seule. Les deux connexions
-          # ne s'ouvrent qu'à la demande d'un client.
+            - "ffmpeg:rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/Streaming/Channels/103#video=copy"
+            - "ffmpeg:rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/Streaming/Channels/101#audio=copy"
           camera_2:
             - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/103#video=copy"
             - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/101#audio=copy"
@@ -231,11 +233,25 @@ spec:
       cameras:
         camera_1:
           enabled: true
+          # Detection and recording come from two different profiles. Channel 103 is the
+          # camera's third stream, set to the exact detect resolution, so the detector sees
+          # the same image as before with sixteen times fewer pixels to decode - measured at
+          # 3.3% CPU against 7.0% when detection ran off the 3072x1728 main stream. Channel
+          # 101 stays 3K, now H.265, and is copied straight to disk.
+          # `/Streaming/Channels/1xx` and not `/H264/ch1/...`: that alias always falls back
+          # to the main channel whatever segment it is given, `/third/` and `/H265/`
+          # included, so it silently serves the wrong stream. ONVIF GetStreamUri returns the
+          # authoritative URLs.
+          # Keep the camera's I-frame interval equal to its frame rate. At the factory 50 it
+          # emitted a keyframe every 3.3 seconds, which is where Frigate is forced to cut
+          # its recording segments and the clips sent to the phone.
           ffmpeg:
             inputs:
-              - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/H264/ch1/main/av_stream
+              - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/Streaming/Channels/103
                 roles:
                   - detect
+              - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/Streaming/Channels/101
+                roles:
                   - record
                   - audio
           detect:
@@ -260,14 +276,7 @@ spec:
               coordinates: 0,0,1280,0,1280,720,0,720
         camera_2:
           enabled: true
-          # Deux flux séparés, contrairement à camera_1 qui décode encore du 3072x1728 pour
-          # détecter en 1280x720. Le canal 103 est le troisième profil de la caméra, réglé à
-          # la résolution de détection exacte : même image qu'avant pour le détecteur, seize
-          # fois moins de pixels à décoder. Le 101 reste en 3K et passe en H.265, copié tel
-          # quel à l'enregistrement.
-          # `/Streaming/Channels/1xx` et non `/H264/ch1/...` : cet alias retombe toujours sur
-          # le canal principal quel que soit le segment qu'on lui donne, y compris `/third/`
-          # ou `/H265/`. Les URL faisant foi sont celles que l'ONVIF renvoie.
+          # Same split as camera_1 above.
           ffmpeg:
             inputs:
               - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/103

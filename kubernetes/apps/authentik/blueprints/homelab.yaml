@@ -258,6 +258,10 @@ data:
           client_type: confidential
           client_id: home-assistant
           client_secret: !Env AUTHENTIK_HA_CLIENT_SECRET
+          # Not the default hashed_user_id: that one is sha256(user.id + install_id), so it
+          # changes with the Authentik database and every app then sees a brand new user.
+          # It drifted four times here and left five admin accounts in Home Assistant.
+          sub_mode: user_uuid
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           redirect_uris:
             - matching_mode: strict

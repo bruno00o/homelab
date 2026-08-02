@@ -90,7 +90,9 @@ spec:
       config:
         enabled: true
         storageClass: ${DEFAULT_STORAGE_CLASS}
-        size: 1Gi
+        # 1Gi was enough until the embedding models landed here: /config/model_cache holds
+        # 495Mi of ONNX next to a frigate.db that grows with the 14-day event retention.
+        size: 2Gi
         skipuninstall: true
       media:
         enabled: true

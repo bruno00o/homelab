@@ -40,6 +40,15 @@ data:
       last_seen: ISO_8601
       transmit_power: 20
       channel: 11
+    # Without this a silent device keeps republishing its last state: two SNZB-04PR2 sat on
+    # `contact: true` — door closed — for a month. 720 minutes rather than upstream's 1500,
+    # the healthy contact sensors report every 25 minutes or so.
+    availability:
+      enabled: true
+      active:
+        timeout: 10
+      passive:
+        timeout: 720
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

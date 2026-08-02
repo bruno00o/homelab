@@ -70,6 +70,16 @@ spec:
 
     securityContext:
       allowPrivilegeEscalation: false
+      # intel_gpu_top reads the i915 PMU through perf_event_open, which is refused twice
+      # over here: the node runs kernel.perf_event_paranoid=3, and the kubelet applies a
+      # RuntimeDefault seccomp profile whose containerd rule only admits the syscall for a
+      # container holding CAP_PERFMON. Granting it clears both — perfmon_capable() bypasses
+      # the paranoid check, and the seccomp allowlist gains the syscall. Without it Frigate
+      # logs "Failed to initialize PMU" once a minute and the GPU panel stays empty, while
+      # OpenVINO detection itself is unaffected: that goes through /dev/dri, not perf.
+      capabilities:
+        add:
+          - PERFMON
 
     shmSize: 1Gi
 

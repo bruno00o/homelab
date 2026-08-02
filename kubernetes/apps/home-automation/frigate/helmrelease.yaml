@@ -217,8 +217,13 @@ spec:
         streams:
           camera_1:
             - "ffmpeg:rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/H264/ch1/main/av_stream#video=copy#audio=copy"
+          # Le canal 103 plutôt que le principal : go2rtc alimente le pont HomeKit, qui
+          # n'accepte que du H.264, et le principal est passé en H.265. L'audio est repris
+          # du 101, le troisième flux étant configuré en vidéo seule. Les deux connexions
+          # ne s'ouvrent qu'à la demande d'un client.
           camera_2:
-            - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/H264/ch1/main/av_stream#video=copy#audio=copy"
+            - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/103#video=copy"
+            - "ffmpeg:rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/101#audio=copy"
 
       ffmpeg:
         hwaccel_args: preset-vaapi
@@ -255,11 +260,21 @@ spec:
               coordinates: 0,0,1280,0,1280,720,0,720
         camera_2:
           enabled: true
+          # Deux flux séparés, contrairement à camera_1 qui décode encore du 3072x1728 pour
+          # détecter en 1280x720. Le canal 103 est le troisième profil de la caméra, réglé à
+          # la résolution de détection exacte : même image qu'avant pour le détecteur, seize
+          # fois moins de pixels à décoder. Le 101 reste en 3K et passe en H.265, copié tel
+          # quel à l'enregistrement.
+          # `/Streaming/Channels/1xx` et non `/H264/ch1/...` : cet alias retombe toujours sur
+          # le canal principal quel que soit le segment qu'on lui donne, y compris `/third/`
+          # ou `/H265/`. Les URL faisant foi sont celles que l'ONVIF renvoie.
           ffmpeg:
             inputs:
-              - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/H264/ch1/main/av_stream
+              - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/103
                 roles:
                   - detect
+              - path: rtsp://admin:${FRIGATE_CAM2_PASSWORD}@10.0.30.3:554/Streaming/Channels/101
+                roles:
                   - record
                   - audio
           detect:

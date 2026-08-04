@@ -17,6 +17,11 @@ data:
   # /app/data/configuration.yaml after an upgrade).
   # Nothing else Z2M persists lives here: the network key and PAN id come from
   # coordinator_backup.json, so the wipe never touched the network identity.
+  # Rename through `zigbee2mqtt/bridge/request/device/rename` and leave
+  # `homeassistant_rename` at its default false: true makes Z2M rename the device in Home
+  # Assistant as well, overwriting the names set there by hand. Left false, HA matches the
+  # republished discovery on its IEEE-keyed unique_id, so entity_ids and name_by_user both
+  # survive — the friendly_name here and the name in HA are meant to diverge.
   configuration.yaml: |
     version: 5
     devices: devices.yaml

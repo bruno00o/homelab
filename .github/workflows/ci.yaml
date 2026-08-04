@@ -85,7 +85,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # 0.4.12
+      - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # v0.4.12
         with:
           # The action exports FLATE_BASE from this input, defaulting to the default branch,
           # and a base makes `test` run in changed-only mode. Cleared on purpose: this job
@@ -122,7 +122,7 @@ jobs:
           # The baseline is a git rev flate materializes itself, so the history has to be here.
           fetch-depth: 0
 
-      - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # 0.4.12
+      - uses: home-operations/flate/action@bf3405a189626478b0aa6ec98dc4d6f7d419df17 # v0.4.12
         with:
           # Cleared here too, and the baseline passed on the command line instead, so the
           # rev this job compares against is written where it is read.

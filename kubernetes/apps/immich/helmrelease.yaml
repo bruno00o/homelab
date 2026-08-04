@@ -25,7 +25,7 @@ spec:
           main:
             image:
               # renovate: datasource=docker depName=ghcr.io/immich-app/immich-server
-              tag: v3.0.3
+              tag: v3.1.0
             env:
               TZ: ${TIMEZONE}
               DB_HOSTNAME: immich-postgres.immich.svc.cluster.local
@@ -149,7 +149,7 @@ spec:
             main:
               image:
                 # renovate: datasource=docker depName=ghcr.io/immich-app/immich-machine-learning
-                tag: v3.0.3-openvino
+                tag: v3.1.0-openvino
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: false

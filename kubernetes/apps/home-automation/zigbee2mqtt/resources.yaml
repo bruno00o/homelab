@@ -117,7 +117,7 @@ spec:
       containers:
         - name: zigbee2mqtt
           # renovate: datasource=docker depName=docker.io/koenkk/zigbee2mqtt
-          image: docker.io/koenkk/zigbee2mqtt:2.12.1
+          image: docker.io/koenkk/zigbee2mqtt:2.13.0
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000

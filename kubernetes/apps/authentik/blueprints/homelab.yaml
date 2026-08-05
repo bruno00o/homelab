@@ -315,6 +315,13 @@ data:
               url: https://immich.${PUBLIC_DOMAIN}/user-settings
             - matching_mode: strict
               url: app.immich:///oauth-callback
+            # The mobile app does not send the custom scheme above: Immich's own config has
+            # mobileOverrideEnabled, so it hands out this HTTPS endpoint instead and bounces
+            # to app.immich:/// itself once it holds the code. Without it registered here,
+            # signing in from the phone answers Redirect URI Error and nothing else breaks -
+            # the web login keeps working, which is what makes it look like an app problem.
+            - matching_mode: strict
+              url: https://immich.${PUBLIC_DOMAIN}/api/oauth/mobile-redirect
           property_mappings:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]

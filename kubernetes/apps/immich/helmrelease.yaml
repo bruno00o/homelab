@@ -184,11 +184,13 @@ spec:
                   memory: 1Gi
                   gpu.intel.com/i915: "1"
                 limits:
-                  # 1Gi held until v3.1.0, which adds OCR: a second model loaded beside CLIP
-                  # in the same process, both kept 300s by the in-memory cache. The container
-                  # was OOMKilled on every model load, so no peak could be measured to size
-                  # this on - trim it once one has been.
-                  memory: 4Gi
+                  # 1Gi held until v3.1.0, which adds OCR: models loaded beside CLIP in the
+                  # same process, kept 300s by the in-memory cache. 4Gi was not enough either
+                  # - OCR alone sat at 2.1Gi, crept to 3.6Gi over three hours and was
+                  # OOMKilled again. The creep is the allocator growing into whatever ceiling
+                  # it is given, so treat this number as headroom, not as a measured peak: a
+                  # kill here is survivable, jobs retry and none has failed yet.
+                  memory: 6Gi
                   gpu.intel.com/i915: "1"
       defaultPodOptions:
         securityContext:

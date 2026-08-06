@@ -93,3 +93,45 @@ spec:
       ports:
         - protocol: TCP
           port: 20108
+---
+# Zigbee2MQTT had no egress beyond ser2net and mosquitto, so it could never reach the OTA
+# firmware index. It retries every 24h and fails in silence — the update entities sit at
+# installed_version -1, and no Zigbee device in the house can be upgraded. Measured from the
+# pod: DNS resolves, every TCP connection out times out.
+# Pinned to one host rather than the 0.0.0.0/0-on-443 shape home-assistant and frigate use
+# next door: all 892 images in Koenkk/zigbee-OTA are served from raw.githubusercontent.com,
+# so there is nothing else to reach, and this pod bridges every Zigbee device here.
+# The DNS rule is not decoration. toFQDNs only ever allows addresses Cilium's own DNS proxy
+# has observed, so without an L7 DNS rule on this endpoint the IP set stays empty and the
+# egress rule matches nothing. matchPattern "*" is deliberate: once any rule sends this
+# endpoint's DNS through the proxy, a narrower pattern would refuse every other lookup —
+# mosquitto included, which would take the whole Zigbee network down.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-zigbee2mqtt-ota-egress
+  namespace: home-automation
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: zigbee2mqtt
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: raw.githubusercontent.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

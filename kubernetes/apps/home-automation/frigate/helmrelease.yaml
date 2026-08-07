@@ -129,7 +129,7 @@ spec:
     resources:
       requests:
         cpu: 500m
-        memory: 2Gi
+        memory: 3Gi
         gpu.intel.com/i915: "1"
       limits:
         memory: 5Gi

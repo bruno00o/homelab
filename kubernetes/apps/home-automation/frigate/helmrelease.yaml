@@ -122,13 +122,17 @@ spec:
       TZ: ${TIMEZONE}
       LIBVA_DRIVER_NAME: iHD
 
+    # The 1Gi request was a bootstrap value the pod never matched - it runs several times
+    # that, so the scheduler was placing it against the wrong footprint. The limit leaves
+    # real headroom on purpose: semantic_search indexes in bursts rather than holding a flat
+    # footprint, which is how immich's machine-learning got OOMKilled on a tight margin.
     resources:
       requests:
         cpu: 500m
-        memory: 1Gi
+        memory: 2Gi
         gpu.intel.com/i915: "1"
       limits:
-        memory: 4Gi
+        memory: 5Gi
         gpu.intel.com/i915: "1"
 
     persistence:
@@ -136,7 +140,9 @@ spec:
         enabled: true
         storageClass: ${DEFAULT_STORAGE_CLASS}
         # 1Gi was enough until the embedding models landed here: /config/model_cache holds
-        # 495Mi of ONNX next to a frigate.db that grows with the 14-day event retention.
+        # a few hundred Mi of ONNX next to a frigate.db that grows with the event retention.
+        # The facedet directory stays behind now that face_recognition is off - Frigate
+        # never prunes a cache it stopped using.
         size: 2Gi
         skipuninstall: true
       media:
@@ -394,9 +400,12 @@ spec:
         enabled: true
         model_size: small
 
+      # Never produced a single sub_label: both cameras are wide-angle and watch a garden,
+      # so a face is a handful of pixels. It cost a model in the cache and a share of the
+      # embeddings process for nothing. Worth re-enabling only if a camera ever frames a
+      # doorway at head height.
       face_recognition:
-        enabled: true
-        model_size: small
+        enabled: false
 
       classification:
         bird:

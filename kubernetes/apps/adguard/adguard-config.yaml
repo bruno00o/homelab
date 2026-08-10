@@ -37,7 +37,11 @@ data:
     tls:
       enabled: false
     querylog:
-      interval: 2160h
+      # This interval sizes the PVC: AdGuard keeps the current log plus one rotation,
+      # so the volume must hold twice the interval's worth of queries. At 90d it was
+      # heading for 5Gi of query log alone. A week is what the "why was this blocked"
+      # lookup actually needs; the dashboard reads stats.db, not this.
+      interval: 168h
       enabled: true
       file_enabled: true
     statistics:

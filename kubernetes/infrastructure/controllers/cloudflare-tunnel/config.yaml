@@ -10,6 +10,12 @@ data:
     metrics: 0.0.0.0:2000
     no-autoupdate: true
 
+    # Nothing here can be tested by curling a ${PUBLIC_DOMAIN} hostname from the LAN: the
+    # AdGuard split-horizon answers with the gateway address, so the request never leaves
+    # the house and cloudflared never sees it. It looks like a successful external check —
+    # same hostname, same 200 — and it measures the wrong path entirely. Force the edge
+    # (`curl --resolve <host>:443:<cloudflare-ip>`) and confirm the reply carries
+    # `server: cloudflare` rather than `server: envoy`.
     ingress:
       - hostname: auth.${PUBLIC_DOMAIN}
         service: http://authentik-server.authentik.svc.cluster.local:80

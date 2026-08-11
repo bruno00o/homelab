@@ -1,0 +1,119 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: vaultwarden
+      version: "0.46.0"
+      sourceRef:
+        kind: HelmRepository
+        name: guerzon
+        namespace: flux-system
+      interval: 1h
+  values:
+    # The chart tracks its own appVersion, but a 0.x chart never automerges here, so the
+    # image would sit on whatever the last manual chart bump shipped. Pinning it makes
+    # vaultwarden its own Renovate dependency instead of a passenger of the chart.
+    image:
+      registry: docker.io
+      repository: vaultwarden/server
+      # renovate: datasource=docker depName=vaultwarden/server
+      tag: "1.37.1-alpine"
+      pullPolicy: IfNotPresent
+
+    # Vaultwarden has exactly one canonical URL: the OIDC callback, the invitation links
+    # and the mail bodies are all derived from it. Same constraint as Homarr — it cannot
+    # be dual-hostname, so it canonicalises on the public one and the LAN reaches it
+    # through the AdGuard split-horizon. The Bitwarden mobile clients settle it anyway:
+    # they will never trust the internal CA.
+    domain: "https://vaultwarden.${PUBLIC_DOMAIN}"
+
+    replicas: 1
+
+    # SQLite in the data PVC. Postgres would buy PITR through the barman plugin, but the
+    # PVC has to be backed up regardless — it holds rsa_key.pem, which signs every JWT —
+    # so a second datastore would only add a moving part.
+    storage:
+      data:
+        name: vaultwarden-data
+        size: "5Gi"
+        class: ${DEFAULT_STORAGE_CLASS}
+        path: "/data"
+        accessMode: "ReadWriteOnce"
+        keepPvc: true
+        # A StatefulSet's volumeClaimTemplates are immutable: this label cannot be added
+        # later without recreating the workload, so the Longhorn backup group is wired in
+        # from the start.
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+
+    # Accounts are created by invitation from /admin only. signupsVerify stays on so the
+    # invitee has to prove the mailbox before the vault exists.
+    signupsAllowed: false
+    signupsVerify: "true"
+    invitationsAllowed: true
+    invitationOrgName: "Going Merry"
+
+    adminToken:
+      existingSecret: vaultwarden-secrets
+      existingSecretKey: admin-token
+
+    smtp:
+      existingSecret: vaultwarden-secrets
+      host: "smtp.resend.com"
+      security: "starttls"
+      port: 587
+      from: "noreply@seilliebert.dev"
+      fromName: "Vaultwarden"
+      # Both go through existingSecret, username included: setting smtp.existingSecret
+      # makes the chart resolve SMTP_USERNAME from that secret and ignore username.value,
+      # which renders a reference to a key that would not exist.
+      username:
+        existingSecretKey: smtp-username
+      password:
+        existingSecretKey: smtp-password
+
+    # Mobile clients only sync when opened until this is enabled, which needs an
+    # installation id/key from https://bitwarden.com/host. The egress to
+    # push.bitwarden.com is already open in network-policies.yaml, so turning this on is
+    # a two-value change plus the secret keys.
+    pushNotifications:
+      enabled: false
+
+    timeZone: ${TIMEZONE}
+
+    resources:
+      requests:
+        cpu: 25m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+
+    # Rocket writes multipart uploads under /tmp, which readOnlyRootFilesystem would
+    # otherwise make unwritable. Everything else it persists lives in /data.
+    extraVolumes:
+      - name: tmp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp

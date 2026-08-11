@@ -167,6 +167,18 @@ spec:
   interval: 1h
   url: https://immich-app.github.io/immich-charts
 ---
+# vaultwarden ships no chart of its own — upstream declined to maintain one — so this is
+# the community chart the ecosystem settled on. HTTPS and not OCI: it is not published to
+# a registry.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: guerzon
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://guerzon.github.io/vaultwarden
+---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:

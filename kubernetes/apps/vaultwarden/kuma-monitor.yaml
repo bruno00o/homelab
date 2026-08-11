@@ -1,0 +1,19 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+spec:
+  config:
+    type: http
+    name: Vaultwarden
+    url: https://vaultwarden.${CLUSTER_DOMAIN}/alive
+    interval: 60
+    ignore_tls: true
+    # Narrower than the usual 200-299: /alive answers 200 with a timestamp or nothing at
+    # all. Anything else is a failure, and a range that swallows the gateway's own 403
+    # would report the vault up while it is unreachable.
+    accepted_statuscodes:
+      - "200-200"
+    notification_name_list:
+      - discord

@@ -115,6 +115,14 @@ spec:
           port: 8080
         - protocol: TCP
           port: 80
+    # 8080, not the Service's 80: the rule is matched against the pod targetPort.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: vaultwarden
+      ports:
+        - protocol: TCP
+          port: 8080
 
 ---
 apiVersion: cilium.io/v2

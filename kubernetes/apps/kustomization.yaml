@@ -19,4 +19,5 @@ resources:
   - umami/ks.yaml
   - uptime-kuma/ks.yaml
   - ca-portal/ks.yaml
+  - vaultwarden/ks.yaml
   - zot/ks.yaml

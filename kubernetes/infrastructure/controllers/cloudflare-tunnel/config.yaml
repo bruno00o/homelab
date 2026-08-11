@@ -41,6 +41,13 @@ data:
         service: http://mas.matrix.svc.cluster.local:8080
       - hostname: element.${PUBLIC_DOMAIN}
         service: http://element.matrix.svc.cluster.local:80
+      # /admin has to die here and nowhere else. The tunnel routes straight to the Service,
+      # so it never crosses the gateway and no HTTPRoute filter can see this traffic; the
+      # rules are first-match-wins, so this one has to precede the catch-all below. The
+      # page stays reachable on vaultwarden.${CLUSTER_DOMAIN}, which is LAN-only.
+      - hostname: vaultwarden.${PUBLIC_DOMAIN}
+        path: ^/admin
+        service: http_status:404
       - hostname: vaultwarden.${PUBLIC_DOMAIN}
         service: http://vaultwarden.vaultwarden.svc.cluster.local:80
       - service: http_status:404

@@ -693,7 +693,10 @@ data:
           negate: false
           timeout: 30
 
-      # Dawarich (admins only — it holds location history, not a family service)
+      # Dawarich (all users). Each account only ever sees its own tracks, so opening this
+      # shares no data between members — it just lets anyone who wants their own location
+      # history have one. Access alone does nothing: the app stays empty until its owner
+      # installs a background GPS collector.
       - model: authentik_core.application
         id: app-dawarich
         state: present
@@ -705,13 +708,25 @@ data:
           meta_launch_url: https://dawarich.${PUBLIC_DOMAIN}
           policy_engine_mode: all
 
+      # The policy is part of a binding's identifiers, so swapping it does not edit the
+      # existing binding — it adds a second one. The application runs policy_engine_mode
+      # "all", so leaving the admin binding in place would require being an admin AND a
+      # user, locking out exactly the people this change is meant to let in.
       - model: authentik_policies.policybinding
-        id: binding-dawarich-admin
-        state: present
+        id: binding-dawarich-admin-removed
+        state: absent
         identifiers:
           order: 0
           target: !Find [authentik_core.application, [slug, dawarich]]
           policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-admins]]
+
+      - model: authentik_policies.policybinding
+        id: binding-dawarich-users
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, dawarich]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-users]]
         attrs:
           enabled: true
           negate: false

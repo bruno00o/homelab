@@ -57,6 +57,14 @@ spec:
             - secretRef:
                 name: paperless-secrets
           env:
+            # An emptyDir on /run lands as root:1000 mode 0775, and s6's preinit refuses to
+            # boot on a /run it does not own and cannot chmod — it aborts with exit 100
+            # before a single init script runs. Kubernetes cannot hand it 1777, so upstream
+            # ships this opt-out, named for precisely this situation. The other way out
+            # would be dropping readOnlyRootFilesystem so the image's own 1777 /run
+            # survives; this keeps the hardening instead.
+            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
+              value: "1"
             - name: PAPERLESS_TIME_ZONE
               value: ${TIMEZONE}
             - name: PAPERLESS_DBENGINE

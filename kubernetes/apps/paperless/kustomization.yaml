@@ -2,6 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
+  # paperless-secrets holds one JSON blob for the whole OIDC provider config, because
+  # Django parses it with json.loads and expands nothing — the client secret can only live
+  # inside it. It carries a ${...} reference all the same: Flux substitutes *after*
+  # decrypting, so a variable inside an encrypted value resolves like anywhere else.
+  # Verified on the running Secret, not assumed.
   - paperless-secrets.sops.yaml
   - paperless-postgres-credentials.sops.yaml
   - valkey-auth.sops.yaml

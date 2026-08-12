@@ -59,6 +59,10 @@ spec:
     invitationsAllowed: true
     invitationOrgName: "Going Merry"
 
+    # /admin is for inviting users, not for settings: its Settings tab persists what it is
+    # given to /data/config.json, which takes precedence over every env var set here. A
+    # value changed there leaves no trace in git and no reconcile will ever put it back —
+    # the manifest and the running server just quietly disagree.
     adminToken:
       existingSecret: vaultwarden-secrets
       existingSecretKey: admin-token

@@ -89,6 +89,12 @@ spec:
     pushNotifications:
       enabled: false
 
+    # The chart defaults to X-Real-IP, which neither path in front of this app sets: the
+    # Cilium gateway and cloudflared both send X-Forwarded-For. Left wrong, every login
+    # failure and every /admin rate-limit decision is attributed to the proxy instead of
+    # the client — /admin/diagnostics reports it as "IP header: No Match".
+    ipHeader: "X-Forwarded-For"
+
     timeZone: ${TIMEZONE}
 
     resources:

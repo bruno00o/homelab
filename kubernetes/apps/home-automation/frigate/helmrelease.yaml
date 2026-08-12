@@ -275,6 +275,16 @@ spec:
             password: ${FRIGATE_CAM1_PASSWORD}
             autotracking:
               enabled: true
+              # Inert until the camera is calibrated, and nothing says so: the absolute
+              # zoom step is `(max_zoom - min_zoom) / 20`, and both bounds stay at their
+              # zero default unless `movement_weights` is populated or `calibrate_on_startup`
+              # runs. A zero step also leaves `zoom_level == max_zoom`, which blocks the
+              # zoom-in branch outright. Calibrating writes the six weights back into
+              # /config/config.yml — the same file the chart's `copyconfig` overwrites with
+              # `cp` on every start — so they have to be copied back here by hand once, then
+              # `calibrate_on_startup` turned off again. That is also why this key belongs
+              # here and not in the UI config editor: anything set there is lost on restart.
+              zooming: absolute
               track:
                 - person
               required_zones:
@@ -284,6 +294,18 @@ spec:
           zones:
             full_frame:
               coordinates: 0,0,1280,0,1280,720,0,720
+          # No `car` on this camera. It frames the parked cars, so a stationary one is a
+          # tracked object for as long as it sits there rather than a passage, and it says
+          # nothing that the garden view is here to answer. A camera-level `track` replaces
+          # the global list rather than extending it, hence the three others repeated.
+          # Filtering on the zone instead would be equivalent only while `full_frame` covers
+          # the whole image — the day it becomes a real autotracking trigger area, the two
+          # stop meaning the same thing.
+          objects:
+            track:
+              - person
+              - dog
+              - cat
         camera_2:
           enabled: true
           # Same split as camera_1 above.

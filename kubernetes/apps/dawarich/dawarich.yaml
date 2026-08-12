@@ -152,10 +152,18 @@ spec:
             - name: app-tmp
               mountPath: /tmp
               subPath: tmp
+          # The header is not decoration. APPLICATION_PROTOCOL=https turns on Rails'
+          # force_ssl, so a plain probe gets a 301 to https on this very port; the kubelet
+          # follows it and opens TLS against a plaintext Puma, which logs a parse error and
+          # never reports ready. Real traffic is unaffected — the gateway and cloudflared
+          # both set X-Forwarded-Proto — so the probe simply has to look like they do.
           livenessProbe:
             httpGet:
               path: /api/v1/health
               port: http
+              httpHeaders:
+                - name: X-Forwarded-Proto
+                  value: https
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
@@ -164,6 +172,9 @@ spec:
             httpGet:
               path: /api/v1/health
               port: http
+              httpHeaders:
+                - name: X-Forwarded-Proto
+                  value: https
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 10

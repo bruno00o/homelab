@@ -163,6 +163,13 @@ data:
           # provider above: hashed_user_id moves with the Authentik database and every
           # rotation hands the app a brand new user.
           sub_mode: user_uuid
+          # Mandatory, and the omission is silent: a provider created by a blueprint gets
+          # an EMPTY grant_types list, not the model defaults the older providers here
+          # carry. Every authorize request is then refused with "invalid_request / the
+          # request is otherwise malformed", which names neither the field nor the grant.
+          grant_types:
+            - authorization_code
+            - refresh_token
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           redirect_uris:
             - matching_mode: strict

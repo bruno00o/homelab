@@ -33,6 +33,14 @@ spec:
       # One container runs the lot — webserver, task workers, scheduler and the consumer
       # folder watcher — because s6-overlay supervises them all inside the image. There is
       # no split to make here, and the four volumes are ReadWriteOnce anyway.
+      #
+      # Not optional here, and the reason is the app's name. Kubelet injects a Docker-link
+      # variable per Service in the namespace, upper-cased and prefixed with the Service
+      # name — so a Service called `paperless` produces PAPERLESS_PORT, which is also a real
+      # Paperless setting. The webserver then starts with --port tcp://10.96.x.y:8000 and
+      # refuses it as a non-integer. Every PAPERLESS_* setting is exposed to the same
+      # collision, so the injection goes rather than one variable being patched over.
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

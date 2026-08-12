@@ -52,6 +52,15 @@ spec:
         labels:
           recurring-job-group.longhorn.io/default: enabled
 
+    # No SSO here, unlike every other app in this cluster — deliberate, not an oversight.
+    # The chart and the server both support it, but the Bitwarden clients handle the flow
+    # badly: redirect handling is broken on desktop, and mobile has open upstream issues
+    # where the login never redirects at all. Mobile is the main use for a family vault,
+    # and the master password stays mandatory with or without SSO — it *is* the encryption
+    # key — so SSO would risk the primary platform without removing the step people
+    # actually find tedious. Enforce 2FA through the organisation's Two Step Login policy
+    # instead.
+    #
     # Accounts are created by invitation from /admin only. signupsVerify stays on so the
     # invitee has to prove the mailbox before the vault exists.
     signupsAllowed: false

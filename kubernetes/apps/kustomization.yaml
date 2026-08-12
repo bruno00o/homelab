@@ -14,6 +14,7 @@ resources:
   - immich/ks.yaml
   - matrix/ks.yaml
   - ntp/ks.yaml
+  - paperless/ks.yaml
   - portfolio/ks.yaml
   - qdrant/ks.yaml
   - random-gif/ks.yaml

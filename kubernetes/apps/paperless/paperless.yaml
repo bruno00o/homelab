@@ -1,0 +1,252 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless
+  namespace: paperless
+spec:
+  selector:
+    app.kubernetes.io/name: paperless
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: paperless
+  namespace: paperless
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  serviceName: paperless
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperless
+    spec:
+      # One container runs the lot — webserver, task workers, scheduler and the consumer
+      # folder watcher — because s6-overlay supervises them all inside the image. There is
+      # no split to make here, and the four volumes are ReadWriteOnce anyway.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: paperless
+          # renovate: datasource=docker depName=ghcr.io/paperless-ngx/paperless-ngx
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.0.5
+          # Unlike Hermes, this image is built for rootless: /run is 1777, the setuid bit is
+          # stripped from s6-overlay-suexec, and every init script branches on
+          # USER_IS_NON_ROOT. UID 1000 is the `paperless` user the image already owns its
+          # files with, so nothing needs chowning and no capability has to be handed back.
+          # Do not set USERMAP_UID/USERMAP_GID: they only apply to the root-started path
+          # and the container warns and ignores them here.
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: paperless-secrets
+          env:
+            - name: PAPERLESS_TIME_ZONE
+              value: ${TIMEZONE}
+            - name: PAPERLESS_DBENGINE
+              value: postgresql
+            - name: PAPERLESS_DBHOST
+              value: paperless-postgres-rw.paperless.svc.cluster.local
+            - name: PAPERLESS_DBPORT
+              value: "5432"
+            - name: PAPERLESS_DBNAME
+              value: paperless
+            - name: PAPERLESS_DBUSER
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-postgres-credentials
+                  key: username
+            - name: PAPERLESS_DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-postgres-credentials
+                  key: password
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: valkey-auth
+                  key: password
+            # Database 5: authentik, immich and homarr share 0, dawarich took 3 and 4. A
+            # broker flush from one app must never reach another one's queues.
+            - name: PAPERLESS_REDIS
+              value: redis://:$(VALKEY_PASSWORD)@valkey.valkey-system.svc.cluster.local:6379/5
+            - name: PAPERLESS_URL
+              value: https://paperless.${PUBLIC_DOMAIN}
+            # PAPERLESS_URL alone does not restrict anything: ALLOWED_HOSTS defaults to
+            # ["*"] and the URL's hostname is *appended* to it, so the wildcard survives and
+            # every Host header still passes. Naming the hosts here is what turns the check
+            # on — "localhost" is then added automatically, which is what the probes use.
+            - name: PAPERLESS_ALLOWED_HOSTS
+              value: paperless.${PUBLIC_DOMAIN},paperless.${CLUSTER_DOMAIN}
+            - name: PAPERLESS_CSRF_TRUSTED_ORIGINS
+              value: https://paperless.${PUBLIC_DOMAIN},https://paperless.${CLUSTER_DOMAIN}
+            - name: PAPERLESS_CORS_ALLOWED_HOSTS
+              value: https://paperless.${PUBLIC_DOMAIN},https://paperless.${CLUSTER_DOMAIN}
+            # TLS stops at the gateway and at cloudflared; without these three Django builds
+            # http:// callback URLs and rejects its own CSRF tokens on POST.
+            - name: PAPERLESS_USE_X_FORWARD_HOST
+              value: "true"
+            - name: PAPERLESS_USE_X_FORWARD_PORT
+              value: "true"
+            - name: PAPERLESS_PROXY_SSL_HEADER
+              value: '["HTTP_X_FORWARDED_PROTO", "https"]'
+            - name: PAPERLESS_DATA_DIR
+              value: /usr/src/paperless/data
+            - name: PAPERLESS_MEDIA_ROOT
+              value: /usr/src/paperless/media
+            - name: PAPERLESS_CONSUMPTION_DIR
+              value: /usr/src/paperless/consume
+            # Everything transient — uploads in flight, OCR working files — under the tmpfs
+            # the read-only root filesystem leaves writable.
+            - name: PAPERLESS_SCRATCH_DIR
+              value: /tmp/paperless
+            # French and English are already compiled into the image. Deliberately leaving
+            # PAPERLESS_OCR_LANGUAGES unset: that variable makes the container apt-get
+            # install language packs at every start, which needs both root and internet and
+            # fails on this pod for both reasons.
+            - name: PAPERLESS_OCR_LANGUAGE
+              value: fra+eng
+            - name: PAPERLESS_APPS
+              value: allauth.socialaccount.providers.openid_connect
+            - name: PAPERLESS_SOCIAL_AUTO_SIGNUP
+              value: "true"
+            # Authentik is the only way into the app. The local superuser below still works,
+            # but only through Django's own /admin/, which the tunnel refuses from outside.
+            - name: PAPERLESS_DISABLE_REGULAR_LOGIN
+              value: "true"
+            - name: PAPERLESS_REDIRECT_LOGIN_TO_SSO
+              value: "true"
+            - name: PAPERLESS_ADMIN_USER
+              value: admin
+            - name: PAPERLESS_ADMIN_MAIL
+              value: admin@${PUBLIC_DOMAIN}
+            - name: PAPERLESS_WEBSERVER_WORKERS
+              value: "1"
+            - name: PAPERLESS_TASK_WORKERS
+              value: "2"
+            - name: PAPERLESS_THREADS_PER_WORKER
+              value: "2"
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/data
+            - name: media
+              mountPath: /usr/src/paperless/media
+            - name: consume
+              mountPath: /usr/src/paperless/consume
+            - name: export
+              mountPath: /usr/src/paperless/export
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
+            - name: fontconfig-cache
+              mountPath: /var/cache/fontconfig
+          # Host: localhost is what makes these pass. PAPERLESS_ALLOWED_HOSTS names two
+          # public hostnames and the kubelet dials the pod IP, which Django would answer
+          # with 400 DisallowedHost; "localhost" is the one name it always accepts.
+          startupProbe:
+            httpGet: &paperlessProbeGet
+              path: /accounts/login/
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: localhost
+                - name: X-Forwarded-Proto
+                  value: https
+            # Migrations and the first tantivy index build happen before the webserver
+            # answers, so the ceiling is ten minutes rather than the usual one.
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: *paperlessProbeGet
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: *paperlessProbeGet
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+
+      volumes:
+        # s6 writes the container environment it hands between init steps under /run, and
+        # fontconfig caches there too — both unwritable once the root filesystem is.
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: fontconfig-cache
+          emptyDir: {}
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: media
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 20Gi
+    # Backed up like the rest: a scan sitting here has been consumed from a phone but not
+    # yet turned into a document, and it exists nowhere else.
+    - metadata:
+        name: consume
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 2Gi
+    # No backup label on purpose: this holds what `document_exporter` writes, which is a
+    # copy of media and the database. Backing it up would store the same documents twice.
+    - metadata:
+        name: export
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 5Gi

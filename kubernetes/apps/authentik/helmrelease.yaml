@@ -89,6 +89,11 @@ spec:
             secretKeyRef:
               name: authentik-dawarich-oidc
               key: dawarich_oidc_client_secret
+        - name: AUTHENTIK_PAPERLESS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-paperless-oidc
+              key: paperless_oidc_client_secret
         - name: AUTHENTIK_CLOUDFLARE_ACCESS_CLIENT_SECRET
           valueFrom:
             secretKeyRef:

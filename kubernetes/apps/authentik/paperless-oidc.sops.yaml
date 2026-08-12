@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-paperless-oidc
+  namespace: authentik
+type: Opaque
+stringData:
+  paperless_oidc_client_secret: ENC[AES256_GCM,data:0694s114KZe2SeiKy6XoHLcrPNNHD5koKAMjRmxSe9K045EeVQaQpGHdeNWyNI1Fga+5waDaxrexbBBMoMJSJA==,iv:Z8SfmCGAQEC5fj/4KXrVbppRFDYWbvyHGR6f7Hw4Bjk=,tag:jv3WDhOAYcNyH2fXPPH2VA==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBSRmRBUHp2a1g1cnAvOWxW
+        bmRmZVFOZkZibVZ1RU5lanNCREVsZWZDcjJVCk9ZWjFPVjNJbGNyRDc0MnlKNU1T
+        OUZZc0pXVHJycnhsMndBVGxySmEreTAKLS0tIFpwd2ZVamh6RlVWS3VZeTJ1OXVP
+        TGZsMWlxT3lGblFhUWkrb1ZjUmI5R0kKmuaY3GCGNrrXTsYfIPxsX0a8NKuzEyIF
+        Sd4MItgjYEnrJ8DCK/ctP31i7uYZkATLvbAiHgm7okxelZzfLC0LsQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSArWDl0YlhMVlJGQmxCdkVM
+        aEpjdEN0NGxZd2loeW0ydUsvMlN0UzR5b0RjCjlnRWRpTnV2a05oa1FCbkRabHFP
+        UnlZRWtqTHMwZHIzRjdtb2xyaFRtNTAKLS0tIGhCYVZuOEZyYit4L1BSQkhFdnEy
+        Z1FsTGhSS3Y2dHo4Y0J3RDBjMWZhTkEKi2aBhP80E/8Bn6i5OuJc/IFrp+EHuBxc
+        AFsRdAqR79zSAqgtY6vUr5B5PzAajiaKy7P1p7vPpfmXfsQiCk8Btw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-08-12T12:51:31Z"
+  mac: ENC[AES256_GCM,data:dk335MHQZc1BHrv5fs7nl5Z7GWalw8JNM7LW5GYPHFMcvPqtR9oA6RsVlBuyFLnu5Z+DmR8QwPnBc8mmbmSbP6D/GIxo2e4t5ISIhdRnVGgp2tWjmZACldlihvHWob0H30rXRQ1LwIVA1eVSVslEt8HWW3HS5Xi2JVyBXjoKl+M=,iv:2xDaswV4PYERlWAHEJcwTNDp4sB26voAVyyswCTCpqQ=,tag:zUBcpX2jLReFH/t1Fn+6pQ==,type:str]
+  version: 3.13.3

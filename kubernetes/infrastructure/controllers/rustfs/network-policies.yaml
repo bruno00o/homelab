@@ -30,6 +30,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: dawarich
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: paperless
       ports:
         - { protocol: TCP, port: 9000 }
 

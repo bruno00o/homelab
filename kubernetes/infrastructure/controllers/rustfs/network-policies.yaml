@@ -27,6 +27,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: matrix
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dawarich
       ports:
         - { protocol: TCP, port: 9000 }
 

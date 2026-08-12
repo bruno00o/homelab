@@ -2,23 +2,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - secrets.sops.yaml
-  - synapse-oidc.sops.yaml
-  - rustfs-oidc.sops.yaml
-  - mas-oidc.sops.yaml
-  - dawarich-oidc.sops.yaml
-  - smtp.sops.yaml
+  - dawarich-secrets.sops.yaml
+  - dawarich-postgres-credentials.sops.yaml
   - valkey-auth.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
-  - helmrelease.yaml
+  - dawarich.yaml
   - httproute.yaml
   - dnsendpoint.yaml
-  - reference-grant.yaml
-  - blueprints/
-  - pdb.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:
   - ../../components/network-policies/base
-namespace: authentik
+namespace: dawarich

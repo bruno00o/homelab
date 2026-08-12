@@ -123,6 +123,13 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dawarich
+      ports:
+        - protocol: TCP
+          port: 3000
 
 ---
 apiVersion: cilium.io/v2

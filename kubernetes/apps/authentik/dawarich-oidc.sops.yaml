@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-dawarich-oidc
+  namespace: authentik
+type: Opaque
+stringData:
+  dawarich_oidc_client_secret: ENC[AES256_GCM,data:wklLBxO20Iamo0UIsMnkAI2EvfcK/zbICj1fzKS56W+421p198ZYs41TWJNkpz680Hg8nO0fVws9gNn6kjXpIQ==,iv:IA08aK4fZYvpITsHOw+VTQfrcxYX7RG9RgpbysJqK4E=,tag:CAu3XS7fwvaQxhHlgKbACA==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwbXBlV3J4VkI3dHNIcVVN
+        RlUvWS81akllQzVabS8rQ0tRU0MrYncwalZnCldEbHQzS21FVTQwUmVLNmpPSDND
+        SjE3R1ptK2hpTHg4TFkyV29Dd055MGcKLS0tIG4wQ240b015ZlVKTUdnNWNuZDJy
+        V1JyQWhPUS9GTXBxS1ZlTmQyczB4VjAK2FpMXIcnLiml3XYxx2O8F6/4rcE8SMzz
+        xYVJjamdira43ug7FXHVJ+dH17bTI93AGVK0xLQu4HoSkhDEntKKjg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBSajFzWC9LOXJpYUdxMkdm
+        ZFYyc0NBVXdNbitRT2hueHVDQ3RUSGpqOEFVCkYyM0lCc05KeWNQZWllNUxZNHdr
+        WVhSQnhNUDREZ3dFVzZwZFg1ZXFoZWsKLS0tIFNBMEdyTFhyS2hFWlFORmhiRGRt
+        aHQ0aUR3dXlPNnd5bGxMVlIzSzB4QkUK6F6INdq+2nwsglg+6eU8IQslaanBZmZ3
+        yKPakEQerMg0s0KlshQs0AoIJv7d0bXV1fD8yBlHWUjw2K5CWMtoEg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-08-12T09:55:14Z"
+  mac: ENC[AES256_GCM,data:UA3XtmFVyTKi44zPP0PiGRimUrMsrTqsEG6bK3gcyTdXqyFbJzlNgRspafLjGuHajb6Zz+m7TgEVOPuoxFXBQaEGqSbN5C92DAaSjeRFIPsvFpwTMPv7EnUcJ1xztmdJ8gvfhpuJm/xvFLyoxLTNKSMsxE0UKTT3WQl+Ol+CO0c=,iv:pmaC0Nv9ri3IqaAFCbLoiNlOOcmIYXv2Kgo1dJ7YqeQ=,tag:vEPAaE6fVOiZbZ7gWjdBPA==,type:str]
+  version: 3.13.3

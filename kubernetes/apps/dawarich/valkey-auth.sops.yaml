@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: valkey-auth
+  namespace: dawarich
+type: Opaque
+stringData:
+  password: ENC[AES256_GCM,data:cWAodx9+g0c95JzLUmmuhm49PRkuhVbNcoTLTUVQg+aSyLKvUx/kGmwC,iv:QtbNZzuVTBsR2je9aEedU612QoRDunclejyZIDCU9g0=,tag:hHMSlK3qROLQ2ZLDh34xXg==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBPd1R0U2NqUGR6bnRVb2tE
+        TUc0emtwSHlhSzNMMkU1Wk43c2kvWmJueVdnCmxKUTl0S2NCeHpMRDVTdVRxS1p4
+        M0xiQVNxbFR0UU5Fc01Cd2JXdklnS00KLS0tIDY4SjJZVGY4WmxqVitURXI3RVBE
+        bDMzdlRiQ2ZHU3FLc0J4MmpmRGJsZWMK6B//ccHYPgAdNwG/kP2O6AwjBkvr1LUg
+        LYUv951Y0yNKskBk6iSA16AgG+CUi9Kw3FcoS9VatOI/7hUXg5zDhg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBjcWZJRWcza2czOEZxVmEx
+        R3hxRVI0eGh1U1F6bkVweW95d2tYcjg5cFI0Cnh6eW9KYkV6aktkS1ZVbDlMY3Qy
+        Q0hXNmtKY09ZTjV3T3lXRDh4UG1BK0kKLS0tIGtRRllsQmVhTXdaL2pKNFV2OHVL
+        eXdaaDlVRVgwcXBSOG1BdzVSd3pQMEEKRMfzWGbAftE6XOWKQF3mR4rQPZlWIXQK
+        jbYhd7S0yO/Kfm14dSQAlPaZOUVp/wU1Hy4b+EcQLDinuynpwpnetQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-08-12T09:59:04Z"
+  mac: ENC[AES256_GCM,data:9cr6m6b3YBq2GMR+RIGHkv5nrsZeqOLF7R4UcVi+GUWnlKJIuCcc8IITjlSO4YdwdIXLxRF4JZTkvy1sqK7h1PH+gYOa3jFs9ZJDlyys/hWsUkGTVDTK4Fxrbso5sCZ52LVy3o6HWbhRsyCTEj5HZs9XtloMSaxxm3lvsALbJQI=,iv:v+mXQbpYfem3AQe/I2WdA3CB0ubSqnNNOvhPfED+fUs=,tag:W3x/X/r6guBjZE39lzDCpA==,type:str]
+  version: 3.13.3

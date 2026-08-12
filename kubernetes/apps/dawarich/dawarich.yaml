@@ -1,0 +1,240 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dawarich
+  namespace: dawarich
+spec:
+  selector:
+    app.kubernetes.io/name: dawarich
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dawarich
+  namespace: dawarich
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  serviceName: dawarich
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dawarich
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dawarich
+    spec:
+      # The web app and Sidekiq are one pod on purpose. They share /var/app/storage,
+      # /var/app/public/exports and the watched import directory, and Longhorn volumes are
+      # ReadWriteOnce — splitting them into two workloads would need RWX (a share-manager
+      # per volume) or a node affinity that pins them together anyway.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          # renovate: datasource=docker depName=freikin/dawarich
+          image: docker.io/freikin/dawarich:1.12.0
+          # The image expects to start as root, chown the mounted paths and drop to
+          # PUID/PGID through gosu. That cannot work here — root without CAP_CHOWN cannot
+          # chown, and this namespace enforces restricted — so we start unprivileged and
+          # let fsGroup do the ownership instead. Leave PUID/PGID unset: setting them
+          # would send the entrypoint down the chown path, which then fails.
+          command: ["web-entrypoint.sh"]
+          args: ["bin/rails", "server", "-p", "3000", "-b", "::"]
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: dawarich-secrets
+          env: &dawarichEnv
+            - name: RAILS_ENV
+              value: production
+            - name: RAILS_LOG_TO_STDOUT
+              value: "true"
+            - name: SELF_HOSTED
+              value: "true"
+            - name: TIME_ZONE
+              value: ${TIMEZONE}
+            - name: DISTANCE_UNIT
+              value: km
+            - name: APPLICATION_PROTOCOL
+              value: https
+            - name: APPLICATION_HOSTS
+              value: dawarich.${PUBLIC_DOMAIN},dawarich.${CLUSTER_DOMAIN}
+            - name: APPLICATION_URL
+              value: https://dawarich.${PUBLIC_DOMAIN}
+            - name: DATABASE_HOST
+              value: dawarich-postgres-rw.dawarich.svc.cluster.local
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: dawarich
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: dawarich-postgres-credentials
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dawarich-postgres-credentials
+                  key: password
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: valkey-auth
+                  key: password
+            - name: REDIS_URL
+              value: redis://:$(VALKEY_PASSWORD)@valkey.valkey-system.svc.cluster.local:6379
+            # The shared valkey already serves authentik, immich and homarr, all of them on
+            # database 0 — which is also what Dawarich defaults to for its cache, and 1 for
+            # its Sidekiq queues. Moving both out of the way keeps a Sidekiq maintenance
+            # operation from ever touching another app's keys.
+            - name: RAILS_CACHE_DB
+              value: "3"
+            - name: RAILS_JOB_QUEUE_DB
+              value: "4"
+            # Reverse geocoding sends coordinates to Komoot's public Photon instance.
+            # Deliberate trade-off: place names and the city/country statistics are most of
+            # what makes the app readable. Set STORE_GEODATA to false to stop it.
+            - name: PHOTON_API_HOST
+              value: photon.komoot.io
+            - name: PHOTON_API_USE_HTTPS
+              value: "true"
+            - name: STORE_GEODATA
+              value: "true"
+            - name: OIDC_ISSUER
+              value: https://auth.${PUBLIC_DOMAIN}/application/o/dawarich/
+            - name: OIDC_CLIENT_ID
+              value: dawarich
+            - name: OIDC_REDIRECT_URI
+              value: https://dawarich.${PUBLIC_DOMAIN}/users/auth/openid_connect/callback
+            - name: OIDC_PROVIDER_NAME
+              value: Authentik
+            - name: OIDC_PKCE_ENABLED
+              value: "true"
+            - name: OIDC_AUTO_REGISTER
+              value: "true"
+            # Authentik is the only way in. Nothing else would be, anyway: no invitation
+            # path is exposed and the family already has accounts there.
+            - name: ALLOW_EMAIL_PASSWORD_REGISTRATION
+              value: "false"
+            - name: WEB_CONCURRENCY
+              value: "1"
+            - name: BACKGROUND_PROCESSING_CONCURRENCY
+              value: "3"
+          volumeMounts: &dawarichMounts
+            - name: storage
+              mountPath: /var/app/storage
+            - name: exports
+              # Mounted on public/exports and NOT on public: the image ships 22 MB of
+              # compiled assets in /var/app/public, and unlike a docker named volume a PVC
+              # does not inherit them — it hides them. The app answers 200 with no CSS and
+              # no JS, which reads as a broken build rather than a mount mistake.
+              mountPath: /var/app/public/exports
+            - name: watched
+              mountPath: /var/app/tmp/imports/watched
+            - name: app-tmp
+              mountPath: /var/app/tmp
+              subPath: app-tmp
+            - name: app-tmp
+              mountPath: /tmp
+              subPath: tmp
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          securityContext: &dawarichSecurity
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+
+        - name: sidekiq
+          # renovate: datasource=docker depName=freikin/dawarich
+          image: docker.io/freikin/dawarich:1.12.0
+          command: ["sidekiq-entrypoint.sh"]
+          args: ["sidekiq"]
+          envFrom:
+            - secretRef:
+                name: dawarich-secrets
+          env: *dawarichEnv
+          volumeMounts: *dawarichMounts
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          securityContext: *dawarichSecurity
+
+      volumes:
+        # Rails writes its pids, its bootsnap cache and its uploads-in-flight under
+        # /var/app/tmp, which readOnlyRootFilesystem makes unwritable. Two subPaths of one
+        # emptyDir rather than two volumes, so the watched PVC can still nest inside.
+        - name: app-tmp
+          emptyDir: {}
+
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: exports
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 2Gi
+    - metadata:
+        name: watched
+        labels:
+          recurring-job-group.longhorn.io/default: enabled
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: ${DEFAULT_STORAGE_CLASS}
+        resources:
+          requests:
+            storage: 2Gi

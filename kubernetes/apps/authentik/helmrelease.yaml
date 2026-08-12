@@ -84,6 +84,11 @@ spec:
             secretKeyRef:
               name: authentik-secrets
               key: immich_client_secret
+        - name: AUTHENTIK_DAWARICH_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-dawarich-oidc
+              key: dawarich_oidc_client_secret
         - name: AUTHENTIK_CLOUDFLARE_ACCESS_CLIENT_SECRET
           valueFrom:
             secretKeyRef:

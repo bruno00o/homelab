@@ -51,6 +51,8 @@ data:
       # so it never crosses the gateway and no HTTPRoute filter can see this traffic; the
       # rules are first-match-wins, so this one has to precede the catch-all below. The
       # page stays reachable on vaultwarden.${CLUSTER_DOMAIN}, which is LAN-only.
+      - hostname: dawarich.${PUBLIC_DOMAIN}
+        service: http://dawarich.dawarich.svc.cluster.local:3000
       - hostname: vaultwarden.${PUBLIC_DOMAIN}
         path: ^/admin
         service: http_status:404

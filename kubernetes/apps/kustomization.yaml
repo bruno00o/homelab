@@ -4,6 +4,7 @@ resources:
   - adguard/ks.yaml
   - aroma/ks.yaml
   - authentik/ks.yaml
+  - dawarich/ks.yaml
   - doublons/ks.yaml
   - dozerdb/ks.yaml
   - gaspard/ks.yaml

@@ -1,0 +1,18 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: dawarich
+  namespace: dawarich
+spec:
+  config:
+    type: http
+    name: Dawarich
+    url: https://dawarich.${CLUSTER_DOMAIN}/api/v1/health
+    interval: 60
+    ignore_tls: true
+    # Not the usual 200-299: a range wide enough to swallow the gateway's own 403 would
+    # report this up while it is unreachable.
+    accepted_statuscodes:
+      - "200-200"
+    notification_name_list:
+      - discord

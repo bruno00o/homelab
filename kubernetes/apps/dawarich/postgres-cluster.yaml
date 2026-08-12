@@ -1,0 +1,104 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: dawarich-postgres
+  namespace: dawarich
+spec:
+  # Two instances, not the three the other clusters run: this one carries location
+  # history, not the identity provider the whole cluster logs in through, and the workers
+  # are the tightest node on memory.
+  instances: 2
+
+  # PostGIS, so a different image family from every other cluster here — and one that
+  # breaks the pinning rule for a reason worth writing down. ghcr.io/cloudnative-pg/postgis
+  # publishes no MM.mm tag and no OS suffix at all (checked against the full tag list), so
+  # the usual `18.4-standard-trixie` shape does not exist. What it does publish is a build
+  # counter, and that is what makes this pinnable: `17-3.5` alone would never gain a
+  # successor and Renovate would stay silent forever, while `17-3.5-9` has one.
+  # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgis versioning=loose
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5-9
+
+  storage:
+    storageClass: ${DEFAULT_STORAGE_CLASS}
+    size: 20Gi
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+      # Do not remove: an inactive replication slot makes Postgres retain WAL forever, which
+      # filled the volume and crashlooped the instance. This drops the slot, not the cluster.
+      max_slot_wal_keep_size: "2GB"
+
+  bootstrap:
+    initdb:
+      database: dawarich
+      owner: dawarich
+      secret:
+        name: dawarich-postgres-credentials
+      # Rails cannot do this itself: CREATE EXTENSION needs superuser and the application
+      # owner is not one. postInitApplicationSQL runs as superuser inside the freshly
+      # created database, which is the only window where that is true. Without it every
+      # migration touching a geometry column fails on a fresh bootstrap.
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS postgis;
+        - CREATE EXTENSION IF NOT EXISTS postgis_topology;
+
+  monitoring:
+    enablePodMonitor: true
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: dawarich-backups
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: dawarich-backups
+  namespace: dawarich
+spec:
+  retentionPolicy: "30d"
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 384Mi
+  configuration:
+    destinationPath: s3://cnpg-dawarich/
+    endpointURL: http://rustfs.rustfs.svc.cluster.local:9000
+    s3Credentials:
+      accessKeyId:
+        name: rustfs-s3-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: rustfs-s3-credentials
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: dawarich-postgres-daily
+  namespace: dawarich
+spec:
+  schedule: "0 30 3 * * *"
+  backupOwnerReference: self
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+  cluster:
+    name: dawarich-postgres

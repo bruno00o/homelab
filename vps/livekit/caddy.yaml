@@ -31,14 +31,18 @@ apps:
               - handler: proxy
                 upstreams:
                   - dial: ["localhost:7880"]
-          # No ALPN: a TURN client offers none, and requiring one drops it.
+          # Accept whatever ALPN the client offers. An empty list here means
+          # "only clients advertising nothing", which silently drops every
+          # client that does — Chrome offers none and worked, Firefox offers
+          # one and lost its relay candidate. Caddy only forwards bytes once
+          # TLS is terminated, so the negotiated protocol is irrelevant.
           - match:
               - tls:
                   sni: ["livekit-turn.seilliebert.app"]
             handle:
               - handler: tls
                 connection_policies:
-                  - alpn: [""]
+                  - alpn: ["stun.turn", "h2", "http/1.1"]
               - handler: proxy
                 upstreams:
                   - dial: ["localhost:5349"]

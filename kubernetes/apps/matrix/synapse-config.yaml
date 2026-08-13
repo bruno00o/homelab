@@ -49,6 +49,13 @@ data:
     # (MAS' /link is a device-code consent page, NOT a rendezvous channel).
     experimental_features:
       msc4108_enabled: true
+
+    # How clients discover the call backend (MSC4143). Nothing else advertises
+    # it, so a call falls back to no SFU at all if this block is missing.
+    extra_well_known_client_content:
+      org.matrix.msc4143.rtc_foci:
+        - type: livekit
+          livekit_service_url: "https://matrix-rtc.${PUBLIC_DOMAIN}"
   log.config: |
     version: 1
     formatters:

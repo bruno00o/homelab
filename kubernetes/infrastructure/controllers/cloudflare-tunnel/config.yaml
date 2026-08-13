@@ -47,6 +47,8 @@ data:
         service: http://mas.matrix.svc.cluster.local:8080
       - hostname: element.${PUBLIC_DOMAIN}
         service: http://element.matrix.svc.cluster.local:80
+      - hostname: matrix-rtc.${PUBLIC_DOMAIN}
+        service: http://lk-jwt-service.matrix.svc.cluster.local:8080
       - hostname: dawarich.${PUBLIC_DOMAIN}
         service: http://dawarich.dawarich.svc.cluster.local:3000
       # /admin has to die here and nowhere else. The tunnel routes straight to the Service,

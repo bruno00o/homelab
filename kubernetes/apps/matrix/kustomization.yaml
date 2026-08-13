@@ -13,6 +13,7 @@ resources:
   - dnsendpoint.yaml
   - network-policies.yaml
   - mas/
+  - rtc/
 components:
   - ../../components/network-policies/base
 namespace: matrix

@@ -5,6 +5,9 @@ metadata:
   name: element-config
   namespace: matrix
 data:
+  # element_call.use_exclusively routes every call through Element Call.
+  # Left off, a two-person room falls back to legacy 1:1 VoIP, which needs a
+  # TURN server advertised by Synapse — /voip/turnServer returns {} here.
   config.json: |
     {
       "default_server_config": {
@@ -15,7 +18,10 @@ data:
       },
       "disable_custom_urls": true,
       "disable_guests": true,
-      "brand": "Element"
+      "brand": "Element",
+      "element_call": {
+        "use_exclusively": true
+      }
     }
 ---
 apiVersion: v1

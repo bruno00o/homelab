@@ -13,7 +13,7 @@ services:
       - ./caddy.yaml:/etc/caddy.yaml
       - caddy_data:/data
   livekit:
-    image: livekit/livekit-server:v1.9.2
+    image: livekit/livekit-server:v1.13.5
     command: --config /etc/livekit.yaml
     restart: unless-stopped
     network_mode: host

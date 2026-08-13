@@ -30,6 +30,13 @@ data:
 
     # Federation OFF (empty whitelist = federate with nobody).
     federation_domain_whitelist: []
+
+    # Advertises port 443 instead of the default 8448. MatrixRTC resolves the
+    # homeserver the federation way to reach the userinfo endpoint, and without
+    # this it dials 8448, which nothing here serves. Advertising is not
+    # federating: the whitelist above still refuses every server, and the only
+    # federation-path endpoint exposed is openid/userinfo.
+    serve_server_wellknown: true
     trusted_key_servers: []
     suppress_key_server_warning: true
 

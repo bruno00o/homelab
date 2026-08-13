@@ -37,3 +37,6 @@ data:
   PUBLIC_DOMAIN: "seilliebert.app"
   PROJECTS_DOMAIN: "seilliebert.dev"
   CF_TUNNEL_HOSTNAME: "e314949b-7ce9-4ae0-aed6-eba2c82a8649.cfargotunnel.com"
+  # The MatrixRTC SFU, the one service that cannot live in the cluster: WebRTC
+  # media needs a public UDP range, which the tunnel does not carry.
+  LIVEKIT_VM_IP: "51.15.252.124"

@@ -13,3 +13,20 @@ spec:
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
           value: "true"
+    # Both unproxied, and they have to stay that way: proxying puts Cloudflare
+    # between the client and the media, which the SFU cannot survive. Two names
+    # because LiveKit's Caddy tells signaling from TURN by SNI on the same 443.
+    - dnsName: livekit.${PUBLIC_DOMAIN}
+      recordType: A
+      targets:
+        - ${LIVEKIT_VM_IP}
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+    - dnsName: livekit-turn.${PUBLIC_DOMAIN}
+      recordType: A
+      targets:
+        - ${LIVEKIT_VM_IP}
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"

@@ -19,3 +19,26 @@ spec:
       backendRefs:
         - name: mas
           port: 8080
+---
+# LAN-only: this hostname is served by the internal wildcard listener and has no
+# entry in the Cloudflare tunnel, so user administration never leaves the house.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mas-admin
+  namespace: matrix
+spec:
+  parentRefs:
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-internal-wildcard
+  hostnames:
+    - mas-admin.${CLUSTER_DOMAIN}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: mas
+          port: 8082

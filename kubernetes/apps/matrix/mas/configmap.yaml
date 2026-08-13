@@ -34,6 +34,16 @@ data:
           binds:
             - host: 0.0.0.0
               port: 8081
+        # Its own listener, deliberately not the `web` one above: that one is
+        # published through the tunnel, and adding adminapi there would put user
+        # administration on the internet. This port is reachable only from
+        # ${CLUSTER_DOMAIN}, which has no tunnel entry.
+        - name: admin
+          resources:
+            - name: adminapi
+          binds:
+            - host: 0.0.0.0
+              port: 8082
 
     database:
       host: mas-postgres-rw.matrix.svc.cluster.local

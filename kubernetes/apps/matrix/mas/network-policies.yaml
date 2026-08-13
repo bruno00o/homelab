@@ -15,6 +15,8 @@ spec:
         - ipBlock: { cidr: 10.0.20.0/24 }
       ports:
         - { protocol: TCP, port: 8080 }
+        # adminapi, LAN-only
+        - { protocol: TCP, port: 8082 }
 ---
 # Cross-node envoy proxy traffic (Cilium ingress identity).
 apiVersion: cilium.io/v2
@@ -31,6 +33,7 @@ spec:
       toPorts:
         - ports:
             - { port: "8080", protocol: TCP }
+            - { port: "8082", protocol: TCP }
 ---
 # Public access via the Cloudflare tunnel (mas.seilliebert.app).
 apiVersion: networking.k8s.io/v1

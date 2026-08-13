@@ -70,5 +70,15 @@ spec:
               memory: 128Mi
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
+          volumeMounts:
+            # The only writable path the image needs: both entrypoint scripts
+            # write here (the rendered index and the listen directive), and the
+            # unprivileged nginx base already keeps its pid and temp files here.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

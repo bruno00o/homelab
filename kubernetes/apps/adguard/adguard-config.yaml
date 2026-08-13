@@ -72,6 +72,16 @@ data:
         - domain: '*.${PUBLIC_DOMAIN}'
           answer: ${LB_GATEWAY}
           enabled: true
+        # The two exceptions to the wildcard above: the SFU is the only host in
+        # this zone that does not live in the cluster, so pointing it at the
+        # gateway breaks calls from the LAN while they work from outside. An
+        # exact rewrite wins over the wildcard.
+        - domain: 'livekit.${PUBLIC_DOMAIN}'
+          answer: ${LIVEKIT_VM_IP}
+          enabled: true
+        - domain: 'livekit-turn.${PUBLIC_DOMAIN}'
+          answer: ${LIVEKIT_VM_IP}
+          enabled: true
       filtering_enabled: true
       rewrites_enabled: true
       protection_enabled: true

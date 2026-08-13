@@ -1,0 +1,23 @@
+---
+# Both containers use host networking: LiveKit has to see the real UDP ports it
+# advertises, and a bridge would rewrite them into addresses no client can
+# reach. Docker itself comes from the official repo — Debian ships no
+# docker-compose-v2 (that is an Ubuntu package) and its docker.io lags.
+services:
+  caddy:
+    image: livekit/caddyl4:latest
+    command: run --config /etc/caddy.yaml --adapter yaml
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./caddy.yaml:/etc/caddy.yaml
+      - caddy_data:/data
+  livekit:
+    image: livekit/livekit-server:v1.9.2
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+volumes:
+  caddy_data:

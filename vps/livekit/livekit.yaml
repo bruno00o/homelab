@@ -1,0 +1,34 @@
+---
+# MatrixRTC SFU. Runs on a Scaleway VPS, not in the cluster: WebRTC media needs
+# a public UDP range and the Cloudflare tunnel carries only HTTP/HTTPS.
+# Deployed by hand to /opt/livekit on the VM — this copy is the source of truth.
+port: 7880
+log_level: info
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  use_external_ip: true
+  # Meant to keep the docker bridge out of the advertised ICE candidates, where
+  # it is unreachable and only wastes connectivity checks. Neither filter
+  # removed it from the external-IP discovery log, so treat this as unproven
+  # until a session's candidate list is checked.
+  interfaces:
+    excludes:
+      - docker0
+  ips:
+    excludes:
+      - 172.17.0.0/16
+turn:
+  enabled: true
+  domain: livekit-turn.seilliebert.app
+  # Caddy terminates TLS on 443 and forwards plaintext here. The config-sample
+  # says LiveKit then advertises tls_port to clients, which would be wrong —
+  # measured, it advertises 443, matching what Caddy actually listens on.
+  tls_port: 5349
+  external_tls: true
+keys:
+  # Must stay identical to LIVEKIT_KEY / LIVEKIT_SECRET in
+  # kubernetes/apps/matrix/rtc/secrets.sops.yaml, or every JWT is rejected.
+  # The real secret is only there and on the VM, never in this file.
+  APIMLpM9APLkykL: REPLACE_WITH_LIVEKIT_SECRET

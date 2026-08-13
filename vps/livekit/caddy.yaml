@@ -1,0 +1,44 @@
+---
+# Splits signaling from TURN by SNI on a single 443, which is what lets calls
+# out of networks that allow nothing else. Both hostnames must resolve to the
+# VM's real address: they are the two exceptions to the AdGuard wildcard that
+# points *.seilliebert.app at the internal gateway.
+logging:
+  logs:
+    default:
+      level: INFO
+storage:
+  module: file_system
+  root: /data
+apps:
+  tls:
+    certificates:
+      automate:
+        - livekit.seilliebert.app
+        - livekit-turn.seilliebert.app
+  layer4:
+    servers:
+      main:
+        listen: [":443"]
+        routes:
+          - match:
+              - tls:
+                  sni: ["livekit.seilliebert.app"]
+            handle:
+              - handler: tls
+                connection_policies:
+                  - alpn: ["http/1.1"]
+              - handler: proxy
+                upstreams:
+                  - dial: ["localhost:7880"]
+          # No ALPN: a TURN client offers none, and requiring one drops it.
+          - match:
+              - tls:
+                  sni: ["livekit-turn.seilliebert.app"]
+            handle:
+              - handler: tls
+                connection_policies:
+                  - alpn: [""]
+              - handler: proxy
+                upstreams:
+                  - dial: ["localhost:5349"]

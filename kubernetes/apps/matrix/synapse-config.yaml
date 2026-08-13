@@ -19,7 +19,10 @@ data:
         x_forwarded: true
         bind_addresses: ['0.0.0.0']
         resources:
-          - names: [client]
+          # `openid` serves only the userinfo endpoint, not federation. MatrixRTC
+          # validates users through it; without it Element Call fails client-side
+          # with OPEN_ID_ERROR and nothing is logged server-side.
+          - names: [client, openid]
             compress: false
 
     media_store_path: /data/media_store

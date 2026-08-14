@@ -56,10 +56,9 @@ data:
     # (MAS' /link is a device-code consent page, NOT a rendezvous channel).
     experimental_features:
       msc4108_enabled: true
-      # Both required by Element Call: the room summary decides what a
-      # non-member is offered, and state_after is how it tracks who is
-      # actually in the call.
-      msc3266_enabled: true
+      # How Element Call tracks who is actually in a call. Its docs also ask
+      # for msc3266_enabled, which no longer exists: the room summary endpoint
+      # graduated and is served unconditionally.
       msc4222_enabled: true
 
     # MSC4140, the dead man's switch behind call participation: a client

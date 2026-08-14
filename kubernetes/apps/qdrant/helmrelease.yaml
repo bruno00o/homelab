@@ -22,6 +22,12 @@ spec:
   values:
     replicaCount: 1
 
+    # Same reason as Grafana's analytics block and Longhorn's upgradeChecker: the namespace
+    # denies egress to the internet, so Qdrant's telemetry call only ever times out and
+    # every SYN retry counts as a dropped packet. Merged into the chart's own config map.
+    config:
+      telemetry_disabled: true
+
     updateVolumeFsOwnership: false
 
     apiKey:

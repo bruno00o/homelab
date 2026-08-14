@@ -33,6 +33,10 @@ spec:
     preUpgradeChecker:
       jobEnabled: false
     defaultSettings:
+      # Same reason as Grafana's analytics block: longhorn-system denies egress to the
+      # internet, so the upgrade responder call times out on every worker and each SYN
+      # retry counts as a dropped packet. Renovate is what tells us about a new Longhorn.
+      upgradeChecker: false
       defaultReplicaCount: 2
       defaultDataPath: /var/mnt/longhorn
       createDefaultDiskLabeledNodes: true

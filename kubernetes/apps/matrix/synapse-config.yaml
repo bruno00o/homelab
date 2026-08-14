@@ -56,6 +56,17 @@ data:
     # (MAS' /link is a device-code consent page, NOT a rendezvous channel).
     experimental_features:
       msc4108_enabled: true
+      # Both required by Element Call: the room summary decides what a
+      # non-member is offered, and state_after is how it tracks who is
+      # actually in the call.
+      msc3266_enabled: true
+      msc4222_enabled: true
+
+    # MSC4140, the dead man's switch behind call participation: a client
+    # schedules its own departure and refreshes it while alive, so a crash
+    # cleans up instead of leaving a ghost in the call. Unset means delayed
+    # events are refused outright, and calls stay stuck.
+    max_event_delay_duration: 24h
 
     # How clients discover the call backend (MSC4143). Nothing else advertises
     # it, so a call falls back to no SFU at all if this block is missing.

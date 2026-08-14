@@ -95,6 +95,13 @@ spec:
       grafana.ini:
         server:
           root_url: https://grafana.${CLUSTER_DOMAIN}
+        # monitoring has no egress to the internet, so these calls to grafana.com can only
+        # time out. They retry on a ten-minute ticker and every SYN is a POLICY_DENIED
+        # drop, which is what kept CiliumDroppedPackets flapping in and out of firing.
+        analytics:
+          check_for_updates: false
+          check_for_plugin_updates: false
+          reporting_enabled: false
         auth:
           disable_login_form: true
           oauth_allow_insecure_email_lookup: true

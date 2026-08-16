@@ -7,7 +7,7 @@ talhelper = "3.1.16"
 kubectl = "1.36.3"
 # https://github.com/fluxcd/flux2
 flux2 = "2.9.4"
-helm = "4.2.3"
+helm = "4.2.4"
 # https://github.com/helmfile/helmfile
 helmfile = "1.7.3"
 sops = "3.13.3"

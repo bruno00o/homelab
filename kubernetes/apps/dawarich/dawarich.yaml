@@ -47,7 +47,7 @@ spec:
         # image would be one more thing to keep pinned.
         - name: init-tmpdir
           # renovate: datasource=docker depName=freikin/dawarich
-          image: docker.io/freikin/dawarich:1.12.0
+          image: docker.io/freikin/dawarich:1.12.1
           command: ["/bin/sh", "-c", "mkdir -p /tmp/ruby"]
           volumeMounts:
             - name: app-tmp
@@ -69,7 +69,7 @@ spec:
       containers:
         - name: app
           # renovate: datasource=docker depName=freikin/dawarich
-          image: docker.io/freikin/dawarich:1.12.0
+          image: docker.io/freikin/dawarich:1.12.1
           # The image expects to start as root, chown the mounted paths and drop to
           # PUID/PGID through gosu. That cannot work here — root without CAP_CHOWN cannot
           # chown, and this namespace enforces restricted — so we start unprivileged and
@@ -228,7 +228,7 @@ spec:
 
         - name: sidekiq
           # renovate: datasource=docker depName=freikin/dawarich
-          image: docker.io/freikin/dawarich:1.12.0
+          image: docker.io/freikin/dawarich:1.12.1
           command: ["sidekiq-entrypoint.sh"]
           args: ["sidekiq"]
           envFrom:

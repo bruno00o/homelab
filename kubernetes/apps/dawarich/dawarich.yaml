@@ -172,11 +172,16 @@ spec:
           volumeMounts: &dawarichMounts
             - name: storage
               mountPath: /var/app/storage
+            - name: public
+              # The image now ships its compiled assets in public_dist and the entrypoint
+              # copies them into public at every start, deleting the old ones first — which
+              # a read-only root refuses, and set -e turns into a crashloop. The copy lands
+              # here instead. Nothing is lost by hiding public/: the sync puts back exactly
+              # what the image had there.
+              mountPath: /var/app/public
             - name: exports
-              # Mounted on public/exports and NOT on public: the image ships 22 MB of
-              # compiled assets in /var/app/public, and unlike a docker named volume a PVC
-              # does not inherit them — it hides them. The app answers 200 with no CSS and
-              # no JS, which reads as a broken build rather than a mount mistake.
+              # Exports are generated files and the volume above is empty again at every
+              # restart, so they keep their own PVC, nested inside it.
               mountPath: /var/app/public/exports
             - name: watched
               mountPath: /var/app/tmp/imports/watched
@@ -251,6 +256,9 @@ spec:
         # emptyDir rather than two volumes, so the watched PVC can still nest inside.
         - name: app-tmp
           emptyDir: {}
+        - name: public
+          emptyDir:
+            sizeLimit: 128Mi
 
   volumeClaimTemplates:
     - metadata:

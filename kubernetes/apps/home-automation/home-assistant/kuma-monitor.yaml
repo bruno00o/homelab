@@ -9,6 +9,11 @@ spec:
     name: Home Assistant
     url: https://home-assistant.${CLUSTER_DOMAIN}
     interval: 60
+    # One beat in roughly thirteen is swallowed on the way to Home Assistant and never
+    # answered — see the hostNetwork section in CLAUDE.md, the cause is still open. The
+    # loss is a single isolated beat every time, never two in a row, so one retry turns it
+    # into a pending beat instead of a false outage and a Discord alert.
+    max_retries: 1
     ignore_tls: true
     accepted_statuscodes:
       - "200-299"

@@ -8,7 +8,12 @@ spec:
     type: http
     name: Home Assistant
     url: https://home-assistant.${CLUSTER_DOMAIN}
-    interval: 60
+    # 50 and not the 60 every other monitor uses. Home Assistant is the only backend
+    # behind the gateway running on the host network, and the only one where a request
+    # is swallowed for good instead of failing: probing on the same period as the proxy's
+    # upstream idle timeout puts every beat on that expiry boundary, and roughly one in
+    # thirteen lands badly. Probing sooner keeps the connection from ever reaching it.
+    interval: 50
     ignore_tls: true
     accepted_statuscodes:
       - "200-299"

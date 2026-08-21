@@ -42,17 +42,27 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       initContainers:
-        # The emptyDir is recreated empty on every pod restart, so TMPDIR has to be
-        # recreated with it. Same image as the app: it is already on the node, and one more
-        # image would be one more thing to keep pinned.
-        - name: init-tmpdir
+        # Both emptyDirs are recreated empty on every pod restart, so whatever the app
+        # expects to already be there has to be put back here. Same image as the app: it is
+        # already on the node, and one more image would be one more thing to keep pinned.
+        # The public copy is not redundant with the entrypoint's own asset sync — that one
+        # globs public_dist/* and so skips .well-known, which is what serves the mobile
+        # apps their site association files. Copying the directory itself keeps them.
+        - name: init-dirs
           # renovate: datasource=docker depName=freikin/dawarich
           image: docker.io/freikin/dawarich:1.12.2
-          command: ["/bin/sh", "-c", "mkdir -p /tmp/ruby"]
+          command:
+            - /bin/sh
+            - -c
+            - mkdir -p /tmp/ruby && cp -r /var/app/public_dist/. /mnt/public/
           volumeMounts:
             - name: app-tmp
               mountPath: /tmp
               subPath: tmp
+            # Staged elsewhere than /var/app/public on purpose: mounted there, the volume
+            # would hide the very directory being copied from.
+            - name: public
+              mountPath: /mnt/public
           resources:
             requests:
               cpu: 10m

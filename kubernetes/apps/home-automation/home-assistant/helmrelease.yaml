@@ -159,7 +159,7 @@ spec:
         # once the policy covers initContainers - no registry prefix to match on - and which
         # is a rolling major tag Renovate can never move.
         # renovate: datasource=docker depName=docker.io/mikefarah/yq
-        image: docker.io/mikefarah/yq:4.53.3
+        image: docker.io/mikefarah/yq:4.53.4
         securityContext:
           # /config PVC is owned by root because the main HA container runs as
           # image-default (root). A non-root init container cannot merge

@@ -21,7 +21,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/bruno00o/portfolio
             image:
               repository: ghcr.io/bruno00o/portfolio
-              tag: latest@sha256:6fe24325d36884ded63640c63afca7171a546b2df705fadfbb0a6882bf95ef04
+              tag: latest@sha256:7642bf773a74116b9ebf137feae2c1d53cd9edd57dc97751c6e7192eeebe3e38
             env:
               TZ: ${TIMEZONE}
             probes:

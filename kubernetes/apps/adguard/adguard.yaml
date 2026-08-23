@@ -81,7 +81,7 @@ spec:
       containers:
         - name: adguard-home
           # renovate: datasource=docker depName=adguard/adguardhome
-          image: docker.io/adguard/adguardhome:v0.107.78
+          image: docker.io/adguard/adguardhome:v0.107.79
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

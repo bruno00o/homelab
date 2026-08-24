@@ -109,7 +109,14 @@ data:
     branding:
       service_name: "Going Merry Matrix"
 
-    clients: []
+    # Static OAuth2 clients. A native app cannot keep a secret, so it
+    # registers with no auth method and MAS requires PKCE from it instead.
+    # The client_id has to be a ULID.
+    clients:
+      - client_id: 01JZKAZ1M0FAM0000000000000
+        client_auth_method: none
+        redirect_uris:
+          - kazimo://oidc/callback
 
     policy:
       data:

@@ -23,7 +23,7 @@ spec:
       registry: docker.io
       repository: vaultwarden/server
       # renovate: datasource=docker depName=vaultwarden/server
-      tag: "1.37.1-alpine"
+      tag: "1.37.2-alpine"
       pullPolicy: IfNotPresent
 
     # Vaultwarden has exactly one canonical URL: the OIDC callback, the invitation links

@@ -21,7 +21,7 @@ spec:
             # renovate: datasource=docker depName=louislam/uptime-kuma
             image:
               repository: docker.io/louislam/uptime-kuma
-              tag: 2.5.0-rootless
+              tag: 2.5.3-rootless
             env:
               TZ: ${TIMEZONE}
             probes:

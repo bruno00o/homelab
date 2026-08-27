@@ -1,0 +1,15 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: ring
+  namespace: kazimo
+spec:
+  config:
+    type: http
+    name: Kazimo Ring
+    url: https://ring.${PUBLIC_DOMAIN}/health
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

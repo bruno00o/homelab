@@ -1,0 +1,79 @@
+---
+# Both halves of the gateway ingress: the ipBlock for same-node host traffic, the Cilium
+# rule for the cross-node proxy identity an ipBlock cannot match.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ring-ingress-from-gateway
+  namespace: kazimo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ring
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 8089 }
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-ring-gateway-proxy-ingress
+  namespace: kazimo
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ring
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "8089", protocol: TCP }
+
+---
+# Public access via the Cloudflare tunnel (routes straight to the service).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ring-ingress-from-cloudflare-tunnel
+  namespace: kazimo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ring
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 8089 }
+
+---
+# APNs, and nothing else. The private ranges are excluded: a push gateway has no reason to
+# reach the LAN or the camera VLAN.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ring-egress-apns
+  namespace: kazimo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ring
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - { protocol: TCP, port: 443 }

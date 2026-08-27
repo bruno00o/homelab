@@ -51,6 +51,10 @@ data:
         service: http://lk-jwt-service.matrix.svc.cluster.local:8080
       - hostname: dawarich.${PUBLIC_DOMAIN}
         service: http://dawarich.dawarich.svc.cluster.local:3000
+      # Two legs on one hostname: the VoIP ring called by kazimod, and the Matrix push
+      # gateway Synapse posts to for messages.
+      - hostname: ring.${PUBLIC_DOMAIN}
+        service: http://ring.kazimo.svc.cluster.local:8089
       # /admin has to die here and nowhere else. The tunnel routes straight to the Service,
       # so it never crosses the gateway and no HTTPRoute filter can see this traffic; the
       # rules are first-match-wins, so a 404 rule has to precede its own catch-all. Both

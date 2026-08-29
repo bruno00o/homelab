@@ -844,10 +844,10 @@ tasks:
   hooks:install:
     desc: Install the git hooks defined in lefthook.yml
     preconditions:
-      - sh: command -v lefthook
-        msg: "lefthook not found. Run 'task deps:install'."
+      - sh: command -v mise
+        msg: "mise is not installed. See https://mise.jdx.dev/getting-started.html"
     cmds:
-      - lefthook install
+      - mise exec -- lefthook install
 
   # =============================================================================
   # CNPG - CloudNativePG

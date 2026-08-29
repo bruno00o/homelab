@@ -194,6 +194,9 @@ controlPlane:
         # Flux instead (metrics-server moved there). Keep this list to what has
         # to exist before Flux does: the CSR approver that signs the kubelet
         # serving certificates enabled by rotate-server-certificates below.
+        # Bumping the pin below is inert on its own: the object already exists, so
+        # it has to be applied by hand. Check the image first — upstream has
+        # shipped that manifest pointing at a floating tag.
         extraManifests:
           # renovate: datasource=github-releases depName=alex1989hu/kubelet-serving-cert-approver
           - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.11.1/deploy/standalone-install.yaml

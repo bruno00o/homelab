@@ -189,14 +189,17 @@ controlPlane:
                   namespaces:
                     - longhorn-system
                     - monitoring
-        # Talos only *creates* extraManifests resources; it never updates one
-        # that already exists. Anything that needs to be upgradable belongs in
-        # Flux instead (metrics-server moved there). Keep this list to what has
-        # to exist before Flux does: the CSR approver that signs the kubelet
-        # serving certificates enabled by rotate-server-certificates below.
-        # Bumping the pin below is inert on its own: the object already exists, so
-        # it has to be applied by hand. Check the image first — upstream has
-        # shipped that manifest pointing at a floating tag.
+        # Applying a config only *creates* extraManifests resources; it never
+        # updates one that already exists. Anything that needs to be upgradable
+        # belongs in Flux instead (metrics-server moved there). Keep this list to
+        # what has to exist before Flux does: the CSR approver that signs the
+        # kubelet serving certificates enabled by rotate-server-certificates below.
+        # A bump here is therefore inert until applied by hand, and check the image
+        # first — upstream has shipped that manifest pointing at a floating tag.
+        # `upgrade-k8s` is the exception: it reconciles this list, so it reverts a
+        # hand-applied version back to the URL the node config holds, and it deletes
+        # what has left the list — that is what removed metrics-server after the
+        # move to Flux, without Flux noticing its own objects were gone.
         extraManifests:
           # renovate: datasource=github-releases depName=alex1989hu/kubelet-serving-cert-approver
           - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.11.1/deploy/standalone-install.yaml

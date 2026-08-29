@@ -2,7 +2,7 @@
 # Must match talos/talconfig.yaml talosVersion
 talosctl = "1.13.7"
 # https://github.com/budimanjojo/talhelper
-talhelper = "3.1.16"
+talhelper = "3.1.17"
 # Should match talos/talconfig.yaml kubernetesVersion
 kubectl = "1.36.4"
 # https://github.com/fluxcd/flux2

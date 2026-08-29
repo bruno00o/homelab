@@ -196,7 +196,7 @@ controlPlane:
         # serving certificates enabled by rotate-server-certificates below.
         extraManifests:
           # renovate: datasource=github-releases depName=alex1989hu/kubelet-serving-cert-approver
-          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.11.0/deploy/standalone-install.yaml
+          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.11.1/deploy/standalone-install.yaml
     - |-
       machine:
         kubelet:

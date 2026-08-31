@@ -21,4 +21,4 @@ kubeconform = "0.8.0"
 # hence the ubi backend. Must match the version in .github/workflows/ci.yaml.
 "ubi:home-operations/flate" = "0.6.0"
 # Git hooks — run `task hooks:install` after installing
-lefthook = "2.1.11"
+lefthook = "2.1.12"

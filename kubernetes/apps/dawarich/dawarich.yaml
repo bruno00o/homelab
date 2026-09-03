@@ -50,7 +50,7 @@ spec:
         # apps their site association files. Copying the directory itself keeps them.
         - name: init-dirs
           # renovate: datasource=docker depName=freikin/dawarich
-          image: docker.io/freikin/dawarich:1.14.0
+          image: docker.io/freikin/dawarich:1.14.1
           command:
             - /bin/sh
             - -c
@@ -79,7 +79,7 @@ spec:
       containers:
         - name: app
           # renovate: datasource=docker depName=freikin/dawarich
-          image: docker.io/freikin/dawarich:1.14.0
+          image: docker.io/freikin/dawarich:1.14.1
           # The image expects to start as root, chown the mounted paths and drop to
           # PUID/PGID through gosu. That cannot work here — root without CAP_CHOWN cannot
           # chown, and this namespace enforces restricted — so we start unprivileged and
@@ -243,7 +243,7 @@ spec:
 
         - name: sidekiq
           # renovate: datasource=docker depName=freikin/dawarich
-          image: docker.io/freikin/dawarich:1.14.0
+          image: docker.io/freikin/dawarich:1.14.1
           command: ["sidekiq-entrypoint.sh"]
           args: ["sidekiq"]
           envFrom:

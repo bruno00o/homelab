@@ -118,6 +118,15 @@ spec:
           login_attribute_path: preferred_username
           name_attribute_path: name
           role_attribute_path: contains(groups[*], 'homelab-admins') && 'Admin' || 'Viewer'
+        # Grafana preinstalls a list of plugins at every start and re-checks each one
+        # against grafana.com. They already ship in the image, and monitoring has no
+        # egress, so every check can only time out. Same dead end as analytics above,
+        # but a different code path — those settings do not cover it.
+        plugins:
+          preinstall_disabled: true
+          # Falls back to the signing key embedded in the image, the one the bundled
+          # plugins are signed with.
+          public_key_retrieval_disabled: true
 
       sidecar:
         resources:

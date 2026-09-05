@@ -48,14 +48,13 @@ tasks:
 
   validate:manifests:
     desc: Schema-validate all manifests, CRDs included
-    preconditions:
-      - sh: command -v kubeconform
-        msg: "kubeconform not found. Run 'task deps:install'."
+    deps: [deps:verify]
     cmds:
       - ./scripts/kubeconform.sh
 
   validate:talos:
     desc: Validate talconfig.yaml
+    deps: [deps:verify]
     dir: "{{.TALOS_DIR}}"
     cmds:
       - talhelper validate talconfig talconfig.yaml
@@ -73,11 +72,7 @@ tasks:
 
   validate:helm-values:
     desc: Check that every HelmRelease value exists in its chart
-    preconditions:
-      - sh: command -v helm
-        msg: "helm not found. Run 'task deps:install'."
-      - sh: command -v jq
-        msg: "jq not found. Run 'task deps:install'."
+    deps: [deps:verify]
     # Pulls every chart, so only worth redoing when a release or a source changed.
     sources:
       - kubernetes/**/helmrelease*.yaml
@@ -89,9 +84,7 @@ tasks:
 
   validate:flate:
     desc: Render every Kustomization and HelmRelease offline, as CI does
-    preconditions:
-      - sh: command -v flate
-        msg: "flate not found. Run 'task deps:install'."
+    deps: [deps:verify]
     cmds:
       - flate test all --path ./kubernetes --no-progress
 
@@ -105,34 +98,27 @@ tasks:
 
   dns:leak-check:
     desc: Check that nothing internal resolves publicly
-    preconditions:
-      - sh: command -v jq
-        msg: "jq not found. Run 'task deps:install'."
+    deps: [deps:verify]
     cmds:
       # Same file the CronJob mounts, so the on-demand and scheduled runs cannot diverge.
       - ./kubernetes/infrastructure/configs/dns-leak/dns-leak.sh
 
   policy:drift:
     desc: Show what the Kyverno exclusions are hiding, minus what we accepted
-    preconditions:
-      - sh: command -v jq
-        msg: "jq not found. Run 'task deps:install'."
+    deps: [deps:verify]
     cmds:
       - ./kubernetes/infrastructure/configs/policy-drift/policy-drift.sh
 
   inventory:
     desc: List what is exposed, on which hostname, through which path
-    preconditions:
-      - sh: command -v jq
-        msg: "jq not found. Run 'task deps:install'."
+    deps: [deps:verify]
     cmds:
       - ./scripts/inventory.sh
 
   drift:
     desc: Show how far behind upstream each running image is, and whether Renovate sees it
+    deps: [deps:verify]
     preconditions:
-      - sh: command -v jq
-        msg: "jq not found. Run 'task deps:install'."
       - sh: command -v curl
         msg: "curl not found."
     cmds:
@@ -147,6 +133,7 @@ tasks:
   # =============================================================================
   talos:genconfig:
     desc: Generate Talos configs from talconfig.yaml
+    deps: [deps:verify]
     dir: "{{.TALOS_DIR}}"
     cmds:
       - talhelper genconfig
@@ -161,6 +148,7 @@ tasks:
   # =============================================================================
   talos:apply-insecure:
     desc: Apply config to a node in insecure mode (fresh install)
+    deps: [deps:verify]
     requires:
       vars: [NODE]
     vars:
@@ -212,6 +200,7 @@ tasks:
   # =============================================================================
   talos:apply:
     desc: Apply config to a node (e.g. task talos:apply NODE=luffy)
+    deps: [deps:verify]
     requires:
       vars: [NODE]
     vars:
@@ -261,6 +250,7 @@ tasks:
   # =============================================================================
   talos:bootstrap:
     desc: Bootstrap the Kubernetes cluster (run once on first node)
+    deps: [deps:verify]
     prompt: "Bootstrap Kubernetes cluster on luffy ({{.NODE_LUFFY}})? This should only be done ONCE."
     cmds:
       - echo "Bootstrapping Kubernetes cluster..."
@@ -269,6 +259,7 @@ tasks:
 
   talos:kubeconfig:
     desc: Fetch kubeconfig from the cluster
+    deps: [deps:verify]
     cmds:
       - talosctl kubeconfig --nodes {{.NODE_LUFFY}} --force
       - echo "Kubeconfig saved to ~/.kube/config"
@@ -278,6 +269,7 @@ tasks:
   # =============================================================================
   talos:reset-soft:
     desc: Reset cluster state but keep Talos installed (wipe Kubernetes only)
+    deps: [deps:verify]
     prompt: "SOFT RESET - This will wipe Kubernetes state but keep Talos installed. Continue?"
     cmds:
       - echo "Resetting cluster state (keeping Talos)..."
@@ -288,6 +280,7 @@ tasks:
 
   talos:reset-hard:
     desc: Full reset - wipes everything including Talos (requires USB reinstall)
+    deps: [deps:verify]
     prompt: "HARD RESET - This will COMPLETELY WIPE all disks including Talos. You will need USB reinstall. Continue?"
     cmds:
       - echo "Performing HARD reset (wiping everything)..."
@@ -302,6 +295,7 @@ tasks:
   talos:etcd-snapshot:
     desc: Save an etcd snapshot outside the repo (before a shutdown or an upgrade)
     silent: true
+    deps: [deps:verify]
     vars:
       CP_NODE:
         sh: yq -r '[.nodes[] | select(.controlPlane)][0].ipAddress' {{.TALOS_DIR}}/talconfig.yaml
@@ -328,6 +322,7 @@ tasks:
   talos:shutdown-all:
     desc: Gracefully shut down the whole cluster (etcd snapshot, then workers, then control planes)
     silent: true
+    deps: [deps:verify]
     prompt: "Shut down ALL 6 nodes? They do not power back on by themselves — the button has to be pressed on each machine."
     cmds:
       - task: talos:etcd-snapshot
@@ -398,6 +393,7 @@ tasks:
   # =============================================================================
   talos:upgrade:
     desc: Upgrade Talos on a node (e.g. task talos:upgrade NODE=luffy)
+    deps: [deps:verify]
     requires:
       vars: [NODE]
     vars:
@@ -456,6 +452,7 @@ tasks:
 
   talos:upgrade-k8s:
     desc: Upgrade Kubernetes version
+    deps: [deps:verify]
     vars:
       K8S_VERSION:
         sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/talconfig.yaml
@@ -473,7 +470,7 @@ tasks:
   talos:diff:
     desc: Show what applying the config would change on a node (NODE=luffy, default all)
     silent: true
-    deps: [talos:genconfig]
+    deps: [deps:verify, talos:genconfig]
     vars:
       NODE: '{{.NODE | default "all"}}'
     cmds:
@@ -494,6 +491,7 @@ tasks:
 
   talos:status:
     desc: Show Talos cluster status
+    deps: [deps:verify]
     cmds:
       - echo "=== Talos Members ==="
       - talosctl get members --nodes {{.NODE_LUFFY}} 2>/dev/null || echo "Cannot reach cluster"
@@ -503,17 +501,20 @@ tasks:
 
   talos:health:
     desc: Check cluster health
+    deps: [deps:verify]
     cmds:
       - talosctl health --nodes {{.NODES}}
 
   talos:dashboard:
     desc: Open interactive Talos dashboard
+    deps: [deps:verify]
     cmds:
       - talosctl dashboard --nodes {{.NODES}}
 
   talos:wait-healthy:
     desc: Wait for a node to become healthy
     internal: true
+    deps: [deps:verify]
     vars:
       NODE_IP: "{{.NODE_IP | default .NODE_LUFFY}}"
     cmds:
@@ -528,6 +529,7 @@ tasks:
 
   talos:wait-ready:
     desc: Wait for all nodes to be Ready in Kubernetes
+    deps: [deps:verify]
     cmds:
       - echo "Waiting for all nodes to be Ready..."
       - kubectl wait --for=condition=ready node --all --timeout=300s
@@ -538,6 +540,7 @@ tasks:
   # =============================================================================
   bootstrap:helmfile:
     desc: Install Cilium CNI + Prometheus CRDs via helmfile (required before Flux)
+    deps: [deps:verify]
     dir: bootstrap
     cmds:
       - echo "Updating Helm repositories..."
@@ -554,6 +557,7 @@ tasks:
 
   bootstrap:sops-secret:
     desc: Create SOPS Age secret for Flux
+    deps: [deps:verify]
     cmds:
       - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -
       - |
@@ -577,12 +581,14 @@ tasks:
 
   bootstrap:deploy-key:
     desc: Install the Flux git deploy key from its encrypted copy
+    deps: [deps:verify]
     cmds:
       - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -
       - sops --decrypt bootstrap/deploy-key.sops.yaml | kubectl apply -f -
 
   bootstrap:flux:
     desc: Install Flux and point it at this repo (after Cilium)
+    deps: [deps:verify]
     preconditions:
       - sh: kubectl get nodes -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep -q True
         msg: "Nodes are not Ready. Run 'task bootstrap:helmfile' first."
@@ -603,6 +609,7 @@ tasks:
 
   bootstrap:full:
     desc: Bootstrap on an already-running Kubernetes (Helmfile + Flux)
+    deps: [deps:verify]
     cmds:
       - task: bootstrap:helmfile
       - task: bootstrap:flux
@@ -626,6 +633,7 @@ tasks:
   # =============================================================================
   flux:reconcile:
     desc: Force Flux reconciliation
+    deps: [deps:verify]
     cmds:
       - flux reconcile source git flux-system
       - flux reconcile kustomization flux-system --with-source
@@ -637,6 +645,7 @@ tasks:
   flux:diff:
     desc: Preview what local changes would do on the cluster (KS=adguard, default all)
     silent: true
+    deps: [deps:verify]
     vars:
       KS: '{{.KS | default "all"}}'
     cmds:
@@ -676,27 +685,32 @@ tasks:
 
   flux:status:
     desc: Show Flux status
+    deps: [deps:verify]
     cmds:
       - flux get all -A
 
   flux:logs:
     desc: Show Flux controller logs
+    deps: [deps:verify]
     cmds:
       - flux logs --all-namespaces --since=10m
 
   flux:hr:
     desc: List all HelmReleases
+    deps: [deps:verify]
     cmds:
       - kubectl get helmreleases -A
 
   flux:suspend:
     desc: Suspend all Flux reconciliation
+    deps: [deps:verify]
     prompt: "Suspend all Flux kustomizations?"
     cmds:
       - flux suspend kustomization --all -n flux-system
 
   flux:resume:
     desc: Resume all Flux reconciliation
+    deps: [deps:verify]
     cmds:
       - flux resume kustomization --all -n flux-system
 
@@ -705,6 +719,7 @@ tasks:
   # =============================================================================
   sops:encrypt:
     desc: Encrypt a secret file (e.g. task sops:encrypt FILE=kubernetes/apps/myapp/secret.sops.yaml)
+    deps: [deps:verify]
     requires:
       vars: [FILE]
     cmds:
@@ -712,6 +727,7 @@ tasks:
 
   sops:decrypt:
     desc: Decrypt a file for reading
+    deps: [deps:verify]
     requires:
       vars: [FILE]
     cmds:
@@ -719,6 +735,7 @@ tasks:
 
   sops:edit:
     desc: Edit an encrypted file
+    deps: [deps:verify]
     requires:
       vars: [FILE]
     cmds:
@@ -727,6 +744,7 @@ tasks:
   sops:age-show:
     desc: Print an Age private key for backup (KEY=main|breakglass)
     silent: true
+    deps: [deps:verify]
     vars:
       KEY: '{{.KEY | default "main"}}'
     cmds:
@@ -759,16 +777,19 @@ tasks:
   # =============================================================================
   k:pods:
     desc: List all pods
+    deps: [deps:verify]
     cmds:
       - kubectl get pods -A
 
   k:events:
     desc: Show recent cluster events
+    deps: [deps:verify]
     cmds:
       - kubectl get events -A --sort-by='.lastTimestamp' | tail -30
 
   k:top:
     desc: Show resource usage
+    deps: [deps:verify]
     cmds:
       - echo "=== Nodes ==="
       - kubectl top nodes
@@ -778,12 +799,14 @@ tasks:
 
   k:errors:
     desc: Show pods with errors
+    deps: [deps:verify]
     cmds:
       - kubectl get pods -A | grep -v Running | grep -v Completed
 
   k:prune-pods:
     desc: Delete terminated pods left behind by hard node reboots
     silent: true
+    deps: [deps:verify]
     cmds:
       - |
         # Job-owned pods are skipped: a completed Job pod is history, not a tombstone.
@@ -808,28 +831,23 @@ tasks:
   # Dependencies
   # =============================================================================
   deps:check:
-    desc: Check if required tools are installed
+    desc: Check the tools on PATH are the ones .mise.toml pins
     cmds:
-      - |
-        echo "Checking dependencies..."
-        MISSING=""
-        command -v talosctl >/dev/null || MISSING="$MISSING talosctl"
-        command -v talhelper >/dev/null || MISSING="$MISSING talhelper"
-        command -v kubectl >/dev/null || MISSING="$MISSING kubectl"
-        command -v flux >/dev/null || MISSING="$MISSING flux"
-        command -v helm >/dev/null || MISSING="$MISSING helm"
-        command -v helmfile >/dev/null || MISSING="$MISSING helmfile"
-        command -v sops >/dev/null || MISSING="$MISSING sops"
-        command -v yq >/dev/null || MISSING="$MISSING yq"
-        command -v jq >/dev/null || MISSING="$MISSING jq"
-        command -v kubeconform >/dev/null || MISSING="$MISSING kubeconform"
-        command -v lefthook >/dev/null || MISSING="$MISSING lefthook"
-        if [ -n "$MISSING" ]; then
-          echo "Missing:$MISSING"
-          echo "Run 'task deps:install'"
-          exit 1
-        fi
-        echo "All dependencies installed"
+      - ./scripts/mise-verify.sh
+      - echo "Every pinned tool resolves to the version .mise.toml names"
+
+  # Guard in front of every task that shells out to a pinned tool. `run: once` so a task
+  # that fans out over the nodes checks the environment one time, not once per node.
+  deps:verify:
+    desc: Verify the pinned tools before running a task
+    internal: true
+    run: once
+    preconditions:
+      - sh: command -v mise
+        msg: "mise is not installed. See https://mise.jdx.dev/getting-started.html"
+    cmds:
+      - cmd: ./scripts/mise-verify.sh
+        silent: true
 
   deps:install:
     desc: Install all dependencies via mise (reads .mise.toml)
@@ -854,6 +872,7 @@ tasks:
   # =============================================================================
   cnpg:status:
     desc: Show CNPG clusters status
+    deps: [deps:verify]
     cmds:
       - echo "=== CNPG Clusters ==="
       - kubectl get clusters.postgresql.cnpg.io -A
@@ -865,6 +884,7 @@ tasks:
   # =============================================================================
   dr:list-backups:
     desc: List available Longhorn backups from NAS
+    deps: [deps:verify]
     cmds:
       - |
         echo "=== Longhorn Backups from NAS ==="
@@ -880,6 +900,7 @@ tasks:
 
   dr:restore:
     desc: Restore a PVC from Longhorn backup (e.g. task dr:restore PVC=authentik/data-authentik-postgres-1)
+    deps: [deps:verify]
     requires:
       vars: [PVC]
     vars:
@@ -1000,6 +1021,7 @@ tasks:
 
   dr:restore-all:
     desc: List all PVCs that can be restored (run after hard reset)
+    deps: [deps:verify]
     cmds:
       - |
         echo "=== Available PVC Restorations ==="

@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: zot.merry.home.arpa/gaspard/mcp
-              tag: "0.1.2"
+              tag: "0.2.0"
             env:
               TZ: ${TIMEZONE}
               LIGHTRAG_URL: "http://lightrag.gaspard.svc.cluster.local:9621"

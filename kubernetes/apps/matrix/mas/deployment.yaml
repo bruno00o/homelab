@@ -116,7 +116,7 @@ spec:
       containers:
         - name: mas
           # renovate: datasource=docker depName=ghcr.io/element-hq/matrix-authentication-service
-          image: ghcr.io/element-hq/matrix-authentication-service:1.21.0
+          image: ghcr.io/element-hq/matrix-authentication-service:1.24.0
           args:
             - server
             - --config=/config/config.yaml

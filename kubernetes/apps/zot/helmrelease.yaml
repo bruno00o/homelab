@@ -21,7 +21,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/project-zot/zot
             image:
               repository: ghcr.io/project-zot/zot
-              tag: v2.1.18
+              tag: v2.1.20
             args:
               - serve
               - /etc/zot/config.json

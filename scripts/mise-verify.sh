@@ -18,10 +18,24 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Fail loudly rather than verifying nothing: without mise the loop below reads an empty
+# list, finds no mismatch and exits 0, which is the silence this script exists to remove.
+if ! command -v mise >/dev/null 2>&1; then
+  echo "mise is not on PATH, so the pinned versions cannot be verified." >&2
+  echo "See https://mise.jdx.dev/getting-started.html" >&2
+  exit 1
+fi
+
 # Only when there is something to do: mise narrates "all tools are installed" on stderr
 # otherwise, and this runs in front of every task.
 if [ -n "$(mise ls --missing)" ]; then
   mise install
+fi
+
+mapfile -t bin_dirs < <(mise bin-paths)
+if [ "${#bin_dirs[@]}" -eq 0 ]; then
+  echo "mise resolved no tool directories for this repo - is .mise.toml readable?" >&2
+  exit 1
 fi
 
 status=0
@@ -44,7 +58,7 @@ while read -r dir; do
       status=1
     fi
   done
-done < <(mise bin-paths)
+done < <(printf '%s\n' "${bin_dirs[@]}")
 
 if [ "$status" -ne 0 ]; then
   cat >&2 <<'MSG'

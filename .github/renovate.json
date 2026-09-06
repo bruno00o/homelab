@@ -121,9 +121,10 @@
       "automerge": true
     },
     {
-      "description": "Quarantine upstream releases for 3 days before they can automerge. Generic mitigation for the supply-chain class of incident that forced the trivy pin in ci.yaml: a compromised release reaches the cluster on its own otherwise",
+      "description": "Quarantine upstream releases for 3 days before they can automerge. Generic mitigation for the supply-chain class of incident that forced the trivy pin in ci.yaml: a compromised release reaches the cluster on its own otherwise. timestamp-optional because the default, timestamp-required, holds a release whose timestamp Renovate cannot read as pending forever rather than for three days - and it does so before creating the branch, so the update never reaches a PR and only ever shows up under Pending Status Checks on the dashboard. The quarantine still applies wherever the timestamp is readable, which is the case for the git and helm sources here",
       "matchUpdateTypes": ["minor", "patch", "digest"],
-      "minimumReleaseAge": "3 days"
+      "minimumReleaseAge": "3 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     },
     {
       "description": "No quarantine on our own images - they are built from repos we control, and delaying them would delay our own deploys for no security gain",

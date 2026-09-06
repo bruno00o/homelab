@@ -51,7 +51,7 @@ spec:
       containers:
         - name: paperless
           # renovate: datasource=docker depName=ghcr.io/paperless-ngx/paperless-ngx
-          image: ghcr.io/paperless-ngx/paperless-ngx:3.0.5
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.1.3
           # Unlike Hermes, this image is built for rootless: /run is 1777, the setuid bit is
           # stripped from s6-overlay-suexec, and every init script branches on
           # USER_IS_NON_ROOT. UID 1000 is the `paperless` user the image already owns its

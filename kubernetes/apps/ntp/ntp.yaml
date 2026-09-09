@@ -37,7 +37,7 @@ spec:
       containers:
         - name: chrony
           # renovate: datasource=docker depName=dockurr/chrony
-          image: docker.io/dockurr/chrony:4.8
+          image: docker.io/dockurr/chrony:4.9
           # The image's own entrypoint generates a chrony.conf from environment
           # variables and runs it as root so it can chown its state directories. The
           # config is ten lines and belongs in git, so only the binary is used here.

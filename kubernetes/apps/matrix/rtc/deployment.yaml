@@ -54,6 +54,11 @@ spec:
               value: wss://livekit.${PUBLIC_DOMAIN}
             - name: LIVEKIT_FULL_ACCESS_HOMESERVERS
               value: matrix.${PUBLIC_DOMAIN}
+            # The service sends a caller's leave event itself, and only learns that a
+            # client has gone from an SFU webhook or from this check. The check is off
+            # by default, and without either a client that crashes stays in the call.
+            - name: LIVEKIT_SANITY_CHECK_INTERVAL_SECONDS
+              value: "30"
           envFrom:
             - secretRef:
                 name: lk-jwt-service-secrets

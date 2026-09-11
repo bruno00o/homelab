@@ -1,5 +1,12 @@
 ---
 creation_rules:
+  # talhelper substitutes ${VAR} from this file into talconfig.yaml, which is committed in
+  # the clear. It holds no `data` key, so the rule below would leave every value readable —
+  # hence its own rule, first, encrypting the whole file.
+  - path_regex: talos/talenv\.sops\.yaml$
+    age: >-
+      age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl,
+      age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
   # Two recipients. The first is the day-to-day key (~/.config/sops/age/keys.txt); the
   # second is break-glass and must live off this machine — a password manager and paper,
   # per docs/age-key-backup.md. One key on one disk is a single point of failure for every

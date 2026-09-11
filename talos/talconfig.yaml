@@ -180,6 +180,33 @@ controlPlane:
       kind: KubeAPIServerConfig
       certExtraSANs:
         - 10.0.20.10
+    # Talos generates this document itself, but names the key `key1` and drops the identity
+    # provider, while the v1alpha1 field it replaces renders `key2` plus identity. The name
+    # is part of the prefix written in front of every encrypted Secret in etcd, so the
+    # generated document makes the apiservers unable to read what they stored. Measured:
+    # all three lost readiness and Secrets became unreadable until the old config was
+    # re-applied. Keep the rendered file identical to what the cluster was built with.
+    # Deleted first: a patch merges into the generated document, and `resources` is a list,
+    # so ours would be appended rather than replace it, and the apiserver reads the first
+    # entry that matches. Doubled `$` because talhelper expands variables before Talos ever
+    # sees the patch, and reads `$patch` as one.
+    - |-
+      apiVersion: v1alpha1
+      kind: KubeEtcdEncryptionConfig
+      $$patch: delete
+    - |-
+      apiVersion: v1alpha1
+      kind: KubeEtcdEncryptionConfig
+      config:
+        resources:
+          - resources:
+              - secrets
+            providers:
+              - secretbox:
+                  keys:
+                    - name: key2
+                      secret: ${SECRETBOX_ENCRYPTION_SECRET}
+              - identity: {}
     - |-
       apiVersion: v1alpha1
       kind: KubeAdmissionControlConfig

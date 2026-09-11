@@ -210,7 +210,7 @@ spec:
   interval: 24h
   url: https://github.com/kubernetes-sigs/gateway-api
   ref:
-    tag: v1.6.1
+    tag: v1.6.2
   ignore: |
     /*
     !/config/crd/standard/

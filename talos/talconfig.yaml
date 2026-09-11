@@ -1,14 +1,12 @@
 ---
 clusterName: going-merry
 endpoint: https://10.0.20.10:6443
-talosVersion: v1.13.9
+talosVersion: v1.14.0
 kubernetesVersion: v1.36.4
 cniConfig:
   name: none
 allowSchedulingOnControlPlanes: false
 
-additionalApiServerCertSans:
-  - 10.0.20.10
 additionalMachineCertSans:
   - 10.0.20.10
   - 10.0.20.11
@@ -85,16 +83,17 @@ nodes:
 # Global patches (all nodes)
 # =============================================================================
 patches:
+  # Talos 1.14 emits a ResolverConfig of its own, and the v1alpha1 fields it replaces now
+  # collide with that document instead of merging into it.
   - |-
-    machine:
-      network:
-        nameservers:
-          - 1.1.1.1
-          - 9.9.9.9
-      features:
-        hostDNS:
-          enabled: true
-          forwardKubeDNSToHost: false
+    apiVersion: v1alpha1
+    kind: ResolverConfig
+    nameservers:
+      - address: 1.1.1.1
+      - address: 9.9.9.9
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: false
   - |-
     machine:
       kubelet:
@@ -173,22 +172,30 @@ patches:
 controlPlane:
   patches:
     - |-
+      apiVersion: v1alpha1
+      kind: KubeProxyConfig
+      enabled: false
+    - |-
+      apiVersion: v1alpha1
+      kind: KubeAPIServerConfig
+      certExtraSANs:
+        - 10.0.20.10
+    - |-
+      apiVersion: v1alpha1
+      kind: KubeAdmissionControlConfig
+      name: PodSecurity
+      configuration:
+        apiVersion: pod-security.admission.config.k8s.io/v1beta1
+        kind: PodSecurityConfiguration
+        exemptions:
+          namespaces:
+            - longhorn-system
+            - monitoring
+    - |-
       cluster:
-        proxy:
-          disabled: true
         etcd:
           extraArgs:
             listen-metrics-urls: http://0.0.0.0:2381
-        apiServer:
-          admissionControl:
-            - name: PodSecurity
-              configuration:
-                apiVersion: pod-security.admission.config.k8s.io/v1beta1
-                kind: PodSecurityConfiguration
-                exemptions:
-                  namespaces:
-                    - longhorn-system
-                    - monitoring
         # Applying a config only *creates* extraManifests resources; it never
         # updates one that already exists. Anything that needs to be upgradable
         # belongs in Flux instead (metrics-server moved there). Keep this list to

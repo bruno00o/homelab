@@ -22,7 +22,13 @@ spec:
   name: snapshot-hourly
   task: snapshot
   cron: "0 * * * *"
-  retain: 24
+  # Retention here is a time span, not a count. A Longhorn chain keeps every block overwritten
+  # since its oldest snapshot, so a volume that rewrites its whole dataset periodically — a
+  # cache flushing to disk, a database checkpointing — pays for the retained span, not for the
+  # data it holds. Keeping a day of it made replica rebuilds copy that history on every node
+  # reboot, which is what makes a Talos upgrade wait on Longhorn. The daily backup covers
+  # anything older; what this window is for is same-day rollback.
+  retain: 6
   concurrency: 2
   groups:
     - default

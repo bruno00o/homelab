@@ -5,14 +5,14 @@ metadata:
   name: internal-gateway
   namespace: kube-system
 spec:
-  # Not in metadata.annotations: Cilium does not copy a Gateway's own annotations onto the
-  # Service it generates, so a request written there is dropped in silence and LB-IPAM
-  # serves the next free address from the pool. This gateway held ${LB_GATEWAY} for months
-  # by luck alone — it is the first address of the pool. spec.infrastructure.annotations is
-  # the Gateway API field implementations must propagate, and Cilium does.
-  infrastructure:
-    annotations:
-      io.cilium/lb-ipam-ips: ${LB_GATEWAY}
+  # The address has to be requested by the Gateway API field, not by an annotation. Cilium
+  # dropped this into `spec.infrastructure.annotations` for a while and deprecates that path
+  # since 1.20; a Gateway's own `metadata.annotations` never worked at all, since Cilium does
+  # not copy them onto the Service it generates — LB-IPAM then serves the next free address
+  # from the pool and nothing says so. The whole LAN resolves here, so it must not drift.
+  addresses:
+    - type: IPAddress
+      value: ${LB_GATEWAY}
   gatewayClassName: cilium
   listeners:
     - name: http

@@ -432,6 +432,7 @@ tasks:
       - kubectl uncordon {{.NODE}}
       - task: talos:wait-healthy
         vars: { NODE_IP: "{{.NODE_IP}}" }
+      - task: talos:wait-storage-healthy
 
   talos:upgrade-all:
     desc: Upgrade Talos on all nodes sequentially
@@ -526,6 +527,73 @@ tasks:
           sleep 5
         done
       - echo "Node {{.NODE_IP}} is healthy"
+
+  talos:wait-storage-healthy:
+    desc: Wait for Longhorn volumes and PostgreSQL clusters to be whole again
+    internal: true
+    silent: true
+    deps: [deps:verify]
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "1200"}}'
+    cmds:
+      - echo "Waiting for storage to recover..."
+      - |
+        # talosctl health says the node is back; it knows nothing about what the reboot did
+        # to the data. The replicas that were on it are stale and rebuild from their peers,
+        # and while a rebuild runs the peer is the only good copy — so it is rebooting the
+        # *next* node that loses a volume, not this one. Hence a barrier between nodes.
+        # Failing is the point: better to stop an upgrade-all halfway than to walk into it.
+        DEADLINE=$(( $(date +%s) + {{.TIMEOUT}} ))
+        while true; do
+          REASON=""
+
+          VOLUMES=$(kubectl -n longhorn-system get volumes.longhorn.io -o json 2>/dev/null)
+          if [ -z "$VOLUMES" ]; then
+            REASON="Longhorn API unreachable"
+          else
+            # Only attached volumes: a detached one has no live replica to lose, and nothing
+            # here will attach it, so waiting on it would just burn the timeout.
+            # printf, not echo: the annotations carry backslash escapes that a POSIX echo
+            # expands, and jq is then handed JSON with a raw newline inside a string.
+            DEGRADED=$(printf '%s' "$VOLUMES" | jq -r '[.items[]
+                       | select(.status.state == "attached" and .status.robustness != "healthy")
+                       | .metadata.name] | join(" ")')
+            REBUILDING=$(printf '%s' "$VOLUMES" | jq -r '[.items[]
+                         | select(((.status.rebuildStatus // {}) | length) > 0)
+                         | .metadata.name] | join(" ")')
+            if [ -n "$DEGRADED" ]; then
+              REASON="degraded: $DEGRADED"
+            fi
+            if [ -n "$REBUILDING" ]; then
+              REASON="${REASON:+$REASON; }rebuilding: $REBUILDING"
+            fi
+          fi
+
+          # CNPG on top of Longhorn, because a replica that comes back and never rejoins
+          # looks exactly like a healthy volume from below.
+          CLUSTERS=$(kubectl get clusters.postgresql.cnpg.io -A -o json 2>/dev/null)
+          if [ -z "$CLUSTERS" ]; then
+            REASON="${REASON:+$REASON; }CNPG API unreachable"
+          else
+            SHORT=$(printf '%s' "$CLUSTERS" | jq -r '[.items[]
+                    | select((.status.readyInstances // 0) < (.status.instances // 0))
+                    | "\(.metadata.namespace)/\(.metadata.name)"] | join(" ")')
+            if [ -n "$SHORT" ]; then
+              REASON="${REASON:+$REASON; }postgres short of replicas: $SHORT"
+            fi
+          fi
+
+          if [ -z "$REASON" ]; then
+            break
+          fi
+          if [ "$(date +%s)" -ge "$DEADLINE" ]; then
+            echo "Storage did not recover within {{.TIMEOUT}}s -- $REASON" >&2
+            exit 1
+          fi
+          echo "  $REASON"
+          sleep 15
+        done
+      - echo "Longhorn volumes healthy, PostgreSQL clusters at full replica count"
 
   talos:wait-ready:
     desc: Wait for all nodes to be Ready in Kubernetes

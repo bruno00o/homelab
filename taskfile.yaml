@@ -966,6 +966,22 @@ tasks:
         echo "To restore a specific PVC, use:"
         echo "  task dr:restore PVC=<namespace>/<pvc-name>"
 
+  dr:orphan-backups:
+    desc: List NAS backups whose source volume no longer exists
+    deps: [deps:verify]
+    cmds:
+      # Read-only. CUTOFF=YYYY-MM-DD narrows it to what a purge would take.
+      - ./scripts/backup-orphans.sh {{if .CUTOFF}}--cutoff {{.CUTOFF}}{{end}}
+
+  dr:purge-orphan-backups:
+    desc: Delete orphaned backups last written on or before CUTOFF (e.g. CUTOFF=2026-03-19)
+    deps: [deps:verify]
+    requires:
+      vars: [CUTOFF]
+    prompt: "Delete every orphaned backup last written on or before {{.CUTOFF}}? This erases the data on the NAS."
+    cmds:
+      - ./scripts/backup-orphans.sh --cutoff {{.CUTOFF}} --purge
+
   dr:restore:
     desc: Restore a PVC from Longhorn backup (e.g. task dr:restore PVC=authentik/data-authentik-postgres-1)
     deps: [deps:verify]

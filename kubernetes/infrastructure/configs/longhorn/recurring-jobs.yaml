@@ -8,7 +8,11 @@ spec:
   name: backup-daily
   task: backup
   cron: "0 2 * * *"
-  retain: 30
+  # Same mechanism as the hourly snapshots below: the store keeps every block overwritten
+  # since the oldest retained backup, so a volume that rewrites itself pays for the window
+  # covered, not for what it holds. Shortened to the range actually worth restoring to.
+  # Surplus backups are pruned on the job's next run, not when this is applied.
+  retain: 14
   concurrency: 2
   groups:
     - default

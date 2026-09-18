@@ -62,6 +62,9 @@ spec:
           "zot.merry.home.arpa": zot.zot.svc.cluster.local:5000
       nonSslRegistries:
         zot: zot.zot.svc.cluster.local:5000
+      # The vulnerability database, refetched from upstream on its own schedule. Named here
+      # for the first time: the chart leaves it empty, which takes the cluster default.
+      storageClassName: longhorn-no-backup
       resources:
         requests:
           cpu: 25m

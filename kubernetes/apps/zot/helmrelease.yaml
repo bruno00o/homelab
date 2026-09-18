@@ -73,7 +73,8 @@ spec:
 
     persistence:
       data:
-        storageClass: ${DEFAULT_STORAGE_CLASS}
+        # Images are pulled again from upstream; nothing here is worth a restore.
+        storageClass: longhorn-no-backup
         accessMode: ReadWriteOnce
         size: 20Gi
         globalMounts:

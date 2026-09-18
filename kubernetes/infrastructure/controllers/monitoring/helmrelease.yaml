@@ -202,7 +202,11 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ${DEFAULT_STORAGE_CLASS}
+              # retention above is a week, so a restore returns metrics that expire within
+              # the week - and the nightly backup is a day behind, so it would not even hold
+              # the incident. Compaction rewrites whole block ranges, which made this the
+              # largest thing on the backup target by far, several times its own size.
+              storageClassName: longhorn-no-backup
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:

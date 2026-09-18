@@ -60,7 +60,9 @@ spec:
       replicas: 1
       persistence:
         enabled: true
-        storageClass: ${DEFAULT_STORAGE_CLASS}
+        # Same reasoning as the Prometheus TSDB: the compactor enforces a week, so there is
+        # no history a restore could give back.
+        storageClass: longhorn-no-backup
         size: 10Gi
       resources:
         requests:

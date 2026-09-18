@@ -48,7 +48,10 @@ spec:
                 cpu: 20m
                 memory: 64Mi
               limits:
-                memory: 256Mi
+                # On an empty volume zot downloads the Trivy CVE database and builds its
+                # index before serving; the old limit only ever held because the volume was
+                # never empty. A cold start - a restore, a lost node - was already OOM bait.
+                memory: 768Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

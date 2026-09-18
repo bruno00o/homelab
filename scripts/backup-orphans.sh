@@ -47,6 +47,9 @@ plan=$(kubectl get backupvolumes.longhorn.io -n "$NS" -o json | jq -r \
   .items[]
   | .metadata as $m
   | ($m.labels["backup-volume"] // "") as $vol
+  # Already on its way out: the resource lingers until the target has erased the data, and
+  # reporting it reads as a purge that did nothing.
+  | select($m.deletionTimestamp == null)
   # No label means the backup has no identity we can check. Never touch it.
   | select($vol != "")
   # Source volume still exists, so this is a live backup, not an orphan.

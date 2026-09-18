@@ -100,48 +100,6 @@ spec:
               protocol: TCP
 
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-egress-to-adguard
-  namespace: homarr
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: homarr
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: adguard
-      ports:
-        - protocol: TCP
-          port: 80
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-egress-to-authentik
-  namespace: homarr
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: homarr
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: authentik
-      ports:
-        - protocol: TCP
-          port: 9000
-
----
 # Homarr's Kubernetes integration lists workloads through the apiserver. Named as an entity
 # because the apiserver is reached through a ClusterIP that DNATs to host-network endpoints,
 # which no ipBlock can express.
@@ -157,3 +115,20 @@ spec:
   egress:
     - toEntities:
         - kube-apiserver
+---
+# The board pings every app it lists, straight at their ClusterIP services. Naming them one
+# by one goes stale the first time a chart moves a targetPort - and homarr answers a dropped
+# ping with a red dot, which reads as the app being down. Replaces the per-namespace rules
+# this used to carry, same conclusion as uptime-kuma.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-cluster-egress
+  namespace: homarr
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homarr
+  egress:
+    - toEntities:
+        - cluster

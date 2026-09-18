@@ -11,6 +11,9 @@ resources:
   # cert-manager/ so its `namespace:` does not stamp a namespace on a cluster-scoped object.
   - cert-manager/issuers.yaml
   - longhorn
+  # Listed as a file for the same reason as the issuers above: a StorageClass is
+  # cluster-scoped and longhorn/'s `namespace:` would stamp a namespace onto it.
+  - longhorn/storageclass.yaml
   - monitoring
   - cloudnative-pg
   - valkey

@@ -1,0 +1,29 @@
+---
+# Storage for data that rebuilds itself: caches, indexes, downloaded models.
+#
+# Declaring no recurring job does not opt a volume out. longhorn-manager adds any volume
+# that has none to the `default` group, which is where the hourly snapshot and the nightly
+# backup come from - the default StorageClass names no selector and every volume created
+# through it is in that group. Opting out means naming a group no job belongs to.
+#
+# Both jobs go, not just the backup: the snapshot chain is what a volume that rewrites
+# itself pays for on disk, and none of this is worth a restore.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-no-backup
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "2"
+  staleReplicaTimeout: "30"
+  fromBackup: ""
+  fsType: "ext4"
+  dataLocality: "disabled"
+  unmapMarkSnapChainRemoved: "ignored"
+  disableRevisionCounter: "true"
+  dataEngine: "v1"
+  backupTargetName: "default"
+  recurringJobSelector: '[{"name":"no-recurring-job","isGroup":true}]'

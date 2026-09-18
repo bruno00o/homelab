@@ -5,9 +5,15 @@ metadata:
   namespace: ca-portal
 spec:
   parentRefs:
+    # Plain HTTP is the point: a client that comes to fetch the root CA does not trust it yet.
     - name: internal-gateway
       namespace: kube-system
       sectionName: http-ca-portal
+    # And HTTPS alongside it, because browsers upgrade the scheme on their own and land on the
+    # wildcard listener, which has no route for this host and answers 404.
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-internal-wildcard
   hostnames:
     - ca.${CLUSTER_DOMAIN}
   rules:

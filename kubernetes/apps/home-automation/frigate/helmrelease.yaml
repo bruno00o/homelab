@@ -165,6 +165,12 @@ spec:
         failureThreshold: 3
 
     config: |
+      # Without it Frigate replays its whole migration chain at every start and rewrites
+      # /config/config.yml while certsync is reading the same file - certsync runs under
+      # errexit, so it exits and s6 takes the container down with it. `copyconfig` hands
+      # the unstamped config back on every boot, so the stamp belongs here.
+      version: "0.18-0"
+
       auth:
         enabled: false
       proxy:

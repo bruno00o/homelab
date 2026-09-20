@@ -23,7 +23,7 @@ spec:
       containers:
         - name: intel-gpu-plugin
           # renovate: datasource=docker depName=intel/intel-gpu-plugin
-          image: docker.io/intel/intel-gpu-plugin:0.36.0
+          image: docker.io/intel/intel-gpu-plugin:0.37.0
           imagePullPolicy: IfNotPresent
           args:
             - -shared-dev-num=10
@@ -49,7 +49,9 @@ spec:
               cpu: 40m
               memory: 45Mi
             limits:
-              memory: 90Mi
+              # Follows upstream's own manifest, which this is copied from: they raised
+              # the ceiling in the same release as the image.
+              memory: 115Mi
           volumeMounts:
             - name: devfs
               mountPath: /dev/dri

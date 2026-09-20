@@ -14,8 +14,16 @@ spec:
     - name: internal-gateway
       namespace: kube-system
       sectionName: https-internal-wildcard
+    # The public domain too: its certificate is signed by a public authority, so a device that
+    # does not trust this CA yet can still fetch it over HTTPS. Safari upgrades the scheme and
+    # refuses to download from behind its warning page, which leaves no way in on the internal
+    # name. LAN-only all the same - the zone has no public wildcard record.
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-app-wildcard
   hostnames:
     - ca.${CLUSTER_DOMAIN}
+    - ca.${PUBLIC_DOMAIN}
   rules:
     - matches:
         - path:

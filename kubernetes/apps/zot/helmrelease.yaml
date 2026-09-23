@@ -76,8 +76,8 @@ spec:
 
     persistence:
       data:
-        # Images are pulled again from upstream; nothing here is worth a restore.
-        storageClass: longhorn-no-backup
+        # Not a mirror: images are pushed here and exist nowhere else.
+        storageClass: ${DEFAULT_STORAGE_CLASS}
         accessMode: ReadWriteOnce
         size: 20Gi
         globalMounts:

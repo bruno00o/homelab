@@ -180,6 +180,14 @@ controlPlane:
       kind: KubeAPIServerConfig
       certExtraSANs:
         - 10.0.20.10
+    # The upstream default only collects terminated pods once there are thousands of them,
+    # so every reboot left its dead pods behind. A count, not an age: the newest are kept,
+    # which spares today's CronJob pods.
+    - |-
+      apiVersion: v1alpha1
+      kind: KubeControllerManagerConfig
+      extraArgs:
+        terminated-pod-gc-threshold: "30"
     # Talos generates this document itself, but names the key `key1` and drops the identity
     # provider, while the v1alpha1 field it replaces renders `key2` plus identity. The name
     # is part of the prefix written in front of every encrypted Secret in etcd, so the

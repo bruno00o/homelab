@@ -13,7 +13,10 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:18.6-standard-trixie
 
   storage:
-    storageClass: ${DEFAULT_STORAGE_CLASS}
+    # barman already keeps base backups and WAL in rustfs, itself backed up to the NAS;
+    # a Longhorn backup of each instance only stored the same database once more.
+    # Existing volumes keep the `longhorn` class; their recurring jobs were relabelled.
+    storageClass: longhorn-no-backup
     size: 10Gi
 
   postgresql:

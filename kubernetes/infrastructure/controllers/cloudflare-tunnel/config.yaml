@@ -22,6 +22,9 @@ data:
       - hostname: home-assistant.${PUBLIC_DOMAIN}
         service: http://home-assistant.home-automation.svc.cluster.local:8123
       - hostname: homarr.${PUBLIC_DOMAIN}
+        path: ^/websockets
+        service: http://homarr.homarr.svc.cluster.local:3001
+      - hostname: homarr.${PUBLIC_DOMAIN}
         service: http://homarr.homarr.svc.cluster.local:7575
       - hostname: random-gif.${PROJECTS_DOMAIN}
         service: http://random-gif.random-gif.svc.cluster.local:8080

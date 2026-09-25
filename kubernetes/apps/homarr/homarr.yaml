@@ -111,6 +111,9 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
+            - name: websockets
+              containerPort: 3001
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /
@@ -209,6 +212,9 @@ spec:
                 path: ca.crt
 
 ---
+# The image puts an nginx on 7575 in front of both servers, sending /websockets to 3001
+# and the rest to 3000. It cannot start on a read-only root, so the split is done here
+# instead, by the route and by the tunnel: its startup error in the log is expected.
 apiVersion: v1
 kind: Service
 metadata:
@@ -222,6 +228,9 @@ spec:
     - name: http
       port: 7575
       targetPort: 3000
+    - name: websockets
+      port: 3001
+      targetPort: 3001
 
 ---
 apiVersion: gateway.networking.k8s.io/v1
@@ -241,6 +250,13 @@ spec:
     - homarr.${CLUSTER_DOMAIN}
     - homarr.${PUBLIC_DOMAIN}
   rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /websockets
+      backendRefs:
+        - name: homarr
+          port: 3001
     - matches:
         - path:
             type: PathPrefix

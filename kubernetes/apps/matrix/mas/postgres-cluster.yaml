@@ -86,9 +86,6 @@ metadata:
 spec:
   schedule: "0 30 3 * * *"
   backupOwnerReference: self
-  # A backup taken on a replica ends in a WAL segment that only the primary can close. On a
-  # quiet database nothing closes it, so the backup reports completed and cannot be restored.
-  target: primary
   method: plugin
   pluginConfiguration:
     name: barman-cloud.cloudnative-pg.io

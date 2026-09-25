@@ -27,9 +27,9 @@ spec:
             env:
               TZ: ${TIMEZONE}
               CA_PORTAL_LISTEN_ADDR: :8080
-              CA_PORTAL_NAMESPACE: cert-manager
-              CA_PORTAL_SECRET_NAME: mugiwara-ca-secret
-              CA_PORTAL_SECRET_KEY: tls.crt
+              CA_PORTAL_NAMESPACE: ca-portal
+              CA_PORTAL_SECRET_NAME: ca-portal-ca
+              CA_PORTAL_SECRET_KEY: ca.crt
               CA_PORTAL_PROFILE_IDENTIFIER: arpa.home.merry.ca
             probes:
               liveness:

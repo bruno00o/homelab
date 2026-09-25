@@ -5,22 +5,39 @@ metadata:
   name: ca-portal
   namespace: ca-portal
 ---
+# The portal serves the public CA certificate and nothing else, so it reads it from a
+# Certificate of its own, whose ca.crt is that certificate. Reading mugiwara-ca-secret
+# directly worked too, but that secret also holds the CA private key.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ca-portal-ca
+  namespace: ca-portal
+spec:
+  secretName: ca-portal-ca
+  commonName: ca-portal.ca-portal.svc
+  dnsNames:
+    - ca-portal.ca-portal.svc
+  issuerRef:
+    kind: ClusterIssuer
+    name: ${CLUSTER_ISSUER}
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: ca-portal-secret-reader
-  namespace: cert-manager
+  namespace: ca-portal
 rules:
   - apiGroups: [""]
     resources: [secrets]
-    resourceNames: [mugiwara-ca-secret]
+    resourceNames: [ca-portal-ca]
     verbs: [get, list, watch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: ca-portal-secret-reader
-  namespace: cert-manager
+  namespace: ca-portal
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

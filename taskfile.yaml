@@ -993,6 +993,13 @@ tasks:
     prompt: "Restore {{.PVC}} from backup? This will create a new volume from the latest backup."
     cmds:
       - echo "=== Restoring {{.PVC}} ==="
+      # The restored claim takes the original name, so this is for a PVC that is gone. On a
+      # live one it would re-apply over the bound claim; a drill restores elsewhere by hand.
+      - |
+        if kubectl -n {{.NAMESPACE}} get pvc {{.PVC_NAME}} >/dev/null 2>&1; then
+          echo "❌ {{.PVC}} still exists. Delete it first, or restore under another name by hand."
+          exit 1
+        fi
       - echo "1. Finding latest backup for {{.PVC}}..."
       - |
         # Find the backup URL for this PVC

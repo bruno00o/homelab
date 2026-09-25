@@ -92,26 +92,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ingress-from-homarr
-  namespace: valkey-system
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: valkey
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: homarr
-      ports:
-        - protocol: TCP
-          port: 6379
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: allow-ingress-from-gaspard
   namespace: valkey-system
 spec:

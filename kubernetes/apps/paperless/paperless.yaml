@@ -98,7 +98,7 @@ spec:
                 secretKeyRef:
                   name: valkey-auth
                   key: password
-            # Database 5: authentik, immich and homarr share 0, dawarich took 3 and 4. A
+            # Database 5: authentik and immich share 0, dawarich took 3 and 4. A
             # broker flush from one app must never reach another one's queues.
             - name: PAPERLESS_REDIS
               value: redis://:$(VALKEY_PASSWORD)@valkey.valkey-system.svc.cluster.local:6379/5

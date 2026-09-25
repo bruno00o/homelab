@@ -5,7 +5,6 @@ resources:
   - homarr.yaml
   - dnsendpoint.yaml
   - homarr-secrets.sops.yaml
-  - valkey-auth.sops.yaml
   - network-policies.yaml
   - pdb.yaml
   - kuma-monitor.yaml

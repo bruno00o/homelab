@@ -133,7 +133,7 @@ spec:
                   key: password
             - name: REDIS_URL
               value: redis://:$(VALKEY_PASSWORD)@valkey.valkey-system.svc.cluster.local:6379
-            # The shared valkey already serves authentik, immich and homarr, all of them on
+            # The shared valkey already serves authentik and immich, both of them on
             # database 0 — which is also what Dawarich defaults to for its cache, and 1 for
             # its Sidekiq queues. Moving both out of the way keeps a Sidekiq maintenance
             # operation from ever touching another app's keys.

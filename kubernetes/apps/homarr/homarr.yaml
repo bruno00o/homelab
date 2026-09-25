@@ -142,15 +142,9 @@ spec:
                 secretKeyRef:
                   name: homarr-secrets
                   key: SECRET_ENCRYPTION_KEY
-            - name: REDIS_HOST
-              value: valkey.valkey-system.svc.cluster.local
-            - name: REDIS_PORT
-              value: "6379"
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: valkey-auth
-                  key: password
+            # No REDIS_* here: the image runs its own Redis inside the pod, and only reads
+            # these when REDIS_IS_EXTERNAL is set. Pointing them at the shared valkey was
+            # ignored for months without a word.
             - name: AUTH_PROVIDERS
               value: "oidc"
             - name: AUTH_OIDC_CLIENT_NAME

@@ -180,9 +180,8 @@ controlPlane:
       kind: KubeAPIServerConfig
       certExtraSANs:
         - 10.0.20.10
-    # The upstream default only collects terminated pods once there are thousands of them,
-    # so every reboot left its dead pods behind. A count, not an age: the newest are kept,
-    # which spares today's CronJob pods.
+    # Talos's default let every reboot's dead pods pile up. A count, not an age: it caps
+    # how many terminated pods are kept and collects the oldest, it does not empty them.
     - |-
       apiVersion: v1alpha1
       kind: KubeControllerManagerConfig

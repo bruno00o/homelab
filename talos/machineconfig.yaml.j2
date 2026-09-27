@@ -55,38 +55,14 @@ machine:
   features:
     diskQuotaSupport: true
 cluster:
-  controlPlane:
-    endpoint: https://10.0.20.10:6443
-  clusterName: going-merry
   token: {{ secrets.bootstraptoken }}
-  ca:
-    crt: {{ certs.k8s.crt }}
-    key: {{ certs.k8s.key if cp else '""' }}
 {% if cp %}
-  aggregatorCA:
-    crt: {{ certs.k8saggregator.crt }}
-    key: {{ certs.k8saggregator.key }}
-  serviceAccount:
-    key: {{ certs.k8sserviceaccount.key }}
   etcd:
     ca:
       crt: {{ certs.etcd.crt }}
       key: {{ certs.etcd.key }}
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
-{#
-  Applying a config only *creates* extraManifests resources; it never updates one that already
-  exists. Anything that needs to be upgradable belongs in Flux instead (metrics-server moved
-  there). Keep this list to what has to exist before Flux does: the CSR approver that signs the
-  kubelet serving certificates enabled by rotate-server-certificates above. A bump here is
-  therefore inert until applied by hand, and check the image first — upstream has shipped that
-  manifest pointing at a floating tag. `upgrade-k8s` is the exception: it reconciles this list,
-  so it reverts a hand-applied version back to the URL the node config holds, and it deletes
-  what has left the list — that is what removed metrics-server after the move to Flux, without
-  Flux noticing its own objects were gone.
-#}
-  extraManifests:
-    - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.12.1/deploy/standalone-install.yaml
 {% endif %}
 ---
 apiVersion: v1alpha1
@@ -226,6 +202,64 @@ apiVersion: v1alpha1
 kind: SysctlConfig
 params:
   net.ipv6.conf.enp1s0.accept_ra_rt_info_max_plen: "64"
+{% endif %}
+{#
+  The endpoint and the service account issuer move together: Talos rejects the endpoint in
+  this document while `cluster.serviceAccount` is still in v1alpha1. The issuer URL is the
+  endpoint, as it was when v1alpha1 derived it; tokens already issued name that issuer.
+#}
+---
+apiVersion: v1alpha1
+kind: KubeClusterConfig
+clusterName: going-merry
+endpoint: https://10.0.20.10:6443
+---
+apiVersion: v1alpha1
+kind: KubeAPIServerCAConfig
+{% if cp %}
+issuingCA:
+  cert: |
+    {{ pem.k8s.crt | trim | indent(4) }}
+  key: |
+    {{ pem.k8s.key | trim | indent(4) }}
+{% else %}
+acceptedCAs:
+  - |
+    {{ pem.k8s.crt | trim | indent(4) }}
+{% endif %}
+{% if cp %}
+---
+apiVersion: v1alpha1
+kind: KubeAggregatorCAConfig
+issuingCA:
+  cert: |
+    {{ pem.k8saggregator.crt | trim | indent(4) }}
+  key: |
+    {{ pem.k8saggregator.key | trim | indent(4) }}
+---
+apiVersion: v1alpha1
+kind: KubeServiceAccountConfig
+issuer:
+  issuerURL: https://10.0.20.10:6443
+  privateKey: |
+    {{ pem.k8sserviceaccount.key | trim | indent(4) }}
+{#
+  Applying a config only *creates* external manifest resources; it never updates one that already
+  exists. Anything that needs to be upgradable belongs in Flux instead (metrics-server moved
+  there). Keep these to what has to exist before Flux does: the CSR approver that signs the
+  kubelet serving certificates enabled by rotate-server-certificates above. A bump here is
+  therefore inert until applied by hand, and check the image first — upstream has shipped that
+  manifest pointing at a floating tag. `upgrade-k8s` is the exception: it reconciles them,
+  so it reverts a hand-applied version back to the URL the node config holds, and it deletes
+  whatever is no longer listed — that is what removed metrics-server after the move to Flux, without
+  Flux noticing its own objects were gone.
+#}
+
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: kubelet-serving-cert-approver
+url: https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.12.1/deploy/standalone-install.yaml
 {% endif %}
 ---
 apiVersion: v1alpha1

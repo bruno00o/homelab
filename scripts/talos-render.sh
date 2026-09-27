@@ -39,10 +39,16 @@ secrets() {
 }
 
 # One data document: nodes.yaml and the bundle side by side. Their top-level keys do not
-# overlap, so the merge only places them next to each other.
+# overlap, so the merge only places them next to each other. The bundle stores certificates
+# and keys base64-encoded, as the v1alpha1 fields take them; the newer documents take PEM,
+# which minijinja cannot decode, so `pem` carries them decoded. Built from to_entries rather
+# than map_values, which decodes `certs` in place as well.
 # --strict turns a missing value into an error instead of an empty field in a valid config.
 secrets \
-  | yq eval-all '. as $doc ireduce ({}; . * $doc)' "$TALOS_DIR/nodes.yaml" - \
+  | yq eval-all '. as $doc ireduce ({}; . * $doc)
+      | .pem = (.certs | to_entries | map({"key": .key, "value": (.value | to_entries
+          | map({"key": .key, "value": (.value | @base64d)}) | from_entries)}) | from_entries)' \
+      "$TALOS_DIR/nodes.yaml" - \
   | minijinja-cli --autoescape none --no-newline --strict --trim-blocks --lstrip-blocks \
       --format yaml --define "node=$NAME" --define "schematic=$SCHEMATIC" \
       "$TALOS_DIR/machineconfig.yaml.j2" -

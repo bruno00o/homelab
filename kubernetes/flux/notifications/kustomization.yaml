@@ -4,3 +4,5 @@ resources:
   - discord-webhook.sops.yaml
   - provider.yaml
   - alerts.yaml
+  - github-token.sops.yaml
+  - github-commit-status.yaml

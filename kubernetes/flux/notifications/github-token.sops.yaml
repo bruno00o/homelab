@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-token
+  namespace: flux-system
+stringData:
+  token: ENC[AES256_GCM,data:ej5/qBIoTlcDOv3S2+IFDM+SXU0TeaFxA+srSUcTqS04ZKGsuDPlIHvUikw8tWNt5eyGIWmyiX8cmTWVrsIBo/Tw2AVk6sFpF2x0xeEBTcVrY5rPlqBXv0BueIKo,iv:d6/U4YeqbsZyKMJHei6Y4EmR7s5VLR2/XMZVE0F97N0=,tag:YAb6fNtfRBpdnJEvVYq/CQ==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2NHJLbmhaM2UydnNQcktP
+        K3lDY3pCb1NndmJQT0E3V2gvb3AyaVRaOTJFCmVVT1psTlRPTFVqMkdiOGtucnov
+        NFZvMG5XR1Eyd210N1ZBaW9Yc1NRbW8KLS0tIHdTVVlKRWkyK3FBTVF2OXJxbXUz
+        Q1A5cnI1Yld6MDlhLzg3OUsyQTY2aHcKjc3tEzBdmjafzEkUK3DB333bc1h1Za+l
+        vCMwXZ/a1GviT93AuYKifdkTOZOFyx/GDXp8zTXO/6XHN3RHVgGO4g==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBERmtFeEN6VUIrWExxVFJx
+        VzhNY2hzWnkwelBTZGIrdFd3ZWpFYzExQUJRCjBlRVVpNW91Wm91QVJHdHpvRW1m
+        bUlhei9ydWdieUkvVWRPTlEwWWw3ZVkKLS0tIEMrQWZsVVMxd3A4ekpsck9MTm5l
+        djNDeE5iWXVZVGJ5enRrWXMyRmloa1kKEI/Tu6YfXdxqKx8+Mh1uFUnVaZhgh8tx
+        Pm/Pz7gvmQIAcyOBEBdW4uZO40yDkIk9sRPlblEt11qTyd4blGiGSg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-09-27T21:32:32Z"
+  mac: ENC[AES256_GCM,data:9bjPklRCdZgk51hPSULYNJHDL9qyTJRpBwutCuBu6+uA54NKkNAkNz6Wh9xlFAV6QN4bHgTRCvsA22m8Wgn2tPcgH2WCKvP1y+qTF7C/6NcEZY7uh7FAlvhivY9Fw7tDLMuEY2QOfzN05dMOVPYLvmr4fxGcQr4bJP/ubOr2t2A=,iv:pEmuCvD69qImX6XUOQ3FIri/BXnChfFDC/pJ5C+fOrQ=,tag:DAPO77iQ+sKDmUan5uzkyg==,type:str]
+  version: 3.13.3

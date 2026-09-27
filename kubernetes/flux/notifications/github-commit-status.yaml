@@ -1,0 +1,35 @@
+---
+# A ✓ or ✗ on each commit of this repo, from what Flux actually did with it. The token is
+# fine-grained, this repository only, commit statuses only.
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: github
+  namespace: flux-system
+spec:
+  type: github
+  address: https://github.com/bruno00o/homelab
+  secretRef:
+    name: github-token
+
+---
+# The top-level Kustomizations only: `apps` waits for every app's own Kustomization, so an
+# app that fails still turns its commit red, with four statuses per commit instead of thirty.
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: github-commit-status
+  namespace: flux-system
+spec:
+  providerRef:
+    name: github
+  eventSeverity: info
+  eventSources:
+    - kind: Kustomization
+      name: flux-system
+    - kind: Kustomization
+      name: infrastructure-controllers
+    - kind: Kustomization
+      name: infrastructure-configs
+    - kind: Kustomization
+      name: apps

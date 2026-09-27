@@ -11,3 +11,4 @@ resources:
   - prometheus-rules
   - dns-leak
   - policy-drift
+  - flux-monitoring

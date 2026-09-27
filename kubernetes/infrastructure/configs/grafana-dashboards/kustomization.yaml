@@ -6,3 +6,5 @@ resources:
   - longhorn.yaml
   - cloudnativepg.yaml
   - trivy-operator.yaml
+  - flux-cluster.yaml
+  - flux-control-plane.yaml

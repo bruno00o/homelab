@@ -227,11 +227,40 @@ tasks:
     vars:
       NODE_IP:
         sh: yq -r '.nodes[] | select(.hostname == "{{.NODE}}" or .ipAddress == "{{.NODE}}") | .ipAddress' {{.TALOS_DIR}}/nodes.yaml
+      NODE_NAME:
+        sh: yq -r '.nodes[] | select(.hostname == "{{.NODE}}" or .ipAddress == "{{.NODE}}") | .hostname' {{.TALOS_DIR}}/nodes.yaml
     preconditions:
       - sh: test -n "{{.NODE_IP}}"
         msg: "{{.NODE}} is not in talos/nodes.yaml"
     cmds:
       - set -o pipefail; ./scripts/talos-render.sh {{.NODE}} | talosctl apply-config --nodes {{.NODE_IP}} --file /dev/stdin
+      - task: spegel:remirror
+        vars: { NODE_NAME: "{{.NODE_NAME}}", NODE_IP: "{{.NODE_IP}}" }
+
+  # Talos rewrites /etc/cri/conf.d/hosts when an applied config changes the registry or CRI
+  # configuration, and that drops the mirror files Spegel writes when its pod starts. Nothing
+  # fails: pulls quietly go straight to the upstream registries. Declaring the mirrors in the
+  # Talos config instead is no fix, since RegistryMirrorConfig cannot set the short
+  # dial_timeout Spegel relies on to fall back fast when it is down. Recreating the node's
+  # Spegel pod writes them back.
+  spegel:remirror:
+    internal: true
+    silent: true
+    requires:
+      vars: [NODE_NAME, NODE_IP]
+    cmds:
+      - |
+        set -eo pipefail
+        sleep 5
+        kubectl -n kube-system delete pod -l app.kubernetes.io/name=spegel \
+          --field-selector spec.nodeName={{.NODE_NAME}} --wait=true >/dev/null
+        kubectl -n kube-system rollout status ds/spegel --timeout=120s >/dev/null
+        if talosctl -n {{.NODE_IP}} ls /etc/cri/conf.d/hosts | grep -q docker.io; then
+          echo "Spegel mirrors back on {{.NODE_NAME}}"
+        else
+          echo "Spegel mirrors still missing on {{.NODE_NAME}}" >&2
+          exit 1
+        fi
 
   talos:apply-all:
     desc: Apply config to all nodes
@@ -409,7 +438,7 @@ tasks:
       # Read from the rendered config rather than rebuilt here, so the upgrade installs
       # exactly the image the machine config names.
       INSTALLER_IMAGE:
-        sh: ./scripts/talos-render.sh {{.NODE}} | yq 'select(documentIndex == 0) | .machine.install.image'
+        sh: ./scripts/talos-render.sh {{.NODE}} | yq 'select(.kind == "UnattendedInstallConfig") | .installer.image'
     preconditions:
       - sh: test -n "{{.NODE_IP}}"
         msg: "{{.NODE}} is not in talos/nodes.yaml"

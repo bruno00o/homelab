@@ -52,43 +52,8 @@ machine:
       serializeImagePulls: false
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
-  network:
-    extraHostEntries:
-      - ip: 10.0.20.20
-        aliases:
-          - zot.merry.home.arpa
-  install:
-    diskSelector:
-      model: {{ this.installDisk }}
-    image: factory.talos.dev/metal-installer/{{ schematic }}:{{ talosVersion }}
-    wipe: false
-    grubUseUKICmdline: true
-{% if not cp %}
-  sysctls:
-    net.ipv6.conf.enp1s0.accept_ra_rt_info_max_plen: "64"
-{% endif %}
-  registries:
-    config:
-      zot.merry.home.arpa:
-        tls:
-          insecureSkipVerify: true
   features:
     diskQuotaSupport: true
-    kubePrism:
-      enabled: true
-      port: 7445
-  nodeLabels:
-{% if cp %}
-    node.kubernetes.io/exclude-from-external-load-balancers: ""
-{% else %}
-{#
-  "config" tells Longhorn to read the default-disks-config annotation below instead of
-  auto-creating a default disk at /var/lib/longhorn.
-#}
-    node.longhorn.io/create-default-disk: config
-  nodeAnnotations:
-    node.longhorn.io/default-disks-config: '[{"name":"longhorn-data","path":"/var/mnt/longhorn","allowScheduling":true,"storageReserved":0,"tags":[]}]'
-{% endif %}
 cluster:
   id: {{ cluster.id }}
   secret: {{ cluster.secret }}
@@ -147,7 +112,8 @@ interval: 168h0m0s
   Spegel serves image layers to the other nodes from each node's containerd store, and
   containerd deletes the compressed layers once they are unpacked unless told not to.
   Changing this document restarts containerd without a reboot. Running containers are not
-  touched, but Spegel exits when containerd's event stream closes and is restarted once.
+  touched, but Spegel exits when containerd's event stream closes, and the mirror files it
+  wrote are gone: talos:apply recreates its pod (see spegel:remirror).
 #}
 ---
 apiVersion: v1alpha1
@@ -157,12 +123,11 @@ content: |
   [plugins."io.containerd.cri.v1.images"]
     discard_unpacked_layers = false
 {#
-  Trust the internal CA at the node level so containerd can verify zot over TLS. The
-  `insecureSkipVerify` in machine.registries does not reach containerd: Spegel owns
-  /etc/cri/conf.d/hosts, and on startup it moves every host config it does not mirror into
-  hosts/_backup/ — zot among them, since it is not in Spegel's mirroredRegistries. The setting
-  stays in the config and is silently inert, which is why an image that is not already cached
-  on the node fails to pull with `x509: certificate signed by unknown authority` without this.
+  Trust the internal CA at the node level so containerd can verify zot over TLS. A TLS setting
+  for zot in the registry config would not reach containerd: Spegel moves every host config it
+  does not mirror into /etc/cri/conf.d/hosts/_backup/ when it starts, zot among them. Without
+  this, an image that is not already cached on the node fails to pull with
+  `x509: certificate signed by unknown authority`.
 #}
 ---
 apiVersion: v1alpha1
@@ -200,6 +165,59 @@ certificates: |-
   qLKTCti0bedT8CT5/ScUj8KnAkCPhvEMF7zIhe7LJtB/6kMvrno+3fN4QskFse8A
   f+wtCEB5RIvFrJsUD4MdtLMQIxPUN8ALwrw4+xY=
   -----END CERTIFICATE-----
+---
+apiVersion: v1alpha1
+kind: StaticHostConfig
+name: 10.0.20.20
+hostnames:
+  - zot.merry.home.arpa
+---
+apiVersion: v1alpha1
+kind: KubePrismConfig
+port: 7445
+{#
+  The control plane's role label and NoSchedule taint are listed here, as in the document
+  `talosctl gen config` writes, rather than left to a default.
+#}
+---
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+{% if cp %}
+labels:
+  node-role.kubernetes.io/control-plane: ""
+  node.kubernetes.io/exclude-from-external-load-balancers: ""
+taints:
+  node-role.kubernetes.io/control-plane: NoSchedule
+{% else %}
+{#
+  "config" tells Longhorn to read the default-disks-config annotation below instead of
+  auto-creating a default disk at /var/lib/longhorn.
+#}
+labels:
+  node.longhorn.io/create-default-disk: config
+annotations:
+  node.longhorn.io/default-disks-config: '[{"name":"longhorn-data","path":"/var/mnt/longhorn","allowScheduling":true,"storageReserved":0,"tags":[]}]'
+{% endif %}
+{#
+  Matched by model: the workers also see every attached Longhorn volume as a /dev/sd* disk,
+  and /dev/sda is the default `talosctl gen config` writes.
+#}
+---
+apiVersion: v1alpha1
+kind: UnattendedInstallConfig
+installer:
+  image: factory.talos.dev/metal-installer/{{ schematic }}:{{ talosVersion }}
+provisioning:
+  diskSelector:
+    match: disk.model == "{{ this.installDisk }}"
+  wipe: false
+{% if not cp %}
+---
+apiVersion: v1alpha1
+kind: SysctlConfig
+params:
+  net.ipv6.conf.enp1s0.accept_ra_rt_info_max_plen: "64"
+{% endif %}
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig

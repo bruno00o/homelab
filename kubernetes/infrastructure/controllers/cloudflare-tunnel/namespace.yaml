@@ -3,4 +3,5 @@ kind: Namespace
 metadata:
   name: cloudflare-tunnel
   labels:
+    pod-security.kubernetes.io/enforce: restricted
     kubernetes.io/metadata.name: cloudflare-tunnel

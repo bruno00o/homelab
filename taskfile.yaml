@@ -304,8 +304,9 @@ tasks:
     cmds:
       - |
         # Written outside the repo on purpose, rather than in it behind a .gitignore rule:
-        # an etcd snapshot contains every Kubernetes Secret in cleartext and this repo is
-        # public, so a path under $HOME cannot be committed by accident.
+        # an etcd snapshot holds every Kubernetes Secret, encrypted, but with a key this
+        # machine also holds in talos/clusterconfig. This repo is public, so a path under
+        # $HOME cannot be committed by accident.
         mkdir -p "{{.SNAPSHOT_DIR}}"
         FILE="{{.SNAPSHOT_DIR}}/etcd-$(date +%Y%m%d-%H%M%S).snapshot"
         talosctl etcd snapshot "$FILE" --nodes {{.CP_NODE}}
@@ -314,8 +315,8 @@ tasks:
         # as a backup.
         [ -s "$FILE" ] || { echo "Snapshot $FILE is empty." >&2; rm -f "$FILE"; exit 1; }
 
-        # ~540 MB each (the snapshot copies the whole etcd file, free pages included), so
-        # keep the 5 most recent and drop the rest.
+        # The snapshot copies the whole etcd file, free pages included, so keep the 5 most
+        # recent and drop the rest.
         ls -1t "{{.SNAPSHOT_DIR}}"/etcd-*.snapshot 2>/dev/null | tail -n +6 \
         | while read -r OLD; do rm -f "$OLD"; done
 

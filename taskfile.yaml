@@ -53,11 +53,27 @@ tasks:
       - ./scripts/kubeconform.sh
 
   validate:talos:
-    desc: Validate talconfig.yaml
+    desc: Render every node's machine config with throwaway secrets and validate it
     deps: [deps:verify]
-    dir: "{{.TALOS_DIR}}"
+    silent: true
     cmds:
-      - talhelper validate talconfig talconfig.yaml
+      - |
+        # Throwaway secrets and schematic: this checks the template, through the same script
+        # as a real render, and has to work offline and without the age key.
+        set -eo pipefail
+        TMP=$(mktemp -d)
+        trap 'rm -rf "$TMP"' EXIT
+        talosctl gen secrets --output-file "$TMP/secrets.yaml" >/dev/null
+        for NODE in $(yq -r '.nodes[].hostname' {{.TALOS_DIR}}/nodes.yaml); do
+          TALOS_SECRETS_FILE="$TMP/secrets.yaml" \
+          TALOS_SCHEMATIC=0000000000000000000000000000000000000000000000000000000000000000 \
+            ./scripts/talos-render.sh "$NODE" > "$TMP/$NODE.yaml"
+          talosctl validate --mode metal --config "$TMP/$NODE.yaml" >/dev/null 2>>"$TMP/warnings" \
+            || { cat "$TMP/warnings" >&2; echo "$NODE: invalid machine config" >&2; exit 1; }
+        done
+        # Deprecations are worth seeing, once: the six nodes share them.
+        sort -u "$TMP/warnings" >&2
+        echo "Machine config valid on every node"
 
   validate:workflows:
     desc: Audit the GitHub Actions workflows with zizmor
@@ -131,17 +147,39 @@ tasks:
   # =============================================================================
   # Talos - Configuration
   # =============================================================================
-  talos:genconfig:
-    desc: Generate Talos configs from talconfig.yaml
+  # Nothing is generated to disk any more: each task below renders the node's config into a
+  # pipe (scripts/talos-render.sh), so there is no file to go stale and none holding secrets.
+  talos:render:
+    desc: Print a node's machine config, secrets included - pipe it, never save it (NODE=luffy)
     deps: [deps:verify]
-    dir: "{{.TALOS_DIR}}"
+    silent: true
+    requires:
+      vars: [NODE]
     cmds:
-      - talhelper genconfig
-    sources:
-      - talconfig.yaml
-      - talsecret.sops.yaml
-    generates:
-      - clusterconfig/*.yaml
+      - ./scripts/talos-render.sh {{.NODE}}
+
+  talos:talosconfig:
+    desc: Write the talosctl client config to talos/clusterconfig/talosconfig
+    deps: [deps:verify]
+    silent: true
+    vars:
+      ENDPOINTS:
+        sh: yq -r '[.nodes[] | select(.controlPlane) | .ipAddress] | join(" ")' {{.TALOS_DIR}}/nodes.yaml
+      ALL_NODES:
+        sh: yq -r '[.nodes[].ipAddress] | join(" ")' {{.TALOS_DIR}}/nodes.yaml
+    cmds:
+      - |
+        # A fresh client certificate from the cluster's CA; the one it replaces stays valid.
+        set -eo pipefail
+        mkdir -p "$(dirname {{.TALOS_CONFIG}})"
+        sops -d {{.TALOS_DIR}}/talsecret.sops.yaml \
+        | talosctl gen config {{.CLUSTER_NAME}} https://10.0.20.10:6443 --with-secrets /dev/stdin \
+            --output-types talosconfig --output {{.TALOS_CONFIG}} --force >/dev/null
+        # It holds a client key, and talosctl writes it world-readable.
+        chmod 600 {{.TALOS_CONFIG}}
+        talosctl --talosconfig {{.TALOS_CONFIG}} config endpoint {{.ENDPOINTS}}
+        talosctl --talosconfig {{.TALOS_CONFIG}} config node {{.ALL_NODES}}
+        echo "Wrote {{.TALOS_CONFIG}}"
 
   # =============================================================================
   # Talos - Fresh Install (insecure mode)
@@ -153,30 +191,13 @@ tasks:
       vars: [NODE]
     vars:
       NODE_IP:
-        sh: |
-          case "{{.NODE}}" in
-            luffy) echo "10.0.20.11" ;;
-            zoro) echo "10.0.20.12" ;;
-            nami) echo "10.0.20.13" ;;
-            usopp) echo "10.0.20.14" ;;
-            sanji) echo "10.0.20.15" ;;
-            chopper) echo "10.0.20.16" ;;
-            *) echo "{{.NODE}}" ;;
-          esac
-      NODE_NAME:
-        sh: |
-          case "{{.NODE}}" in
-            10.0.20.11) echo "luffy" ;;
-            10.0.20.12) echo "zoro" ;;
-            10.0.20.13) echo "nami" ;;
-            10.0.20.14) echo "usopp" ;;
-            10.0.20.15) echo "sanji" ;;
-            10.0.20.16) echo "chopper" ;;
-            *) echo "{{.NODE}}" ;;
-          esac
+        sh: yq -r '.nodes[] | select(.hostname == "{{.NODE}}" or .ipAddress == "{{.NODE}}") | .ipAddress' {{.TALOS_DIR}}/nodes.yaml
+    preconditions:
+      - sh: test -n "{{.NODE_IP}}"
+        msg: "{{.NODE}} is not in talos/nodes.yaml"
     cmds:
-      - echo "Applying config to {{.NODE_NAME}} ({{.NODE_IP}}) in insecure mode..."
-      - talosctl apply-config --nodes {{.NODE_IP}} --file {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-{{.NODE_NAME}}.yaml --insecure
+      - echo "Applying config to {{.NODE}} ({{.NODE_IP}}) in insecure mode..."
+      - set -o pipefail; ./scripts/talos-render.sh {{.NODE}} | talosctl apply-config --nodes {{.NODE_IP}} --file /dev/stdin --insecure
 
   talos:apply-insecure-all:
     desc: Apply config to ALL nodes in insecure mode (fresh install)
@@ -205,29 +226,12 @@ tasks:
       vars: [NODE]
     vars:
       NODE_IP:
-        sh: |
-          case "{{.NODE}}" in
-            luffy) echo "10.0.20.11" ;;
-            zoro) echo "10.0.20.12" ;;
-            nami) echo "10.0.20.13" ;;
-            usopp) echo "10.0.20.14" ;;
-            sanji) echo "10.0.20.15" ;;
-            chopper) echo "10.0.20.16" ;;
-            *) echo "{{.NODE}}" ;;
-          esac
-      NODE_NAME:
-        sh: |
-          case "{{.NODE}}" in
-            10.0.20.11) echo "luffy" ;;
-            10.0.20.12) echo "zoro" ;;
-            10.0.20.13) echo "nami" ;;
-            10.0.20.14) echo "usopp" ;;
-            10.0.20.15) echo "sanji" ;;
-            10.0.20.16) echo "chopper" ;;
-            *) echo "{{.NODE}}" ;;
-          esac
+        sh: yq -r '.nodes[] | select(.hostname == "{{.NODE}}" or .ipAddress == "{{.NODE}}") | .ipAddress' {{.TALOS_DIR}}/nodes.yaml
+    preconditions:
+      - sh: test -n "{{.NODE_IP}}"
+        msg: "{{.NODE}} is not in talos/nodes.yaml"
     cmds:
-      - talosctl apply-config --nodes {{.NODE_IP}} --file {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-{{.NODE_NAME}}.yaml
+      - set -o pipefail; ./scripts/talos-render.sh {{.NODE}} | talosctl apply-config --nodes {{.NODE_IP}} --file /dev/stdin
 
   talos:apply-all:
     desc: Apply config to all nodes
@@ -298,15 +302,15 @@ tasks:
     deps: [deps:verify]
     vars:
       CP_NODE:
-        sh: yq -r '[.nodes[] | select(.controlPlane)][0].ipAddress' {{.TALOS_DIR}}/talconfig.yaml
+        sh: yq -r '[.nodes[] | select(.controlPlane)][0].ipAddress' {{.TALOS_DIR}}/nodes.yaml
       SNAPSHOT_DIR:
         sh: echo "${TALOS_SNAPSHOT_DIR:-$HOME/talos-etcd-snapshots}"
     cmds:
       - |
         # Written outside the repo on purpose, rather than in it behind a .gitignore rule:
         # an etcd snapshot holds every Kubernetes Secret, encrypted, but with a key this
-        # machine also holds in talos/clusterconfig. This repo is public, so a path under
-        # $HOME cannot be committed by accident.
+        # machine can decrypt from talos/talsecret.sops.yaml. This repo is public, so a path
+        # under $HOME cannot be committed by accident.
         mkdir -p "{{.SNAPSHOT_DIR}}"
         FILE="{{.SNAPSHOT_DIR}}/etcd-$(date +%Y%m%d-%H%M%S).snapshot"
         talosctl etcd snapshot "$FILE" --nodes {{.CP_NODE}}
@@ -328,10 +332,10 @@ tasks:
     cmds:
       - task: talos:etcd-snapshot
       - |
-        # Roles are read from talconfig.yaml, the file that defines them.
+        # Roles are read from nodes.yaml, the file that defines them.
         WORKERS=$(yq -r '[.nodes[] | select(.controlPlane | not) | .ipAddress] | join(",")' \
-          {{.TALOS_DIR}}/talconfig.yaml)
-        CP_LIST=$(yq -r '.nodes[] | select(.controlPlane) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml)
+          {{.TALOS_DIR}}/nodes.yaml)
+        CP_LIST=$(yq -r '.nodes[] | select(.controlPlane) | .ipAddress' {{.TALOS_DIR}}/nodes.yaml)
 
         # One control plane is both the endpoint every request is proxied through and the
         # last machine to stop. talosctl dispatches through a single endpoint, so putting
@@ -399,23 +403,18 @@ tasks:
       vars: [NODE]
     vars:
       NODE_IP:
-        sh: |
-          case "{{.NODE}}" in
-            luffy) echo "10.0.20.11" ;;
-            zoro) echo "10.0.20.12" ;;
-            nami) echo "10.0.20.13" ;;
-            usopp) echo "10.0.20.14" ;;
-            sanji) echo "10.0.20.15" ;;
-            chopper) echo "10.0.20.16" ;;
-            *) echo "{{.NODE}}" ;;
-          esac
+        sh: yq -r '.nodes[] | select(.hostname == "{{.NODE}}" or .ipAddress == "{{.NODE}}") | .ipAddress' {{.TALOS_DIR}}/nodes.yaml
       TALOS_VERSION:
-        sh: yq '.talosVersion' {{.TALOS_DIR}}/talconfig.yaml
+        sh: yq '.talosVersion' {{.TALOS_DIR}}/nodes.yaml
+      # Read from the rendered config rather than rebuilt here, so the upgrade installs
+      # exactly the image the machine config names.
       INSTALLER_IMAGE:
-        sh: yq '.machine.install.image' {{.TALOS_DIR}}/clusterconfig/going-merry-{{.NODE}}.yaml | head -1
+        sh: ./scripts/talos-render.sh {{.NODE}} | yq 'select(documentIndex == 0) | .machine.install.image'
     preconditions:
+      - sh: test -n "{{.NODE_IP}}"
+        msg: "{{.NODE}} is not in talos/nodes.yaml"
       - sh: test -n "{{.INSTALLER_IMAGE}}"
-        msg: "Cannot read installer image. Run 'task talos:genconfig' first."
+        msg: "Cannot render the installer image of {{.NODE}}."
     prompt: "Upgrade {{.NODE}} ({{.NODE_IP}}) to Talos {{.TALOS_VERSION}}?"
     cmds:
       - echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
@@ -457,7 +456,7 @@ tasks:
     deps: [deps:verify]
     vars:
       K8S_VERSION:
-        sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/talconfig.yaml
+        sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/nodes.yaml
     prompt: "Upgrade Kubernetes to {{.K8S_VERSION}}?"
     cmds:
       - echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
@@ -472,23 +471,24 @@ tasks:
   talos:diff:
     desc: Show what applying the config would change on a node (NODE=luffy, default all)
     silent: true
-    deps: [deps:verify, talos:genconfig]
+    deps: [deps:verify]
     vars:
       NODE: '{{.NODE | default "all"}}'
     cmds:
       - |
-        # Hostnames and IPs are read from talconfig.yaml, the file that defines them,
-        # rather than copied into yet another `case` block that would drift the day a
-        # node is renamed. genconfig runs first, so this never diffs a stale file.
-        yq -r '.nodes[] | .hostname + " " + .ipAddress' {{.TALOS_DIR}}/talconfig.yaml \
+        # Hostnames and IPs are read from nodes.yaml, the file that defines them, rather
+        # than copied into yet another `case` block that would drift the day a node is
+        # renamed. Each config is rendered on the spot, so this never diffs a stale file.
+        set -o pipefail
+        yq -r '.nodes[] | .hostname + " " + .ipAddress' {{.TALOS_DIR}}/nodes.yaml \
         | while read -r NAME IP; do
             case "{{.NODE}}" in
               all|"$NAME"|"$IP") ;;
               *) continue ;;
             esac
             echo "=== $NAME ($IP) ==="
-            talosctl apply-config --dry-run --nodes "$IP" \
-              --file {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-$NAME.yaml
+            ./scripts/talos-render.sh "$NAME" \
+            | talosctl apply-config --dry-run --nodes "$IP" --file /dev/stdin
           done
 
   talos:status:
@@ -690,8 +690,9 @@ tasks:
     desc: Single entry point from bare Talos nodes to a reconciling cluster
     prompt: "Bootstrap the WHOLE cluster from bare Talos nodes? Only for a new or reset cluster."
     cmds:
-      # clusterconfig/ is gitignored, so a recovery machine has to regenerate it first.
-      - task: talos:genconfig
+      # talosctl needs its client config first, and it is gitignored: a recovery machine
+      # has none until it is written from the secrets bundle.
+      - task: talos:talosconfig
       - task: talos:apply-insecure-all
       - task: talos:bootstrap
       - task: talos:kubeconfig
@@ -1124,14 +1125,3 @@ tasks:
           sort | uniq || echo "No backups found - is Longhorn running and connected to NAS?"
         echo ""
         echo "Note: Restore PVCs BEFORE Flux creates the workloads, or suspend Flux first."
-
-  # =============================================================================
-  # Cleanup
-  # =============================================================================
-  clean:
-    desc: Clean generated Talos config files
-    prompt: "Delete generated config files?"
-    cmds:
-      - rm -f {{.TALOS_DIR}}/clusterconfig/{{.CLUSTER_NAME}}-*.yaml
-      - rm -f {{.TALOS_DIR}}/clusterconfig/talosconfig
-      - echo "Generated files removed"

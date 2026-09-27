@@ -1,0 +1,332 @@
+{#
+  Machine config of every node. scripts/talos-render.sh renders it with the node's entry from
+  nodes.yaml and the secrets bundle, decrypted into a pipe and never written to disk.
+
+  Nothing here is generated. talhelper built it from the Talos library it embedded, and a
+  generator's library decides the shape of the config as much as talosVersion does: a newer
+  one emits new documents on its own, and that is how KubeEtcdEncryptionConfig arrived with
+  the apiserver outage. `talosctl gen config` output is still worth reading as the reference
+  for what Talos now expects, but a new document enters this file by hand, in a diff.
+#}
+{% set this = (nodes | selectattr("hostname", "eq", node) | list)[0] %}
+{% set cp = this.controlPlane %}
+version: v1alpha1
+debug: false
+persist: true
+machine:
+  type: {{ "controlplane" if cp else "worker" }}
+  token: {{ trustdinfo.token }}
+  ca:
+    crt: {{ certs.os.crt }}
+    key: {{ certs.os.key if cp else '""' }}
+  certSANs:
+    - 10.0.20.10
+    - 10.0.20.11
+    - 10.0.20.12
+    - 10.0.20.13
+    - 10.0.20.14
+    - 10.0.20.15
+    - 10.0.20.16
+  kubelet:
+    image: ghcr.io/siderolabs/kubelet:{{ kubernetesVersion }}
+    extraArgs:
+      rotate-server-certificates: "true"
+    extraMounts:
+      - destination: /var/lib/longhorn
+        type: bind
+        source: /var/lib/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
+{% if not cp %}
+      - destination: /var/mnt/longhorn
+        type: bind
+        source: /var/mnt/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
+{% endif %}
+    extraConfig:
+      serializeImagePulls: false
+    defaultRuntimeSeccompProfileEnabled: true
+    disableManifestsDirectory: true
+  network:
+    extraHostEntries:
+      - ip: 10.0.20.20
+        aliases:
+          - zot.merry.home.arpa
+  install:
+    diskSelector:
+      model: {{ this.installDisk }}
+    image: factory.talos.dev/metal-installer/{{ schematic }}:{{ talosVersion }}
+    wipe: false
+    grubUseUKICmdline: true
+  files:
+    - content: |-
+        [plugins."io.containerd.cri.v1.images"]
+          discard_unpacked_layers = false
+      permissions: 0o0
+      path: /etc/cri/conf.d/20-customization.part
+      op: create
+{#
+  Trust the internal CA at the node level so containerd can verify zot over TLS. The
+  `insecureSkipVerify` below no longer reaches containerd: Spegel owns /etc/cri/conf.d/hosts,
+  and on startup it moves every host config it does not mirror into hosts/_backup/ — zot among
+  them, since it is not in Spegel's mirroredRegistries. The setting stays in this file and is
+  silently inert, which is why an image that is not already cached on the node fails to pull
+  with `x509: certificate signed by unknown authority`. Measured on all six nodes.
+#}
+    - content: |-
+        -----BEGIN CERTIFICATE-----
+        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
+        f+wtCEB5RIvFrJsUD4MdtLMQIxPUN8ALwrw4+xY=
+        -----END CERTIFICATE-----
+      permissions: 0o0
+      path: /etc/ssl/certs/ca-certificates.crt
+      op: append
+{% if not cp %}
+  sysctls:
+    net.ipv6.conf.enp1s0.accept_ra_rt_info_max_plen: "64"
+{% endif %}
+  registries:
+    config:
+      zot.merry.home.arpa:
+        tls:
+          insecureSkipVerify: true
+  features:
+    diskQuotaSupport: true
+    kubePrism:
+      enabled: true
+      port: 7445
+  nodeLabels:
+{% if cp %}
+    node.kubernetes.io/exclude-from-external-load-balancers: ""
+{% else %}
+{#
+  "config" tells Longhorn to read the default-disks-config annotation below instead of
+  auto-creating a default disk at /var/lib/longhorn.
+#}
+    node.longhorn.io/create-default-disk: config
+  nodeAnnotations:
+    node.longhorn.io/default-disks-config: '[{"name":"longhorn-data","path":"/var/mnt/longhorn","allowScheduling":true,"storageReserved":0,"tags":[]}]'
+{% endif %}
+cluster:
+  id: {{ cluster.id }}
+  secret: {{ cluster.secret }}
+  controlPlane:
+    endpoint: https://10.0.20.10:6443
+  clusterName: going-merry
+  token: {{ secrets.bootstraptoken }}
+  ca:
+    crt: {{ certs.k8s.crt }}
+    key: {{ certs.k8s.key if cp else '""' }}
+{% if cp %}
+  aggregatorCA:
+    crt: {{ certs.k8saggregator.crt }}
+    key: {{ certs.k8saggregator.key }}
+  serviceAccount:
+    key: {{ certs.k8sserviceaccount.key }}
+  etcd:
+    ca:
+      crt: {{ certs.etcd.crt }}
+      key: {{ certs.etcd.key }}
+    extraArgs:
+      listen-metrics-urls: http://0.0.0.0:2381
+{#
+  Applying a config only *creates* extraManifests resources; it never updates one that already
+  exists. Anything that needs to be upgradable belongs in Flux instead (metrics-server moved
+  there). Keep this list to what has to exist before Flux does: the CSR approver that signs the
+  kubelet serving certificates enabled by rotate-server-certificates above. A bump here is
+  therefore inert until applied by hand, and check the image first — upstream has shipped that
+  manifest pointing at a floating tag. `upgrade-k8s` is the exception: it reconciles this list,
+  so it reverts a hand-applied version back to the URL the node config holds, and it deletes
+  what has left the list — that is what removed metrics-server after the move to Flux, without
+  Flux noticing its own objects were gone.
+#}
+  extraManifests:
+    - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.12.1/deploy/standalone-install.yaml
+{% endif %}
+---
+apiVersion: v1alpha1
+kind: DiscoveryServiceConfig
+name: default
+endpoint: https://discovery.talos.dev/
+---
+apiVersion: v1alpha1
+kind: ResolverConfig
+nameservers:
+  - address: 1.1.1.1
+  - address: 9.9.9.9
+hostDNS:
+  enabled: true
+  forwardKubeDNSToHost: false
+---
+apiVersion: v1alpha1
+kind: FilesystemTrimConfig
+interval: 168h0m0s
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: 'off'
+hostname: {{ this.hostname }}
+---
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+dnsDomain: cluster.local
+podSubnets:
+  - 10.244.0.0/16
+serviceSubnets:
+  - 10.96.0.0/12
+{% if cp %}
+---
+apiVersion: v1alpha1
+kind: KubeAdmissionControlConfig
+name: PodSecurity
+configuration:
+  apiVersion: pod-security.admission.config.k8s.io/v1beta1
+  defaults:
+    audit: restricted
+    audit-version: latest
+    enforce: baseline
+    enforce-version: latest
+    warn: restricted
+    warn-version: latest
+  exemptions:
+    namespaces:
+      - kube-system
+      - longhorn-system
+      - monitoring
+    runtimeClasses: []
+    usernames: []
+  kind: PodSecurityConfiguration
+---
+apiVersion: v1alpha1
+kind: KubeAuditPolicyConfig
+configuration:
+  apiVersion: audit.k8s.io/v1
+  kind: Policy
+  rules:
+    - level: Metadata
+---
+apiVersion: v1alpha1
+kind: KubeAuthenticationConfig
+configuration:
+  anonymous:
+    conditions:
+      - path: /livez
+      - path: /readyz
+      - path: /healthz
+    enabled: true
+  jwt: []
+---
+apiVersion: v1alpha1
+kind: KubeAuthorizerConfig
+name: node
+type: Node
+---
+apiVersion: v1alpha1
+kind: KubeAuthorizerConfig
+name: rbac
+type: RBAC
+---
+apiVersion: v1alpha1
+kind: KubeAPIServerConfig
+image: registry.k8s.io/kube-apiserver:{{ kubernetesVersion }}
+certExtraSANs:
+  - 10.0.20.10
+{# Talos's default let every reboot's dead pods pile up. A count, not an age: it caps how many
+   terminated pods are kept and collects the oldest, it does not empty them. #}
+---
+apiVersion: v1alpha1
+kind: KubeControllerManagerConfig
+image: registry.k8s.io/kube-controller-manager:{{ kubernetesVersion }}
+extraArgs:
+  terminated-pod-gc-threshold: "30"
+---
+apiVersion: v1alpha1
+kind: KubeSchedulerConfig
+image: registry.k8s.io/kube-scheduler:{{ kubernetesVersion }}
+config: {}
+---
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+image: registry.k8s.io/kube-proxy:{{ kubernetesVersion }}
+config: {}
+{% endif %}
+---
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: enp1s0
+{% if cp %}
+---
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: 10.0.20.10
+link: enp1s0
+{#
+  The encryption key keeps the name `key2` and the identity provider that the v1alpha1 field it
+  replaced rendered. Talos's own KubeEtcdEncryptionConfig names it `key1` and drops identity, but
+  the name is part of the prefix written in front of every encrypted Secret in etcd: with it,
+  all three apiservers lost readiness and Secrets became unreadable until the old config was
+  re-applied. Keep this identical to what the cluster was built with.
+#}
+---
+apiVersion: v1alpha1
+kind: KubeEtcdEncryptionConfig
+config:
+  resources:
+    - providers:
+        - secretbox:
+            keys:
+              - name: key2
+                secret: {{ secrets.secretboxencryptionsecret }}
+        - identity: {}
+      resources:
+        - secrets
+{% else %}
+---
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  maxSize: 100GiB
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn
+provisioning:
+  diskSelector:
+    match: system_disk
+  grow: true
+  minSize: 200GiB
+{% endif %}

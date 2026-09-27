@@ -1,0 +1,34 @@
+---
+# The nodes and the versions they run. machineconfig.yaml.j2 renders from this file, and the
+# talos:* tasks read roles and addresses from it rather than keeping their own copy.
+talosVersion: v1.14.1
+kubernetesVersion: v1.36.4
+
+nodes:
+  # --- Control Plane ---
+  - hostname: luffy
+    ipAddress: 10.0.20.11
+    controlPlane: true
+    installDisk: CT500P310SSD8
+  - hostname: zoro
+    ipAddress: 10.0.20.12
+    controlPlane: true
+    installDisk: CT500P310SSD8
+  - hostname: nami
+    ipAddress: 10.0.20.13
+    controlPlane: true
+    installDisk: CT500P310SSD8
+
+  # --- Workers ---
+  - hostname: usopp
+    ipAddress: 10.0.20.14
+    controlPlane: false
+    installDisk: CT2000T500SSD8
+  - hostname: sanji
+    ipAddress: 10.0.20.15
+    controlPlane: false
+    installDisk: CT2000T500SSD8
+  - hostname: chopper
+    ipAddress: 10.0.20.16
+    controlPlane: false
+    installDisk: CT2000T500SSD8

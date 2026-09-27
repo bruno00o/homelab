@@ -34,8 +34,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Talos version in talconfig.yaml",
-      "managerFilePatterns": ["/talos/talconfig\\.ya?ml$/"],
+      "description": "Talos version in talos/nodes.yaml",
+      "managerFilePatterns": ["/talos/nodes\\.yaml$/"],
       "matchStrings": [
         "talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
       ],
@@ -44,8 +44,8 @@
     },
     {
       "customType": "regex",
-      "description": "Kubernetes version in talconfig.yaml",
-      "managerFilePatterns": ["/talos/talconfig\\.ya?ml$/"],
+      "description": "Kubernetes version in talos/nodes.yaml",
+      "managerFilePatterns": ["/talos/nodes\\.yaml$/"],
       "matchStrings": [
         "kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
       ],
@@ -82,7 +82,7 @@
     {
       "customType": "regex",
       "description": "kubelet-serving-cert-approver in Talos extraManifests",
-      "managerFilePatterns": ["/talos/talconfig\\.ya?ml$/"],
+      "managerFilePatterns": ["/talos/machineconfig\\.yaml\\.j2$/"],
       "matchStrings": [
         "kubelet-serving-cert-approver/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
       ],

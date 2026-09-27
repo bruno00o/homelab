@@ -1,9 +1,9 @@
 [tools]
-# Must match talos/talconfig.yaml talosVersion
+# Must match talos/nodes.yaml talosVersion
 talosctl = "1.14.1"
-# https://github.com/budimanjojo/talhelper
-talhelper = "3.1.17"
-# Should match talos/talconfig.yaml kubernetesVersion
+# Renders talos/machineconfig.yaml.j2 (scripts/talos-render.sh). Not in mise's registry.
+"aqua:mitsuhiko/minijinja" = "2.24.0"
+# Should match talos/nodes.yaml kubernetesVersion
 kubectl = "1.36.4"
 # https://github.com/fluxcd/flux2
 flux2 = "2.9.5"

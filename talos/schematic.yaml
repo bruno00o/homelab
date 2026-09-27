@@ -1,0 +1,10 @@
+---
+# Image Factory schematic of every node. Its ID names the installer image in the machine
+# config; scripts/talos-render.sh asks factory.talos.dev for it on each render.
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/intel-ucode
+      - siderolabs/i915
+      - siderolabs/iscsi-tools
+      - siderolabs/util-linux-tools

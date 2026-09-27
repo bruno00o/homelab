@@ -1,7 +1,4 @@
-going-merry-luffy.yaml
-going-merry-zoro.yaml
-going-merry-nami.yaml
-talosconfig
-going-merry-usopp.yaml
-going-merry-sanji.yaml
-going-merry-chopper.yaml
+# Only the talosctl client config lives here (task talos:talosconfig). Everything is ignored,
+# so that a machine config saved here by mistake, secrets included, can never be committed.
+*
+!.gitignore

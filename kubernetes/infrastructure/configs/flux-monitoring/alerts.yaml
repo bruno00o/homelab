@@ -12,10 +12,11 @@ spec:
     - name: flux
       rules:
         # The Flux events that reach Discord say what happened at one reconcile; this says
-        # that something has stayed broken. Not Ready also covers a reconcile stuck in
-        # progress, which never emits a failure event at all.
+        # that something has stayed broken. Unknown covers a reconcile stuck in progress,
+        # which never emits a failure event at all. Not `!= "True"`: an OCI HelmRepository
+        # has no Ready condition, so its label is empty and it would fire forever.
         - alert: FluxResourceNotReady
-          expr: max by (customresource_kind, exported_namespace, name) (gotk_resource_info{ready!="True", suspended!="true"}) == 1
+          expr: max by (customresource_kind, exported_namespace, name) (gotk_resource_info{ready=~"False|Unknown", suspended!="true"}) == 1
           for: 30m
           labels:
             severity: warning

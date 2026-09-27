@@ -94,6 +94,11 @@ spec:
             secretKeyRef:
               name: authentik-paperless-oidc
               key: paperless_oidc_client_secret
+        - name: AUTHENTIK_FLUX_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-flux-oidc
+              key: flux_oidc_client_secret
         - name: AUTHENTIK_CLOUDFLARE_ACCESS_CLIENT_SECRET
           valueFrom:
             secretKeyRef:

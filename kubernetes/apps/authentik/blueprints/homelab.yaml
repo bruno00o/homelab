@@ -159,9 +159,7 @@ data:
           client_type: confidential
           client_id: dawarich
           client_secret: !Env AUTHENTIK_DAWARICH_CLIENT_SECRET
-          # user_uuid from the start, for the reason spelled out on the Home Assistant
-          # provider above: hashed_user_id moves with the Authentik database and every
-          # rotation hands the app a brand new user.
+          # user_uuid, like the Home Assistant provider below.
           sub_mode: user_uuid
           # Mandatory, and the omission is silent: a provider created by a blueprint gets
           # an EMPTY grant_types list, not the model defaults the older providers here
@@ -323,9 +321,12 @@ data:
           client_type: confidential
           client_id: home-assistant
           client_secret: !Env AUTHENTIK_HA_CLIENT_SECRET
-          # Not the default hashed_user_id: that one is sha256(user.id + install_id), so it
-          # changes with the Authentik database and every app then sees a brand new user.
-          # It drifted four times here and left five admin accounts in Home Assistant.
+          # user_uuid, where most providers keep the default hashed_user_id. Both are stored
+          # in the Authentik database (the hash is of user.id and install_id), so neither is
+          # steadier, and switching an existing provider orphans every account its app holds.
+          # Home Assistant's duplicate accounts came from its side: auth_oidc stores
+          # sha256("<issuer>.<sub>"), so a new issuer URL is a new user too, and a subject
+          # written into its storage by hand must take that form.
           sub_mode: user_uuid
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           redirect_uris:

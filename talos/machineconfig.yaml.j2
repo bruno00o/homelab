@@ -55,8 +55,6 @@ machine:
   features:
     diskQuotaSupport: true
 cluster:
-  id: {{ cluster.id }}
-  secret: {{ cluster.secret }}
   controlPlane:
     endpoint: https://10.0.20.10:6443
   clusterName: going-merry
@@ -95,6 +93,17 @@ apiVersion: v1alpha1
 kind: DiscoveryServiceConfig
 name: default
 endpoint: https://discovery.talos.dev/
+{#
+  The discovery identity keeps the values the cluster was built with, straight from the
+  secrets bundle. Talos 1.14 changed how a new bundle encodes the ID; these two are plain
+  base64 of 32 bytes either way, and any other value would make the nodes a new cluster to
+  the discovery service.
+#}
+---
+apiVersion: v1alpha1
+kind: DiscoveryIdentityConfig
+clusterID: {{ cluster.id }}
+clusterSecret: {{ cluster.secret }}
 ---
 apiVersion: v1alpha1
 kind: ResolverConfig

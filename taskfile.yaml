@@ -254,13 +254,17 @@ tasks:
         sleep 5
         kubectl -n kube-system delete pod -l app.kubernetes.io/name=spegel \
           --field-selector spec.nodeName={{.NODE_NAME}} --wait=true >/dev/null
-        kubectl -n kube-system rollout status ds/spegel --timeout=120s >/dev/null
-        if talosctl -n {{.NODE_IP}} ls /etc/cri/conf.d/hosts | grep -q docker.io; then
-          echo "Spegel mirrors back on {{.NODE_NAME}}"
-        else
-          echo "Spegel mirrors still missing on {{.NODE_NAME}}" >&2
-          exit 1
-        fi
+        # Poll the files themselves: `rollout status` on a DaemonSet can return before the
+        # controller has even seen the deletion, let alone started the pod that writes them.
+        for _ in $(seq 30); do
+          if talosctl -n {{.NODE_IP}} ls /etc/cri/conf.d/hosts | grep -q docker.io; then
+            echo "Spegel mirrors back on {{.NODE_NAME}}"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "Spegel mirrors still missing on {{.NODE_NAME}}" >&2
+        exit 1
 
   talos:apply-all:
     desc: Apply config to all nodes

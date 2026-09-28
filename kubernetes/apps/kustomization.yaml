@@ -8,7 +8,6 @@ resources:
   - doublons/ks.yaml
   - dozerdb/ks.yaml
   - gaspard/ks.yaml
-  - hermes/ks.yaml
   - homarr/ks.yaml
   - home-automation/ks.yaml
   - immich/ks.yaml

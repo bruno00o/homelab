@@ -59,7 +59,7 @@ spec:
       # redirects it to the gateway's L7 proxy, which drops the HTTP request and answers
       # `403 Access denied` without ever forwarding to zot (hubble: `http-request DROPPED`).
       # An unpoliced namespace reaches the same URL fine, which is what made this look like
-      # a registry problem. rustfs, MAS and hermes each work around it with an in-pod nginx
+      # a registry problem. rustfs and MAS each work around it with an in-pod nginx
       # sidecar and a hostAlias to 127.0.0.1; that is not available here, because the scan
       # Jobs are built by the operator, not by us.
       #

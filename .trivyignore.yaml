@@ -42,12 +42,11 @@ misconfigurations:
   #   - DozerDB (Neo4j fork): writes /logs, /conf, /plugins and others
   #   - immich-postgres: vanilla Postgres image needs /var/run/postgresql, /tmp
   #   - synapse: writes /data signing key, media; oidc-proxy/element/cinny are
-  #     nginx images that need /var/cache and /tmp; hermes-agent owns its rootfs
+  #     nginx images that need /var/cache and /tmp
   - id: KSV-0014
     paths:
       - "apps/dozerdb/dozerdb.yaml"
       - "apps/immich/postgres.yaml"
-      - "apps/hermes/statefulset.yaml"
       - "apps/matrix/synapse.yaml"
       - "apps/matrix/cinny.yaml"
       - "apps/matrix/element.yaml"

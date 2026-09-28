@@ -64,7 +64,7 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 256Mi
+          memory: 512Mi
         limits:
           # Was 512Mi and peaked at 497Mi over 7 days — 97% of its own limit, one dashboard
           # render away from being killed.
@@ -191,7 +191,7 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 512Mi
+            memory: 2Gi
           limits:
             # Peaked at 1988Mi against a 2Gi limit — 97%. Go sizes its heap to the limit, so
             # this was not "using what it needs" but "running as close to the wall as it

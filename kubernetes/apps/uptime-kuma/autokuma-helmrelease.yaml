@@ -45,9 +45,11 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 32Mi
-              limits:
                 memory: 128Mi
+              limits:
+                # Peaked at 127Mi against 128Mi and was OOMKilled; it keeps every entity it
+                # syncs in memory, so it grows with the number of monitors.
+                memory: 256Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

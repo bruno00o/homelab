@@ -43,6 +43,15 @@ spec:
       # from the reports, and there is then no way back to the full picture.
       metricsVulnIdEnabled: true
 
+    # The operator had no requests at all while holding close to 1Gi: invisible to the
+    # scheduler, and the first thing evicted under memory pressure.
+    resources:
+      requests:
+        cpu: 50m
+        memory: 768Mi
+      limits:
+        memory: 1536Mi
+
     trivy:
       # Scans of the two first-party images produced no report at all. Two blockers, both
       # measured: the scan pods carry no CA for zot's mugiwara certificate, and - the real

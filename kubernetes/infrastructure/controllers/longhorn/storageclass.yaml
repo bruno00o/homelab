@@ -12,6 +12,10 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: longhorn-no-backup
+  annotations:
+    # StorageClass parameters are immutable: without this, a changed parameter fails the
+    # apply instead of recreating the class. Existing volumes are not affected.
+    kustomize.toolkit.fluxcd.io/force: enabled
 provisioner: driver.longhorn.io
 allowVolumeExpansion: true
 reclaimPolicy: Delete
@@ -21,9 +25,37 @@ parameters:
   staleReplicaTimeout: "30"
   fromBackup: ""
   fsType: "ext4"
-  dataLocality: "disabled"
+  dataLocality: "best-effort"
   unmapMarkSnapChainRemoved: "ignored"
   disableRevisionCounter: "true"
   dataEngine: "v1"
   backupTargetName: "default"
+  recurringJobSelector: '[{"name":"no-recurring-job","isGroup":true}]'
+
+---
+# Storage for CloudNativePG instances. Postgres already replicates between instances, so
+# Longhorn replicas only multiplied every write, synchronously and over the network; both
+# projects recommend a single replica, kept on the instance's own node.
+#
+# strict-local places the replica when the volume is first attached, then pins the PV to
+# that node: an instance whose node is down stays Pending while CNPG fails over, and one on
+# a node lost for good is recreated elsewhere with `kubectl cnpg destroy`. Each Cluster
+# requires its instances on distinct nodes, or two copies would share a disk.
+#
+# No recurring job: barman already keeps base backups and WAL in rustfs.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-cnpg
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+  dataLocality: "strict-local"
+  staleReplicaTimeout: "30"
+  fsType: "ext4"
+  disableRevisionCounter: "true"
+  dataEngine: "v1"
   recurringJobSelector: '[{"name":"no-recurring-job","isGroup":true}]'

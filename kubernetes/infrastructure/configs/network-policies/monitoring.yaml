@@ -55,8 +55,6 @@ spec:
         - protocol: TCP
           port: 3101 # Promtail metrics
         - protocol: TCP
-          port: 3200 # Tempo
-        - protocol: TCP
           port: 2000 # cloudflared metrics
         - protocol: TCP
           port: 6333 # qdrant
@@ -133,13 +131,6 @@ spec:
       ports:
         - protocol: TCP
           port: 3100
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: tempo-system
-      ports:
-        - protocol: TCP
-          port: 3200
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

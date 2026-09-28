@@ -8,11 +8,16 @@ spec:
   # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
   imageName: ghcr.io/cloudnative-pg/postgresql:18.6-standard-trixie
 
+  # Required, not the default `preferred`: each volume has a single replica on its
+  # instance's node (longhorn-cnpg), so two instances on one node would share one disk.
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+
   storage:
-    # barman already keeps base backups and WAL in rustfs, itself backed up to the NAS;
-    # a Longhorn backup of each instance only stored the same database once more.
-    # Existing volumes keep the `longhorn` class; their recurring jobs were relabelled.
-    storageClass: longhorn-no-backup
+    # See longhorn-cnpg: one strict-local replica, no Longhorn backup. Instances created
+    # before it keep the volume they have until they are recreated.
+    storageClass: longhorn-cnpg
     size: 20Gi
 
   postgresql:

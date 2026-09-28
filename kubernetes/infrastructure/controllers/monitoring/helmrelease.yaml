@@ -158,29 +158,15 @@ spec:
       defaultDashboardsTimezone: Europe/Paris
 
       additionalDataSources:
-        # Both need an explicit uid. Without one Grafana generates a random one at
-        # provisioning, and the Tempo -> Loki correlation below pointed at a datasource
-        # called `loki` that did not exist: "Logs for this span" answered `Datasource loki
-        # was not found`. The chart's own Prometheus and Alertmanager entries set a uid,
-        # which is what made the cross-reference look like it resolved.
+        # An explicit uid: without one Grafana generates a random one at provisioning, and
+        # anything referring to the datasource by `loki` finds nothing ("Datasource loki was
+        # not found"), as the Tempo correlation did before Tempo was removed, unused.
         - name: Loki
           type: loki
           uid: loki
           url: http://loki.loki-system.svc:3100
           access: proxy
           isDefault: false
-        - name: Tempo
-          type: tempo
-          uid: tempo
-          url: http://tempo.tempo-system.svc:3200
-          access: proxy
-          isDefault: false
-          jsonData:
-            tracesToLogsV2:
-              datasourceUid: loki
-              tags: ["job", "namespace", "pod"]
-            nodeGraph:
-              enabled: true
 
     prometheus:
       prometheusSpec:

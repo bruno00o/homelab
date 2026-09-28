@@ -38,6 +38,9 @@ spec:
       # retry counts as a dropped packet. Renovate is what tells us about a new Longhorn.
       upgradeChecker: false
       defaultReplicaCount: 2
+      # Longhorn's recommended default: keep one replica on the node that runs the pod, so
+      # reads stay local. Existing volumes keep their own setting.
+      defaultDataLocality: best-effort
       defaultDataPath: /var/mnt/longhorn
       createDefaultDiskLabeledNodes: true
       # `ignored` is a per-volume value; as a global setting longhorn-manager rejects it
@@ -75,6 +78,7 @@ spec:
     persistence:
       defaultClass: true
       defaultClassReplicaCount: 2
+      defaultDataLocality: best-effort
       defaultFsType: ext4
       reclaimPolicy: Delete
 

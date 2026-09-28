@@ -20,7 +20,6 @@ resources:
   - reloader
   - spegel
   - loki
-  - tempo
   - trivy-operator
   - kyverno
   - kyverno-policies

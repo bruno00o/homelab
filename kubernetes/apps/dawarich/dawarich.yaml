@@ -189,12 +189,14 @@ spec:
               # here instead. Nothing is lost by hiding public/: the sync puts back exactly
               # what the image had there.
               mountPath: /var/app/public
-            - name: exports
-              # Exports are generated files and the volume above is empty again at every
-              # restart, so they keep their own PVC, nested inside it.
+            # The volume above is empty again at every restart, so exports and the watched
+            # import directory live on the storage volume, nested inside it.
+            - name: storage
               mountPath: /var/app/public/exports
-            - name: watched
+              subPath: public-exports
+            - name: storage
               mountPath: /var/app/tmp/imports/watched
+              subPath: imports-watched
             - name: app-tmp
               mountPath: /var/app/tmp
               subPath: app-tmp
@@ -263,7 +265,7 @@ spec:
       volumes:
         # Rails writes its pids, its bootsnap cache and its uploads-in-flight under
         # /var/app/tmp, which readOnlyRootFilesystem makes unwritable. Two subPaths of one
-        # emptyDir rather than two volumes, so the watched PVC can still nest inside.
+        # emptyDir rather than two volumes, so the watched directory can still nest inside.
         - name: app-tmp
           emptyDir: {}
         - name: public
@@ -281,23 +283,3 @@ spec:
         resources:
           requests:
             storage: 10Gi
-    - metadata:
-        name: exports
-        labels:
-          recurring-job-group.longhorn.io/default: enabled
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: ${DEFAULT_STORAGE_CLASS}
-        resources:
-          requests:
-            storage: 2Gi
-    - metadata:
-        name: watched
-        labels:
-          recurring-job-group.longhorn.io/default: enabled
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: ${DEFAULT_STORAGE_CLASS}
-        resources:
-          requests:
-            storage: 2Gi

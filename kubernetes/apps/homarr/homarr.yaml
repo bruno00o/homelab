@@ -46,23 +46,6 @@ subjects:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: homarr-config
-  namespace: homarr
-  annotations:
-    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
-    kustomize.toolkit.fluxcd.io/prune: Disabled
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: ${DEFAULT_STORAGE_CLASS}
-  resources:
-    requests:
-      storage: 1Gi
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: homarr-data
   namespace: homarr
   annotations:
@@ -174,8 +157,6 @@ spec:
             - name: NODE_OPTIONS
               value: "--use-system-ca"
           volumeMounts:
-            - name: config
-              mountPath: /app/data/configs
             - name: data
               mountPath: /appdata/db
             - name: ca-cert
@@ -190,9 +171,6 @@ spec:
             limits:
               memory: 1Gi
       volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: homarr-config
         - name: data
           persistentVolumeClaim:
             claimName: homarr-data

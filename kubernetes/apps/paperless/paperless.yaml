@@ -163,8 +163,11 @@ spec:
               mountPath: /usr/src/paperless/data
             - name: media
               mountPath: /usr/src/paperless/media
-            - name: consume
+            # A scan waiting here exists nowhere else, so it lives on the backed-up data
+            # volume rather than a volume of its own.
+            - name: data
               mountPath: /usr/src/paperless/consume
+              subPath: consume
             - name: export
               mountPath: /usr/src/paperless/export
             - name: run
@@ -222,6 +225,11 @@ spec:
           emptyDir: {}
         - name: fontconfig-cache
           emptyDir: {}
+        # What `document_exporter` writes is a copy of media and the database, only worth
+        # anything once copied off the pod.
+        - name: export
+          emptyDir:
+            sizeLimit: 5Gi
 
   volumeClaimTemplates:
     - metadata:
@@ -244,25 +252,3 @@ spec:
         resources:
           requests:
             storage: 20Gi
-    # Backed up like the rest: a scan sitting here has been consumed from a phone but not
-    # yet turned into a document, and it exists nowhere else.
-    - metadata:
-        name: consume
-        labels:
-          recurring-job-group.longhorn.io/default: enabled
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: ${DEFAULT_STORAGE_CLASS}
-        resources:
-          requests:
-            storage: 2Gi
-    # No backup label on purpose: this holds what `document_exporter` writes, which is a
-    # copy of media and the database. Backing it up would store the same documents twice.
-    - metadata:
-        name: export
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: ${DEFAULT_STORAGE_CLASS}
-        resources:
-          requests:
-            storage: 5Gi

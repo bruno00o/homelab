@@ -86,12 +86,13 @@ spec:
                   key: NEO4J_AUTH
             - name: NEO4J_server_default__listen__address
               value: "0.0.0.0"
+            # Sized on the graph, which is small: the page cache only needs to hold the store
             - name: NEO4J_server_memory_heap_initial__size
-              value: "512m"
+              value: "256m"
             - name: NEO4J_server_memory_heap_max__size
-              value: "1g"
-            - name: NEO4J_server_memory_pagecache_size
               value: "512m"
+            - name: NEO4J_server_memory_pagecache_size
+              value: "256m"
           livenessProbe:
             tcpSocket:
               port: bolt
@@ -121,9 +122,9 @@ spec:
           resources:
             requests:
               cpu: 200m
-              memory: 1Gi
+              memory: 768Mi
             limits:
-              memory: 2Gi
+              memory: 1280Mi
       volumes:
         - name: logs
           emptyDir: {}

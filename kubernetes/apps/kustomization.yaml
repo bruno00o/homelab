@@ -16,6 +16,7 @@ resources:
   - ntp/ks.yaml
   - paperless/ks.yaml
   - portfolio/ks.yaml
+  - portfolio-previews/ks.yaml
   - qdrant/ks.yaml
   - random-gif/ks.yaml
   - umami/ks.yaml

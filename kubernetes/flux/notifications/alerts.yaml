@@ -21,6 +21,6 @@ spec:
     - "^Dependencies do not meet ready condition, retrying in.*"
     - "^unable to clone '.*': dial tcp: .*: server misbehaving$"
     - "^HelmChart '.*' is not ready$"
-    # Drift detection runs in warn mode and would report the same drift at every
-    # reconcile; each HelmRelease's Drifted condition carries it instead.
+    # Each drift is announced twice, detected then corrected; the correction, which
+    # carries the same diff, is the one kept.
     - "^Cluster state of release .* has drifted from the desired state"

@@ -131,11 +131,11 @@ spec:
             keepHistory: false
           # Without it, a hand edit to an object a chart owns stays in place with no signal:
           # helm-controller does not compare the cluster with the release by default, unlike
-          # kustomize-controller. `warn` reports drift in each HelmRelease's Drifted condition;
-          # `enabled` would also revert it, and would fight any controller that legitimately
-          # rewrites a field until that field has an ignore rule.
+          # kustomize-controller. It ran in `warn` first, long enough to show that no other
+          # controller rewrites a chart's fields; one that does would be reverted at every
+          # reconcile until the field gets an ignore rule.
           driftDetection:
-            mode: warn
+            mode: enabled
 
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -226,7 +226,7 @@ spec:
           uninstall:
             keepHistory: false
           driftDetection:
-            mode: warn
+            mode: enabled
 
     # Defaults for the per-app Kustomizations (the ks.yaml files). Each app declares only
     # its own `path`; the boilerplate below — including the HelmRelease patch again, since
@@ -282,4 +282,4 @@ spec:
                   uninstall:
                     keepHistory: false
                   driftDetection:
-                    mode: warn
+                    mode: enabled

@@ -34,6 +34,9 @@ spec:
       # nothing — verified on the cluster, OPERATOR_CONCURRENT_NODE_COLLECTOR_LIMIT is 0 and
       # no node-collector job has ever run.
       scanNodeCollectorLimit: 0
+      # Fewer scans at once, so the higher scan job limit below stays affordable when a
+      # reboot sends every workload back to the scanner together.
+      scanJobsConcurrentLimit: 3
       builtInTrivyServer: true
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true
@@ -74,12 +77,15 @@ spec:
       # The vulnerability database, refetched from upstream on its own schedule. Named here
       # for the first time: the chart leaves it empty, which takes the cluster default.
       storageClassName: longhorn-no-backup
+      # The scan job unpacks the image itself even in client/server mode. The large images
+      # (home-assistant, paperless, cilium) were OOMKilled on every attempt and retried in a
+      # loop, so they never had a report, and nothing said so.
       resources:
         requests:
           cpu: 25m
           memory: 128Mi
         limits:
-          memory: 256Mi
+          memory: 1Gi
 
     serviceMonitor:
       enabled: true

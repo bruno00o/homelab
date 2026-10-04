@@ -6,7 +6,7 @@ talosctl = "1.14.2"
 # Should match talos/nodes.yaml kubernetesVersion
 kubectl = "1.36.4"
 # https://github.com/fluxcd/flux2
-flux2 = "2.9.5"
+flux2 = "2.9.6"
 helm = "4.3.0"
 # https://github.com/helmfile/helmfile
 helmfile = "1.8.1"

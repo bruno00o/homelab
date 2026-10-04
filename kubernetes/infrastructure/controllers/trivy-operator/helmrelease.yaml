@@ -74,6 +74,10 @@ spec:
           "zot.merry.home.arpa": zot.zot.svc.cluster.local:5000
       nonSslRegistries:
         zot: zot.zot.svc.cluster.local:5000
+      # Low and Unknown findings are most of a report, and on the largest images they push
+      # it past what the API server will store: no report at all, so not even the Critical
+      # ones. Nothing here looks at them; the per-CVE metric already drops them at ingest.
+      severity: MEDIUM,HIGH,CRITICAL
       # The vulnerability database, refetched from upstream on its own schedule. Named here
       # for the first time: the chart leaves it empty, which takes the cluster default.
       storageClassName: longhorn-no-backup

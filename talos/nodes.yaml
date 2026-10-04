@@ -2,7 +2,7 @@
 # The nodes and the versions they run. machineconfig.yaml.j2 renders from this file, and the
 # talos:* tasks read roles and addresses from it rather than keeping their own copy.
 talosVersion: v1.14.1
-kubernetesVersion: v1.36.4
+kubernetesVersion: v1.37.1
 
 nodes:
   # --- Control Plane ---

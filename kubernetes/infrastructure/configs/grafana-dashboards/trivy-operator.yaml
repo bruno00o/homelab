@@ -234,7 +234,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{severity=\"Critical\", fixed_version!=\"\"}))",
+                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{$scope, severity=\"Critical\", fixed_version!=\"\"}))",
                   "instant": true,
                   "legendFormat": "Fixable critical CVEs",
                   "range": false,
@@ -333,7 +333,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope})",
                   "instant": true,
                   "legendFormat": "Vulnerabilities",
                   "range": false,
@@ -529,7 +529,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Critical\"})",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Critical\"})",
                   "instant": true,
                   "legendFormat": "Critical",
                   "range": false,
@@ -542,7 +542,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"High\"})",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"High\"})",
                   "hide": false,
                   "instant": true,
                   "legendFormat": "High",
@@ -556,7 +556,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Medium\"})",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Medium\"})",
                   "hide": false,
                   "instant": true,
                   "legendFormat": "Medium",
@@ -570,7 +570,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Low\"})",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Low\"})",
                   "hide": false,
                   "instant": true,
                   "legendFormat": "Low",
@@ -584,7 +584,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Unknown\"})",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Unknown\"})",
                   "hide": false,
                   "instant": true,
                   "legendFormat": "Unknown",
@@ -678,7 +678,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "sum(trivy_image_vulnerabilities) by (namespace)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope}) by (namespace)",
                   "legendFormat": "__auto",
                   "range": true,
                   "refId": "A"
@@ -785,7 +785,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Critical\"}) by (image_repository,image_tag)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Critical\"}) by (image_repository,image_tag)",
                   "format": "table",
                   "instant": true,
                   "range": false,
@@ -798,7 +798,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"High\"}) by (image_repository,image_tag)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"High\"}) by (image_repository,image_tag)",
                   "format": "table",
                   "hide": false,
                   "instant": true,
@@ -812,7 +812,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Medium\"}) by (image_repository,image_tag)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Medium\"}) by (image_repository,image_tag)",
                   "format": "table",
                   "hide": false,
                   "instant": true,
@@ -826,7 +826,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Low\"}) by (image_repository,image_tag)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Low\"}) by (image_repository,image_tag)",
                   "format": "table",
                   "hide": false,
                   "instant": true,
@@ -840,7 +840,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(trivy_image_vulnerabilities{severity=\"Unknown\"}) by (image_repository,image_tag)",
+                  "expr": "sum(trivy_image_vulnerabilities{$scope, severity=\"Unknown\"}) by (image_repository,image_tag)",
                   "format": "table",
                   "hide": false,
                   "instant": true,
@@ -976,7 +976,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{severity=\"Critical\"}))",
+                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{$scope, severity=\"Critical\"}))",
                   "instant": true,
                   "range": false,
                   "refId": "A"
@@ -1042,7 +1042,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{severity=\"Critical\", fixed_version!=\"\"}))",
+                  "expr": "count(count by (vuln_id) (trivy_vulnerability_id{$scope, severity=\"Critical\", fixed_version!=\"\"}))",
                   "instant": true,
                   "range": false,
                   "refId": "A"
@@ -1100,7 +1100,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "max by (severity, image_repository, image_tag, resource, installed_version, fixed_version, vuln_id) (trivy_vulnerability_id{fixed_version!=\"\"})",
+                  "expr": "max by (severity, image_repository, image_tag, resource, installed_version, fixed_version, vuln_id) (trivy_vulnerability_id{$scope, fixed_version!=\"\"})",
                   "format": "table",
                   "instant": true,
                   "range": false,
@@ -1646,6 +1646,162 @@ data:
           ],
           "title": "Exposed Secrets",
           "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "id": 50,
+          "title": "Coverage",
+          "type": "row",
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Running images that have no vulnerability report. Every number elsewhere on this dashboard silently leaves them out.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 6,
+                "x": 0,
+                "y": 6
+              },
+              "id": 51,
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto"
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "count(count by (namespace, image_spec) (label_replace(label_replace(kube_pod_container_info, \"ref\", \"$1\", \"image_spec\", \"(?:[^/]*\\\\.[^/]*/)?([^@]+).*\"), \"ref\", \"library/$1\", \"image_spec\", \"(?:docker\\\\.io/)?([^/@]+)(?:@.*)?\") unless on (ref) label_replace(label_join(trivy_image_vulnerabilities, \"ref\", \":\", \"image_repository\", \"image_tag\"), \"ref\", \"$1\", \"ref\", \"(.+):\"))) or vector(0)",
+                  "instant": true,
+                  "range": false,
+                  "refId": "A"
+                }
+              ],
+              "title": "Images without a report",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "A scan that fails leaves no trace in the reports: an OOMKilled scan job, or a report too large for the API server to store. The cause is in the trivy-operator log.",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": "auto",
+                    "displayMode": "auto"
+                  },
+                  "mappings": []
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 18,
+                "x": 6,
+                "y": 6
+              },
+              "id": 52,
+              "options": {
+                "footer": {
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "Namespace"
+                  }
+                ]
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "count by (namespace, image_spec) (label_replace(label_replace(kube_pod_container_info, \"ref\", \"$1\", \"image_spec\", \"(?:[^/]*\\\\.[^/]*/)?([^@]+).*\"), \"ref\", \"library/$1\", \"image_spec\", \"(?:docker\\\\.io/)?([^/@]+)(?:@.*)?\") unless on (ref) label_replace(label_join(trivy_image_vulnerabilities, \"ref\", \":\", \"image_repository\", \"image_tag\"), \"ref\", \"$1\", \"ref\", \"(.+):\"))",
+                  "format": "table",
+                  "instant": true,
+                  "range": false,
+                  "refId": "A"
+                }
+              ],
+              "title": "Running images without a vulnerability report",
+              "transformations": [
+                {
+                  "id": "organize",
+                  "options": {
+                    "excludeByName": {
+                      "Time": true,
+                      "Value": true
+                    },
+                    "indexByName": {},
+                    "renameByName": {
+                      "image_spec": "Image",
+                      "namespace": "Namespace"
+                    }
+                  }
+                }
+              ],
+              "type": "table"
+            }
+          ]
         }
       ],
       "refresh": false,
@@ -1680,6 +1836,39 @@ data:
             "regex": "",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "All images",
+              "value": "image_repository=~\".+\""
+            },
+            "description": "Own images are only fixed in their own repository; third-party ones only by a version bump.",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Images",
+            "multi": false,
+            "name": "scope",
+            "options": [
+              {
+                "selected": true,
+                "text": "All images",
+                "value": "image_repository=~\".+\""
+              },
+              {
+                "selected": false,
+                "text": "Mine",
+                "value": "image_repository=~\"bruno00o/.+|doublons|gaspard/.+\""
+              },
+              {
+                "selected": false,
+                "text": "Third-party",
+                "value": "image_repository!~\"bruno00o/.+|doublons|gaspard/.+\""
+              }
+            ],
+            "query": "All images : image_repository=~\".+\",Mine : image_repository=~\"bruno00o/.+|doublons|gaspard/.+\",Third-party : image_repository!~\"bruno00o/.+|doublons|gaspard/.+\"",
+            "skipUrlSync": false,
+            "type": "custom"
           }
         ]
       },

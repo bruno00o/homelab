@@ -95,9 +95,19 @@ spec:
           # under memory pressure is the worst moment to lose it.
           memory: 1Gi
 
-    # No longhornDriver.resources or longhornUI.resources: longhornManager above is the only
-    # component whose resources the chart exposes. Both blocks used to sit here and were
-    # ignored, which is why the two Deployments show up unbounded in `task policy:drift`.
+    # The chart ships it with no resources at all. Its memory follows the cluster's pod
+    # count, since it caches every pod, hence the headroom over what it uses today.
+    longhornGlobalManager:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+
+    # No longhornDriver.resources or longhornUI.resources: the chart exposes resources only
+    # for the two managers above. Both blocks used to sit here and were ignored, which is
+    # why the two Deployments show up unbounded in `task policy:drift`.
 
     metrics:
       serviceMonitor:

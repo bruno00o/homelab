@@ -44,6 +44,8 @@ longhorn-system Deployment/csi-snapshotter audit-*
 # for longhornManager only, so there is no key through which to give these two a limit.
 longhorn-system Deployment/longhorn-driver-deployer audit-*
 longhorn-system Deployment/longhorn-ui audit-*
+# The global manager has its limits, but the chart gives it no securityContext key.
+longhorn-system Deployment/longhorn-global-manager audit-disallow-privilege-escalation
 longhorn-system InstanceManager/instance-manager-* audit-*
 
 # node-exporter reads the host's /proc and /sys. The two StatefulSets fail on the
@@ -56,7 +58,6 @@ monitoring StatefulSet/prometheus-kube-prometheus-stack-prometheus audit-require
 
 # Trivy ships from mirror.gcr.io, same reasoning as Kyverno. trivy-server needs a writable
 # root for its vulnerability database.
-trivy-system Deployment/trivy-operator audit-require-resource-limits
 trivy-system Deployment/trivy-operator audit-restrict-registries
 trivy-system StatefulSet/trivy-server audit-disallow-privilege-escalation
 trivy-system StatefulSet/trivy-server audit-restrict-registries

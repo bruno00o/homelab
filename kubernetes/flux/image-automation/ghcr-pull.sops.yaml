@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: ENC[AES256_GCM,data:iyRoGBd0rxTERE6Fy1032ftw4ootWux/gs+fYsOHPlV6OP+aG9FjJD6/Ro60RiNRy31+B/EWdMLXJI96s4dyWQr8knvd7eydaPRmdHA6rOc50NFc7yTXbKw0DVAJm4uf8q2caEeyP0WkjuJ7/Q17mfofPcMjTI5GG0Oyux0Ts/Soghz5ewwzjYxxRMS9j9HIx95gyxpygYN9roZf2F2nfdc0eIGn6ntiJYlMCQ/W0SMDrtWd5yM+77Iq40kwuVtJ6moRLP/2u5TGdJeERiaKfBT6SEE7OuUeAGuCLxxE/6XdTELFg/Vb0vbr+cY=,iv:NEcIsqOgWE+3LnuyqCkpjWYsfdxdBsNWAiNHDjsaZi0=,tag:D1np+NrZKazObaFEMZHCpg==,type:str]
+kind: Secret
+metadata:
+  name: ghcr-pull
+  namespace: flux-system
+type: kubernetes.io/dockerconfigjson
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBkUy84MDhuYlNlZWVqZjhY
+        YmpFaWo2QlRra1B2eTZMN3J5anA2UmQzRVcwCjdUK0NVeW54VDdhSDhHMzZDZHlj
+        dldlaXk4ZVVsaWljRUxzMHArcWhaK28KLS0tIEtoSmVqaWJtRlN5NDJabFNZVWtE
+        NTJXSjBHMFFqN2tVVEJmOUsyZW1XSU0K0W4GkoyVxCcVLkSgBjP2aQZJNgwv6H3X
+        tgLYqFA5SQIdIRQQz65RLoK+9/xbq2nokGxsxOYKjZsA5mza97OJeA==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWS21tdnBZZVNuRGNIUitO
+        bEN6cVhlR3VpbGRoZC81L3RUNWtTa2hiV0JJClBKckZvYXJ2ZkF4RklyYUtpZHdt
+        RGx6MzdnR3JnNTBNOHZYSlRQckJmMlkKLS0tIGJBeUJVNWJ1d3JCbjR1Z1U2bXI4
+        WDZFTDlvSy94Wjg3NnZVU2w4aE0xL2MK5XwMioDxGPwt6iqFUwhHI5FW2UmN9VQr
+        OgcVy4TeDc1N+qI711UDMGDSrZirgAgJkFqetqjf3JQtHPy/Y967jA==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-07T16:26:17Z"
+  mac: ENC[AES256_GCM,data:s2smjLuKPZbGUuokftiDrG/51yEWV/9+YaWyiH0OFM2BYeacWKv1FCQsh+g67wKyQ9vAIctY/MoYogH7x9xhVvvIyPDmtgP8fiGhSqQKRbfUxPhc36rdEB6EY11WLRaqKsREazOEM1Au4e8g6CdfJjPjVn8u4kVRs3es9yrU/ig=,iv:ix5qFQLxVcGUyzih6rdZepIJ3bNsMXXuS0A86onMPU0=,tag:w7ZLOF7yg1aagM/AMUvlmQ==,type:str]
+  version: 3.13.3

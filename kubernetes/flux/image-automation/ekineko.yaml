@@ -1,0 +1,94 @@
+# Releases only: a semver tag, which release-please pushes. The sha-* tags are for previews
+# and are ignored here, as is any pre-release.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: ekineko-server
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/ekineko-server
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: ekineko-server
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: ekineko-server
+  policy:
+    semver:
+      range: ">=1.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: ekineko-web
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/ekineko-web
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: ekineko-web
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: ekineko-web
+  policy:
+    semver:
+      range: ">=1.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: ekineko-motis
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/ekineko-motis
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: ekineko-motis
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: ekineko-motis
+  policy:
+    semver:
+      range: ">=1.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: ekineko-postgres
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/ekineko-postgres
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: ekineko-postgres
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: ekineko-postgres
+  policy:
+    semver:
+      range: ">=1.0.0"

@@ -1,0 +1,45 @@
+---
+# Our own images are deployed by Flux the moment a release is published; third-party ones
+# stay with Renovate, for its quarantine and automerge rules. Only lines carrying an
+# `$imagepolicy` marker are ever rewritten.
+#
+# Its own source, with its own key: the one Flux syncs through stays read-only, and this
+# one is the only deploy key allowed to write, and to push past the checks on main.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: homelab-write
+  namespace: flux-system
+spec:
+  interval: 1h
+  ref:
+    branch: main
+  secretRef:
+    name: flux-image-automation
+  url: ssh://git@github.com/bruno00o/homelab
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: homelab
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: homelab-write
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxcdbot
+        email: fluxcdbot@users.noreply.github.com
+      messageTemplate: >-
+        chore(images): {{ range $i, $c := .Changed.Changes }}{{ if $i }}, {{ end }}{{ $c.OldValue }} -> {{ $c.NewValue }}{{ end }}
+    push:
+      branch: main
+  update:
+    path: ./kubernetes/apps
+    strategy: Setters

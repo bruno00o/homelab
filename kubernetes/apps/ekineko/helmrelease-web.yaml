@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bruno00o/ekineko-web
-              tag: sha-4780151
+              tag: sha-4780151 # {"$imagepolicy": "flux-system:ekineko-web:tag"}
             env:
               TZ: ${TIMEZONE}
               NODE_ENV: production

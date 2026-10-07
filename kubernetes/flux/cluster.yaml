@@ -43,6 +43,31 @@ spec:
       name: sops-age
 
 ---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: image-automation
+  namespace: flux-system
+spec:
+  interval: 1h
+  timeout: 5m
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/flux/image-automation
+  prune: true
+  # An ImagePolicy stays not ready until its project publishes a first release, which would
+  # hold this Kustomization failed and alerting in the meantime.
+  wait: false
+  dependsOn:
+    - name: cluster-vars
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+
+---
 # Upstream CRDs, from their own source. Own Kustomization rather than a directory of
 # infrastructure-controllers so a failed fetch blocks the CRDs alone instead of the 40-odd
 # resources next to them. No postBuild: substitution must not run over a foreign repo.

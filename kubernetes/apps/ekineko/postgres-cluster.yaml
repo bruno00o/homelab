@@ -8,7 +8,7 @@ spec:
     # The CloudNativePG PostGIS image with TimescaleDB and its toolkit added, built by the
     # project itself: no upstream image carries all three.
     - major: 17
-      image: ghcr.io/bruno00o/ekineko-postgres:sha-4780151
+      image: ghcr.io/bruno00o/ekineko-postgres:sha-4780151 # {"$imagepolicy": "flux-system:ekineko-postgres"}
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster

@@ -15,6 +15,8 @@ spec:
       name: "*"
     - kind: GitRepository
       name: "*"
+    - kind: ImageUpdateAutomation
+      name: "*"
   exclusionList:
     - ".*upgrade.*checksum.*"
     - ".*no changes.*"

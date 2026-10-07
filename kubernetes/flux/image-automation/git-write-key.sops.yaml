@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flux-image-automation
+  namespace: flux-system
+stringData:
+  identity: ENC[AES256_GCM,data:zkQ5x3uSmYvDGg+8L5eeTvCXM4HmaBwLnxJba6d2TDureJglm6se0wUYDJcvNLOVTskE/nxzESwQ5S5GydCjguWaE2Mh1UNvjVrePfLnFCxYaGhS8V5Xjv+1rruOMa0fGZXQQQRvuAkmaLT1TIa3hVWv3YnWEOU=,iv:mADlI0fZ29z1+7pwAUs2VcOn7WpeKMM+KKN7DB8I/2g=,tag:PlB0ydzTNnfyqqfy6kwQdg==,type:str]
+  identity.pub: ENC[AES256_GCM,data:xizY1faPZv4xX5h6EjWqq4sT35xBn7nBVCQ7o51NbyyHRH39DnnLj0UFviu5BwcCNUkHCAFPg+PcnM1gLDnQs+VNHWszzNyiZILosd9qkmZP,iv:5kzgopyHs7enmOxq31S1W4DXo4CfNrta3v1sMPfo4is=,tag:6m37qGZI8xTOx38RLNhVfw==,type:str]
+  known_hosts: ENC[AES256_GCM,data:aWSvEsJq1enOYiixYcpXAIIRJl8DrWDYPh2Ih5DEoJmsH9zsnQV4zZid8IoQJLUdli8U+/CnEr34j8IRVqi7IJy7yGQJiPknnFQaCFfSVKXYQ1pfzPwVnWKd4q/uJnQtYqKAOtH80lrXt0r9dKbGIkcUmkI8b9zkc1cDcADiKBkUvjKDadLAKMfdQ7qHZCupqloSaVH/wkxzFCWuiNY8mZEwcHRBWmBljwDm,iv:DVYI4mAuB2qfLnHroqYBPOjm54EoaCU5y30FWOKws6A=,tag:FEwbiDEV86WFxWZjZvhm2A==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB1ZjRWSHRkN2hnT2lPQmUw
+        ZzcvWnhkMXQ1bGJQMlNNMUxZRWp5Z3l2NWpNCnZWNnRSWGlmOTZDcXNWUXluZzlk
+        YkNiWkVDcUNtbXRxc2tOUXRacldrdlEKLS0tIHdMYkVoOHNPUjQzNXVUbUNxeE92
+        NWt5SUVFTXVsMTkvZVExM011UnRMZW8KwGv3xzbntxH3701EkonyWNOh3SX1kFtk
+        hPDls+cq8oM5zHCEglmfij7ph3Pshz6Ax078qA2BWp+S95Lqs200xw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0c3VpRWJJNy9WZXJBaVBD
+        R2M1VTY0V3RPTlFVSXE5NktSU1JVckhKOWgwClV4bHM5OEtDVXJ1L3d1V0praHZV
+        d0lVVGxUeTBtajlLNWNLU0xCTHk2VnMKLS0tIGRXalBUaFpiQ21KZGNLdU1oS0dL
+        OFIwN2pFNzNTV24rd3FRRUtjZXBhTWMK3I/v955pWFevzWne2UK1OGcucNNdwMGR
+        RuwAKu39sYFjYLJtZYvE1TkZrJ3A43FL8ONxGz+0s6RhBGWUEnIerg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-07T16:26:17Z"
+  mac: ENC[AES256_GCM,data:iJ8pg193wx0qoe5gtSZ6eLTQJaie1de5G92aK6dG29NDUATf8r05Pk5W2ZibX64YifL0Gfud+aHIUA65Hj1irDUPUVlqW3yJryhWltrDRLEMhB0Z4j7zBy/AiESHXgobPQCM1sQmb35iIo0YzyLSO4qto3a3uoMXBqQA3s0wQtE=,iv:xona33SBQVOXY05dGjtUwS2Cmb2uLMSst0oC2NO4wug=,tag:zPiaz7bI/kxgw51/RaHp9g==,type:str]
+  version: 3.13.3

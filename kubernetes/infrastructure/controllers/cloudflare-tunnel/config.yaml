@@ -42,7 +42,6 @@ data:
         service: http://portfolio.portfolio.svc.cluster.local:8080
       - hostname: doublons.${PROJECTS_DOMAIN}
         service: http://doublons.doublons.svc.cluster.local:3000
-      # Answers only once ekineko.app has a DNS record pointing at the tunnel.
       - hostname: ekineko.app
         path: ^/(api|ws)(/|$)
         service: http://ekineko-server.ekineko.svc.cluster.local:8800

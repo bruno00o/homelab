@@ -9,6 +9,7 @@ resources:
   - helmrelease-server.yaml
   - helmrelease-web.yaml
   - httproute.yaml
+  - dnsendpoint.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:

@@ -40,6 +40,7 @@ spec:
     domainFilters:
       - ${PROJECTS_DOMAIN}
       - ${PUBLIC_DOMAIN}
+      - ekineko.app
 
     extraArgs:
       - --cloudflare-proxied

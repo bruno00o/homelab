@@ -1,0 +1,127 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: ekineko-postgres
+  namespace: ekineko
+spec:
+  instances: 2
+
+  # The CloudNativePG PostGIS image with TimescaleDB and its toolkit added, built by the
+  # project itself: no upstream image carries all three.
+  imageName: ghcr.io/bruno00o/ekineko-postgres:sha-4780151
+  imagePullSecrets:
+    - name: ghcr-pull
+
+  # Required, not the default `preferred`: each volume has a single replica on its
+  # instance's node (longhorn-cnpg), so two instances on one node would share one disk.
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+
+  storage:
+    storageClass: longhorn-cnpg
+    size: 20Gi
+
+  postgresql:
+    shared_preload_libraries:
+      - timescaledb
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+      # Do not remove: an inactive replication slot makes Postgres retain WAL forever, which
+      # filled the volume and crashlooped the instance. This drops the slot, not the cluster.
+      max_slot_wal_keep_size: "2GB"
+      # The database has no egress to the internet; this keeps it from trying.
+      timescaledb.telemetry_level: "off"
+
+  # No secret: the operator generates ekineko-postgres-app, whose `uri` the server reads.
+  # That URI targets the -rw service, and must: the GTFS tables are UNLOGGED, so a replica
+  # has them empty, and a failover empties them until the server reimports.
+  bootstrap:
+    initdb:
+      database: ekineko
+      owner: ekineko
+
+  monitoring:
+    enablePodMonitor: true
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: ekineko-backups
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+---
+# CREATE EXTENSION needs a superuser and the application owner is not one. The operator
+# applies this as one, and keeps it applied on a cluster restored from backup.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: ekineko
+  namespace: ekineko
+spec:
+  cluster:
+    name: ekineko-postgres
+  name: ekineko
+  owner: ekineko
+  extensions:
+    # A version here is what makes the operator run ALTER EXTENSION ... UPDATE when the
+    # image brings a new one; bump it with the image.
+    - name: postgis
+      ensure: present
+      version: "3.6.4"
+    - name: timescaledb
+      ensure: present
+      version: "2.30.2"
+    - name: timescaledb_toolkit
+      ensure: present
+      version: "1.26.0"
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: ekineko-backups
+  namespace: ekineko
+spec:
+  retentionPolicy: "30d"
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 384Mi
+  configuration:
+    destinationPath: s3://cnpg-ekineko/
+    endpointURL: http://rustfs.rustfs.svc.cluster.local:9000
+    s3Credentials:
+      accessKeyId:
+        name: rustfs-s3-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: rustfs-s3-credentials
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: ekineko-postgres-daily
+  namespace: ekineko
+spec:
+  schedule: "0 45 3 * * *"
+  backupOwnerReference: self
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+  cluster:
+    name: ekineko-postgres

@@ -1,0 +1,311 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway-server
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-server
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 8800 }
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress-server
+  namespace: ekineko
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-server
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "8800", protocol: TCP }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cloudflare-tunnel-server
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-server
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 8800 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway-web
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-web
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 3000 }
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress-web
+  namespace: ekineko
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-web
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "3000", protocol: TCP }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cloudflare-tunnel-web
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-web
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 3000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-web-to-server
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-web
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ekineko-server
+      ports:
+        - { protocol: TCP, port: 8800 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-server-from-web
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-server
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ekineko-web
+      ports:
+        - { protocol: TCP, port: 8800 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-server-to-postgres
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-server
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: ekineko-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+
+---
+# The server pod (and MOTIS beside it) reaches these hosts and nothing else outside. The
+# DNS rule is what makes toFQDNs work: it only allows addresses Cilium's DNS proxy has
+# seen resolved. matchPattern "*" because once this endpoint's DNS goes through the proxy,
+# a narrower pattern would refuse every other lookup, the database included.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-server-upstream-egress
+  namespace: ekineko
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ekineko-server
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: prim.iledefrance-mobilites.fr
+        - matchName: eu.ftp.opendatasoft.com
+        - matchName: data.iledefrance-mobilites.fr
+        - matchName: data.geopf.fr
+        - matchName: download.geofabrik.de
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cnpg-operator
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: ekineko-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-ingress
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: ekineko-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ekineko-server
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: ekineko-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+        # The instance manager status port the replicas poll each other on.
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape-postgres
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: ekineko-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - { protocol: TCP, port: 9187 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-egress
+  namespace: ekineko
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: ekineko-postgres
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: ekineko-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+    # WAL archiving and base backups, through the barman sidecar.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - { protocol: TCP, port: 9000 }
+
+---
+# Deliberately not a `ports:` block with no `to:` — that reads as "to anywhere" and would
+# open the database pods to the whole internet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: ekineko
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: ekineko-postgres
+  egress:
+    - toEntities:
+        - kube-apiserver

@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: ENC[AES256_GCM,data:bj6h2pk8RWrh0yD09wQ8kl+b3VDYP68v9zk8iVM8q1RswL3Qe7q7ozxUI3DoiY9ORmlujft9Av7OLyegs1u6UKfxdigt2Qhs2Lkw8pUnlHx2Vxch5ta0zOKe4e7yIYrfCZu8QZmAG1m4PMvm64fjsRoLOyIgIzKNKlyc1IvxLpPxAijXPO6SxfQF2tdZVi6B,iv:gbaqFvzUNWqVjfDOX0ZFKJ4AMk1myY1Lhdh3Iv6SyCw=,tag:woI8l5Og+BU2NdYVyQDDCw==,type:str]
+kind: Secret
+metadata:
+  name: ghcr-pull
+  namespace: ekineko
+type: kubernetes.io/dockerconfigjson
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBJd09Dak1BQ1JlejRySmdr
+        K1NYVU0yYWNRWnMySlVEa2plNG04SjdYRlJVClpwa3RPM1JsRzFnYWNnY2xvRHlR
+        dk1mZGtOeUZ0NEVXNHhCNSt1MUhJOFEKLS0tIHNMOE11bjVSRXJRWnFuT2l5bTNw
+        dmI5N01RSCs4UlVXZnQ2TTRIbU12WmsKQla4Gm4aKBc4ek7xLJlEm5uQQ0MfyZNC
+        LJCFW803wWAtdTjnYMwmr4XP8CTJLD6s6tQuczxj5HW/T2XcbyWc3w==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB4U0hka0U4UVE1TXlVMm94
+        dXErUVVlK2E1cXd2Z0IxQlZNRlJGdTU5MDFnClkrV2RnSlpXNCtnTFZnUnpMK2tp
+        T2RWWTY1d1B1aTdrd3lhS0hPWHB2MUEKLS0tIG1KVzRiU3lXMDQ4S2NNZXFCYnl4
+        blJ1Q2RteVNYZit0OE5QeWRwbE9ZUUUKg54NKRJu/nMLlfviTRgqjSVwk9ePMCzV
+        zlJSy1vgUs3pFbJuiPFzuTvkPLrbi6Z4EogEsb2i/z7PWROXO5MVBw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-07T13:11:18Z"
+  mac: ENC[AES256_GCM,data:l+n0tc93uSMsdxp7UFuYZ1zUQqYQSN4cNFsf4xNBF8VzlFFFvLepXPEgHptbiti4JWRGHOvXrLN267Ld8vxkqvbqJe14HewJKLTw05zq0YQwrwFQU7BjdHy/UYrrqK+XirLRuAsR98KHiNqql8JsbStFRvhCq0aMIlixL2IhUx8=,iv:L9hJnHTZzNn9s+AsIMPKBjePnXSm+9v6NTvwrRyr+vw=,tag:J0a/SMEirBl4edO84PXDZQ==,type:str]
+  version: 3.13.3

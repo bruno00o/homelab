@@ -6,6 +6,7 @@ resources:
   - authentik/ks.yaml
   - dawarich/ks.yaml
   - doublons/ks.yaml
+  - ekineko/ks.yaml
   - dozerdb/ks.yaml
   - gaspard/ks.yaml
   - homarr/ks.yaml

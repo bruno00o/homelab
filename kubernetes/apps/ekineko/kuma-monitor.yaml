@@ -1,0 +1,17 @@
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: ekineko
+  namespace: ekineko
+spec:
+  config:
+    type: http
+    name: ekineko
+    url: https://ekineko.${CLUSTER_DOMAIN}/api/health
+    interval: 60
+    ignore_tls: true
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

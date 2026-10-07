@@ -81,6 +81,15 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: ekineko
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 8800
+    - to:
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: gaspard
       ports:
         - protocol: TCP

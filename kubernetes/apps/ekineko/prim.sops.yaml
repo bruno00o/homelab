@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  EKINEKO_PRIM_KEY: ENC[AES256_GCM,data:8VCUir3NCMAosJT40B5Vyw==,iv:meNULedUBR6/uudfzBQ3dDUAj0UkPQAe9txXz5ey17Y=,tag:zWAEpqqwxSGSKz5bl11LCw==,type:str]
+kind: Secret
+metadata:
+  name: ekineko-prim
+  namespace: ekineko
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA1TGE1WmkrMmxOb3IxNXpv
+        cUpzblBTUDBCTUVBNnh6c1dvTDBiTCtrUVJ3Cmk2SEd3SHExWElsek94a1g2Y1RN
+        c1pnY2pmRHZzazBRWlA1eEdlcU9aMFUKLS0tIFNLSTJKaENKYllQMkJLcVBKbDBm
+        d1FIZkx0OElKOUZpTkhQNGxQTjBWdkEKdA6gh7piLnyDP/oSecylextr6yw0drzL
+        mq8jAOvvWU5xKI1gdnfGwlmPsfAU6Xv4YUdOtJsyNtya66tIDQ93Xg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBmR0JmeWxtSHMya1N5UjVV
+        QklnNGVTblI1YXlpdzBxSFk2bGY2dkt3SURjCnl3RVdXZzlRRUpTY0Q5UkJCUVg3
+        cU01WEN3Qkc5QmcvbXJYaWgxaGNNMVkKLS0tIHQ1dWlRenYvR0srLzhCWkRKZVI3
+        eVllZ1lBS2ZNbFJWdFVMcHFVd3dLMk0KTW2l8B/qSz2LYZWqjav9glSptqIOp6NI
+        YEp0P6WsV0ZVd1msr/dAuN7d8qQpeNsGvaKtzftp4XHHuMYp4fEYlQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-07T13:15:52Z"
+  mac: ENC[AES256_GCM,data:vvAMlr7bTaE1GkTQ8Yu1POipxJWBsNrYpjY185dzgHXrW4smSZYXeZ3UhG/lyALcNQRRWqowMChjzGdCWOM31683bdMhT7npxvcfeE4nh8ObQIo3bsY7JqW/FsyhNl5xdUxAVhj910cZMFbwTv4BWaD3XeY4mETuesJk7K2HSMQ=,iv:uckri6lGCfFRu6XyO46bBkOwmwZISwJ5hZy/4X56d5Q=,tag:jvkQZMtWBwceIEXbJ+pQKA==,type:str]
+  version: 3.13.3

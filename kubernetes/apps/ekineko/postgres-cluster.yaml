@@ -1,4 +1,16 @@
 apiVersion: postgresql.cnpg.io/v1
+kind: ImageCatalog
+metadata:
+  name: ekineko-postgres
+  namespace: ekineko
+spec:
+  images:
+    # The CloudNativePG PostGIS image with TimescaleDB and its toolkit added, built by the
+    # project itself: no upstream image carries all three.
+    - major: 17
+      image: ghcr.io/bruno00o/ekineko-postgres:sha-4780151
+---
+apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: ekineko-postgres
@@ -6,9 +18,13 @@ metadata:
 spec:
   instances: 2
 
-  # The CloudNativePG PostGIS image with TimescaleDB and its toolkit added, built by the
-  # project itself: no upstream image carries all three.
-  imageName: ghcr.io/bruno00o/ekineko-postgres:sha-4780151
+  # Through the catalog below rather than imageName: the operator reads the major version
+  # from an imageName tag and rejects one that is not a version, like sha-*.
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ImageCatalog
+    name: ekineko-postgres
+    major: 17
   imagePullSecrets:
     - name: ghcr-pull
 

@@ -8,7 +8,7 @@ spec:
     # The CloudNativePG PostGIS image with TimescaleDB and its toolkit added, built by the
     # project itself: no upstream image carries all three.
     - major: 17
-      image: ghcr.io/bruno00o/ekineko-postgres:sha-4780151 # {"$imagepolicy": "flux-system:ekineko-postgres"}
+      image: ghcr.io/bruno00o/ekineko-postgres:1.0.0 # {"$imagepolicy": "flux-system:ekineko-postgres"}
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -17,7 +17,6 @@ metadata:
   namespace: ekineko
 spec:
   instances: 2
-
   # Through the catalog below rather than imageName: the operator reads the major version
   # from an imageName tag and rejects one that is not a version, like sha-*.
   imageCatalogRef:
@@ -27,17 +26,14 @@ spec:
     major: 17
   imagePullSecrets:
     - name: ghcr-pull
-
   # Required, not the default `preferred`: each volume has a single replica on its
   # instance's node (longhorn-cnpg), so two instances on one node would share one disk.
   affinity:
     enablePodAntiAffinity: true
     podAntiAffinityType: required
-
   storage:
     storageClass: longhorn-cnpg
     size: 20Gi
-
   postgresql:
     shared_preload_libraries:
       - timescaledb
@@ -49,7 +45,6 @@ spec:
       max_slot_wal_keep_size: "2GB"
       # The database has no egress to the internet; this keeps it from trying.
       timescaledb.telemetry_level: "off"
-
   # No secret: the operator generates ekineko-postgres-app, whose `uri` the server reads.
   # That URI targets the -rw service, and must: the GTFS tables are UNLOGGED, so a replica
   # has them empty, and a failover empties them until the server reimports.
@@ -57,16 +52,13 @@ spec:
     initdb:
       database: ekineko
       owner: ekineko
-
   monitoring:
     enablePodMonitor: true
-
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
         barmanObjectName: ekineko-backups
-
   resources:
     requests:
       cpu: 100m

@@ -9,7 +9,6 @@ spec:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
-
   values:
     controllers:
       ekineko-server:
@@ -29,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bruno00o/ekineko-server
-              tag: sha-4780151 # {"$imagepolicy": "flux-system:ekineko-server:tag"}
+              tag: 1.0.0 # {"$imagepolicy": "flux-system:ekineko-server:tag"}
             env:
               TZ: ${TIMEZONE}
               EKINEKO_PORT: "8800"
@@ -118,7 +117,6 @@ spec:
               readOnlyRootFilesystem: true
               capabilities:
                 drop: ["ALL"]
-
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -127,14 +125,12 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-
     service:
       app:
         controller: ekineko-server
         ports:
           http:
             port: 8800
-
     persistence:
       # Downloaded and rebuilt from upstream, so no backup: see longhorn-no-backup.
       data:

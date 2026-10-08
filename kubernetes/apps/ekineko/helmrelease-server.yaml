@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bruno00o/ekineko-server
-              tag: 1.3.0 # {"$imagepolicy": "flux-system:ekineko-server:tag"}
+              tag: 1.4.0 # {"$imagepolicy": "flux-system:ekineko-server:tag"}
             env:
               TZ: ${TIMEZONE}
               EKINEKO_PORT: "8800"
@@ -80,7 +80,7 @@ spec:
           motis:
             image:
               repository: ghcr.io/bruno00o/ekineko-motis
-              tag: 1.3.0 # {"$imagepolicy": "flux-system:ekineko-motis:tag"}
+              tag: 1.4.0 # {"$imagepolicy": "flux-system:ekineko-motis:tag"}
             env:
               TZ: ${TIMEZONE}
             # The supervisor answers while a build runs, so the pod stays ready through one;

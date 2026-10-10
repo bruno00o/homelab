@@ -80,7 +80,7 @@ spec:
           motis:
             image:
               repository: ghcr.io/bruno00o/ekineko-motis
-              tag: 1.5.0 # {"$imagepolicy": "flux-system:ekineko-motis:tag"}
+              tag: 1.6.0 # {"$imagepolicy": "flux-system:ekineko-motis:tag"}
             env:
               TZ: ${TIMEZONE}
             # The supervisor answers while a build runs, so the pod stays ready through one;

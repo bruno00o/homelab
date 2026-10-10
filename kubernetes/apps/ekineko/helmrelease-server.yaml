@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bruno00o/ekineko-server
-              tag: 1.8.0 # {"$imagepolicy": "flux-system:ekineko-server:tag"}
+              tag: 1.9.0 # {"$imagepolicy": "flux-system:ekineko-server:tag"}
             env:
               TZ: ${TIMEZONE}
               EKINEKO_PORT: "8800"

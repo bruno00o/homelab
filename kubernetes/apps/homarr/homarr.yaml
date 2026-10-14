@@ -84,6 +84,25 @@ spec:
       automountServiceAccountToken: true
       securityContext:
         fsGroup: 1000
+      initContainers:
+        # The entrypoint writes nginx.conf from a template under /etc/nginx and refuses to
+        # start if nginx cannot load it, so that directory has to be writable. An emptyDir
+        # would hide the template, hence the copy. Same image as the app, already on the node.
+        - name: nginx-etc
+          image: ghcr.io/homarr-labs/homarr:v2.5.2
+          command: ["cp", "-a", "/etc/nginx/.", "/mnt/nginx-etc/"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: nginx-etc
+              mountPath: /mnt/nginx-etc
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
       containers:
         - name: homarr
           image: ghcr.io/homarr-labs/homarr:v2.5.2
@@ -164,6 +183,14 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
+            - name: nginx-etc
+              mountPath: /etc/nginx
+            - name: nginx-run
+              mountPath: /run/nginx
+            - name: nginx-log
+              mountPath: /var/log/nginx
+            - name: nginx-tmp
+              mountPath: /var/lib/nginx/tmp
           resources:
             requests:
               cpu: 100m
@@ -175,6 +202,14 @@ spec:
           persistentVolumeClaim:
             claimName: homarr-data
         - name: tmp
+          emptyDir: {}
+        - name: nginx-etc
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
+        - name: nginx-log
+          emptyDir: {}
+        - name: nginx-tmp
           emptyDir: {}
         - name: ca-cert
           secret:

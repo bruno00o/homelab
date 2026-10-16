@@ -21,6 +21,7 @@ resources:
   - qdrant/ks.yaml
   - random-gif/ks.yaml
   - umami/ks.yaml
+  - open-webui/ks.yaml
   - uptime-kuma/ks.yaml
   - ca-portal/ks.yaml
   - vaultwarden/ks.yaml

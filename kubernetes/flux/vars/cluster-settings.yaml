@@ -40,3 +40,6 @@ data:
   # The MatrixRTC SFU, the one service that cannot live in the cluster: WebRTC
   # media needs a public UDP range, which the tunnel does not carry.
   LIVEKIT_VM_IP: "51.15.252.124"
+  # The LLM machine, outside the cluster: llama-swap serves an OpenAI-compatible API on
+  # 8080, behind an API key.
+  JINBE_IP: "10.0.20.50"

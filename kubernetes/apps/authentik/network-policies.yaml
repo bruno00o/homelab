@@ -408,6 +408,13 @@ spec:
       ports:
         - protocol: TCP
           port: 9001
+    # jinbe, outside the cluster, for the llama-swap UI.
+    - to:
+        - ipBlock:
+            cidr: "${JINBE_IP}/32"
+      ports:
+        - protocol: TCP
+          port: 8080
 
 ---
 # Apiserver egress for both workloads in this namespace: authentik manages its outposts

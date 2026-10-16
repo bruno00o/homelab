@@ -1,0 +1,153 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      open-webui:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # SQLite on a ReadWriteOnce volume: two pods would share neither.
+        strategy: Recreate
+        initContainers:
+          # At startup the app empties its static directory and refills it from the
+          # frontend build, which a read-only root refuses. An emptyDir there would hide
+          # what the image ships beyond that build, hence the copy first.
+          static-copy:
+            image:
+              # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
+              repository: ghcr.io/open-webui/open-webui
+              tag: v0.12.3-slim
+            command: ["cp", "-a", "/app/backend/open_webui/static/.", "/mnt/static/"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+        containers:
+          app:
+            image:
+              # The slim image leaves out the local embedding and speech models: everything
+              # runs on jinbe.
+              # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
+              repository: ghcr.io/open-webui/open-webui
+              tag: v0.12.3-slim
+            # Most of these only seed the first boot: the app then keeps its settings in its
+            # own database and ignores the variable, unless it is about OAuth.
+            env:
+              TZ: ${TIMEZONE}
+              WEBUI_URL: https://chat.${CLUSTER_DOMAIN}
+              # The image runs as root and points HOME at /root, which this user cannot write.
+              HOME: /tmp
+              # No internet from this namespace: no Hugging Face, no update check.
+              OFFLINE_MODE: "true"
+              ANONYMIZED_TELEMETRY: "false"
+              ENABLE_COMMUNITY_SHARING: "false"
+              ENABLE_OLLAMA_API: "false"
+              OPENAI_API_BASE_URLS: http://${JINBE_IP}:8080/v1
+              DEFAULT_MODELS: qwen3.6
+              # Titles, tags and follow-ups do not need the reasoning pass.
+              TASK_MODEL_EXTERNAL: qwen3.6-nothink
+              RAG_EMBEDDING_ENGINE: openai
+              RAG_OPENAI_API_BASE_URL: http://${JINBE_IP}:8080/v1
+              RAG_EMBEDDING_MODEL: embeddinggemma-2
+              # embeddinggemma expects its task prompts, prepended as is: keep the trailing space.
+              RAG_EMBEDDING_QUERY_PREFIX: "task: search result | query: "
+              RAG_EMBEDDING_CONTENT_PREFIX: "title: none | text: "
+              ENABLE_SIGNUP: "false"
+              ENABLE_LOGIN_FORM: "false"
+              ENABLE_OAUTH_SIGNUP: "true"
+              OAUTH_PROVIDER_NAME: Authentik
+              OAUTH_CLIENT_ID: open-webui
+              OPENID_PROVIDER_URL: https://auth.${PUBLIC_DOMAIN}/application/o/open-webui/.well-known/openid-configuration
+              OPENID_REDIRECT_URI: https://chat.${CLUSTER_DOMAIN}/oauth/oidc/login/callback
+              OAUTH_SCOPES: openid email profile groups
+              ENABLE_OAUTH_ROLE_MANAGEMENT: "true"
+              OAUTH_ROLES_CLAIM: groups
+              OAUTH_ALLOWED_ROLES: homelab-admins,homelab-users
+              OAUTH_ADMIN_ROLES: homelab-admins
+            envFrom:
+              - secretRef:
+                  name: open-webui-secrets
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 8080
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 8080
+              startup:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 8080
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: open-webui
+        ports:
+          http:
+            port: 8080
+
+    persistence:
+      data:
+        storageClass: ${DEFAULT_STORAGE_CLASS}
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        globalMounts:
+          - path: /app/backend/data
+      static:
+        type: emptyDir
+        advancedMounts:
+          open-webui:
+            static-copy:
+              - path: /mnt/static
+            app:
+              - path: /app/backend/open_webui/static
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

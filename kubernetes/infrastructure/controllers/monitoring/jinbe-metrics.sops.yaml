@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jinbe-metrics
+  namespace: monitoring
+type: Opaque
+stringData:
+  token: ENC[AES256_GCM,data:CXeUT/HIi8r89FgMNcMThXi/Ur6D7XpLnnk0NtpW4JmZk7/iqwAUzaAUalCiwQ==,iv:m6CnvVbNKSUzvOiqdQOgZax3MNCzNZ8Tqb+r87id8ss=,tag:tSPeBJlpYcW9ZKdlfpLuLQ==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpdEZVWXRPWEV2V0YwZkhq
+        WWZINTJTUklvWWYrQnordGs0Z2ZYMVo0Q2dBCko1UzRQalVvV3hRdHcxdytlczNZ
+        NlZWZ0pkdm1rb2FaL2trUi9UMHlKZlUKLS0tIDJRVVYxRDFveWZlS1VmQ2hxemUw
+        SUF4QWJodjdhMGZ4RkZaSGlMOSthalUKC+gxhe7mzsVB79106hGf0F9rzsV/y8iH
+        MHxwHW6v+KFLLJHMNkPycURz0bpH0WCtXv93dmSBnCuOMIUIWD+cPQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpYTFTMWNvVGh0Slh0bE5W
+        Y1V5VVp2L3BzV3VWODFXdEk2YUxhakxub3lFClFZZGVNWnBNL0VYWWpndnE2ajZv
+        aVJqd1NHNTRRMit3RVlZaUhCVlNQSWMKLS0tIEltMk8zVzJVaEI5S3VFcVFtVU1E
+        U1pyVVZCeVlZQTRVUk1NblBtRWRGVE0KhiYe7X4KzTLuQHpP49BDJjCuDKmpU56Q
+        CARldt6uEdKnxebmRCAyoL0IjvQiy4xxObVNLmiHXH/0Ztrw+G/UDw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-16T17:45:10Z"
+  mac: ENC[AES256_GCM,data:xmxqrC+7YInEmwt517KrOaAHthQJtduUcGBN69SPtdPwJahweJmjN8wPZ1HzP1hMfbDXaxEoaPKFRq9qcw8LlD6o3ivzwxy/s63/8dKc8QMBVoqD/vXtoSQGOz05IOH/M2BwDwHPc91AywO+9M7WktJBTLre7qWJOdI5iRZIsu0=,iv:SxkoDO6rST0Avf8UL4R5ebREe+BV6tpIM6kzqLyx+HQ=,tag:Wb0wkz9p4dKubZNa6HwRQQ==,type:str]
+  version: 3.13.3

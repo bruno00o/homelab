@@ -9,12 +9,15 @@ resources:
   - dawarich-oidc.sops.yaml
   - paperless-oidc.sops.yaml
   - flux-oidc.sops.yaml
+  - openwebui-oidc.sops.yaml
+  - jinbe-proxy.sops.yaml
   - smtp.sops.yaml
   - valkey-auth.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
   - helmrelease.yaml
   - httproute.yaml
+  - jinbe.yaml
   - dnsendpoint.yaml
   - reference-grant.yaml
   - blueprints/

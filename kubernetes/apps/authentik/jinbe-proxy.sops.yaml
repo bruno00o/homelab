@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authentik-jinbe-proxy
+  namespace: authentik
+type: Opaque
+stringData:
+  jinbe_api_key: ENC[AES256_GCM,data:L9WVw8RWP7nx28y2DQCyPPXxcL9X6jriY6qBX5uKEceU6Po9f6TCgkrkQtp8,iv:5MX4nRHp23UB6wFeiym4tqQZUSxs7Lqwvm7+UWMozBg=,tag:MN6fMpjjsd1lp+P8UqOutg==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBYa0xybHh1NnFNRUpwbnlC
+        TzkwZXl2N3lxVitxRkltWXprc21sR1JVNUNvCjBrOVppVWhMYWRBNHRqTWw0NWQ4
+        WjNhNzgwWUVNOEJMckpWNERIK1pSUGsKLS0tIGlHVXVzOVZ6K1RETDcrZzFWUnRN
+        NXAxbFhTd2tkaUxabUdvSFFUM3RZbFUKmokPx+JgUtkQJl88G+RhYWKvMYDzR799
+        32uk0hbB0EGwSWU9jFMkVjn6agOumoELInCMfYpWVGxOZzDcZRHNfA==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBQUzNsVzZwd3lsaDlndk0r
+        VUlTdjFDUUkrOWFBSWRDb3NHa3Q3ZWVHRlUwCnh2enVLK2hNWTlLRU5CUVBZRVpx
+        d2ZIK1VnU1BvTkFmeHdVR2xEZmZLYXMKLS0tIGxucjVUaVRvenhSYnlXbnBVVjZO
+        dktSREoxODBBRUtUVFdVdEUxRUMvT3cK/tIZ6riAm+Vh8V1GQQFr/NCM3fD/u7ih
+        KND9qBOk/h+W54Ct2TMi8PwlVZcQzfCKWZ6xFmKVf6s0XiteeXQFMw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-16T17:45:10Z"
+  mac: ENC[AES256_GCM,data:FSfDKlp9qhSDHMGeSFhFvMbBeWCvJpofla/aYCxaQ4YMo138CFliGKtjEYsvLxbheJK2AWyVFDPrpwtjqoUuBOLkQLrpbzneEkvFnfy49QyxLlDrw0WxkjeWFesYi+xdz25mTMGp0la/26erZ6nzBXCzmi0MVX9LkcLn362cbig=,iv:PJ2F1oT6cQZbp18xgVDJOrjfC9WNai21NQStI66WChE=,tag:qzZqgN4XTxhyZBq7H6bkYw==,type:str]
+  version: 3.13.3

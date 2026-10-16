@@ -4,4 +4,5 @@ resources:
   - namespace.yaml
   - grafana-secret.sops.yaml
   - grafana-oauth-secret.sops.yaml
+  - jinbe-metrics.sops.yaml
   - helmrelease.yaml

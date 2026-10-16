@@ -1,0 +1,58 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway
+  namespace: open-webui
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: open-webui
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 8080 }
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: open-webui
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: open-webui
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "8080", protocol: TCP }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-open-webui
+  namespace: open-webui
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: open-webui
+  policyTypes: [Egress]
+  egress:
+    # Chat, tasks and embeddings, all on jinbe, outside the cluster.
+    - to:
+        - ipBlock: { cidr: "${JINBE_IP}/32" }
+      ports:
+        - { protocol: TCP, port: 8080 }
+    # OIDC discovery and the token exchange. Port 9000 is authentik's pod targetPort — the
+    # Service's 80 would never match, Cilium evaluates egress after DNAT.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
+      ports:
+        - { protocol: TCP, port: 9000 }

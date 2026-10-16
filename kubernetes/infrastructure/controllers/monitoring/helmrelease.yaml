@@ -197,6 +197,9 @@ spec:
               resources:
                 requests:
                   storage: 20Gi
+        # Mounted under /etc/prometheus/secrets/<name>/.
+        secrets:
+          - jinbe-metrics
         additionalScrapeConfigs:
           - job_name: etcd
             static_configs:
@@ -204,6 +207,13 @@ spec:
                   - ${NODE_LUFFY}:2381
                   - ${NODE_ZORO}:2381
                   - ${NODE_NAMI}:2381
+          # The LLM machine, outside the cluster. llama-swap wants its API key here too.
+          - job_name: jinbe
+            authorization:
+              credentials_file: /etc/prometheus/secrets/jinbe-metrics/token
+            static_configs:
+              - targets:
+                  - ${JINBE_IP}:8080
 
     alertmanager:
       config:

@@ -119,6 +119,16 @@ spec:
             secretKeyRef:
               name: authentik-mas-oidc
               key: mas_oidc_client_secret
+        - name: AUTHENTIK_OPENWEBUI_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-openwebui-oidc
+              key: openwebui_oidc_client_secret
+        - name: AUTHENTIK_JINBE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: authentik-jinbe-proxy
+              key: jinbe_api_key
         - name: AUTHENTIK_HOST_BROWSER
           value: "https://auth.${CLUSTER_DOMAIN}"
         - name: AUTHENTIK_HOST

@@ -51,6 +51,7 @@ spec:
             env:
               TZ: ${TIMEZONE}
               WEBUI_URL: https://chat.${CLUSTER_DOMAIN}
+              CORS_ALLOW_ORIGIN: https://chat.${CLUSTER_DOMAIN}
               # The image runs as root and points HOME at /root, which this user cannot write.
               HOME: /tmp
               # No internet from this namespace: no Hugging Face, no update check.

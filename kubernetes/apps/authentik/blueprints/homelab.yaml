@@ -49,6 +49,9 @@ data:
           users:
             - !Find [authentik_core.user, [username, bruno]]
           attributes:
+            # llama-swap ignores the user name, but authentik will not send the header
+            # without one.
+            jinbe_api_user: authentik
             jinbe_api_key: !Env AUTHENTIK_JINBE_API_KEY
 
       # =====================================================
@@ -124,6 +127,7 @@ data:
           internal_host: http://${JINBE_IP}:8080
           internal_host_ssl_validation: false
           basic_auth_enabled: true
+          basic_auth_user_attribute: jinbe_api_user
           basic_auth_password_attribute: jinbe_api_key
 
       - model: authentik_providers_oauth2.oauth2provider

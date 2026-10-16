@@ -26,7 +26,7 @@ spec:
               # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
               repository: ghcr.io/open-webui/open-webui
               tag: v0.12.3-slim
-            command: ["cp", "-a", "/app/backend/open_webui/static/.", "/mnt/static/"]
+            command: ["cp", "-R", "/app/backend/open_webui/static/.", "/mnt/static/"]
             resources:
               requests:
                 cpu: 10m

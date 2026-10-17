@@ -32,6 +32,10 @@ spec:
       enabled: true
     hostServices:
       enabled: true
+    # Without it Cilium ignores trafficDistribution, and spegel relies on PreferSameNode to
+    # serve each node's pulls from its own instance first.
+    loadBalancer:
+      serviceTopology: true
     l2announcements:
       enabled: true
     l2podAnnouncements:

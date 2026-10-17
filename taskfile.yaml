@@ -844,6 +844,16 @@ tasks:
     cmds:
       - sops {{.FILE}}
 
+  mqtt:passwd:
+    desc: Set a Mosquitto user's password, prompted and never shown (e.g. task mqtt:passwd MQTT_USER=ha)
+    interactive: true
+    deps: [deps:verify]
+    # Not USER: the shell already sets it, and the task would run for the login name.
+    requires:
+      vars: [MQTT_USER]
+    cmds:
+      - ./scripts/mqtt-passwd.sh {{.MQTT_USER}}
+
   sops:age-show:
     desc: Print an Age private key for backup (KEY=main|breakglass)
     silent: true

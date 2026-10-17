@@ -18,10 +18,9 @@ spec:
         strategy: RollingUpdate
         containers:
           app:
-            # renovate: datasource=docker depName=ghcr.io/bruno00o/portfolio
             image:
               repository: ghcr.io/bruno00o/portfolio
-              tag: latest@sha256:49426fdfec7f4c3df17a51d58e5db131f65086774ca28416196e33095909da84
+              tag: 1.6.0 # {"$imagepolicy": "flux-system:portfolio:tag"}
             env:
               TZ: ${TIMEZONE}
             probes:

@@ -132,6 +132,11 @@
       "minimumReleaseAge": null
     },
     {
+      "description": "Flux image automation deploys these releases itself (kubernetes/flux/image-automation). Renovate would open the same bump a second time",
+      "matchPackageNames": ["ghcr.io/bruno00o/portfolio"],
+      "enabled": false
+    },
+    {
       "description": "GitHub Actions run with repository credentials, so quarantine them whatever the update type - majors included, which the rule above does not cover",
       "matchManagers": ["github-actions"],
       "minimumReleaseAge": "3 days"

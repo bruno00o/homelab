@@ -1,0 +1,23 @@
+# Releases only, as for ekineko: the sha-* tags belong to the pull request previews. The
+# image is public, so no pull secret.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: portfolio
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/portfolio
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: portfolio
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: portfolio
+  policy:
+    semver:
+      range: ">=1.0.0"

@@ -5,3 +5,4 @@ resources:
   - ghcr-pull.sops.yaml
   - automation.yaml
   - ekineko.yaml
+  - portfolio.yaml

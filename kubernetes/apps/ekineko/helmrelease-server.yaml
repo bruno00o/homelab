@@ -37,7 +37,6 @@ spec:
               EKINEKO_GTFS_MOTIS: sidecar
               EKINEKO_MOTIS_URL: http://127.0.0.1:8080
               EKINEKO_CLIENT_IP_HEADER: cf-connecting-ip
-              EKINEKO_FEATURES: bus
               EKINEKO_DATABASE_URL:
                 valueFrom:
                   secretKeyRef:

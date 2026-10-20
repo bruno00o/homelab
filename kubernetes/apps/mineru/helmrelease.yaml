@@ -66,12 +66,14 @@ spec:
                 spec:
                   failureThreshold: 30
                   periodSeconds: 5
+            # The process keeps what it allocates between jobs: two jobs of a few pages each
+            # already brought it to the edge of a 4Gi limit.
             resources:
               requests:
                 cpu: 200m
-                memory: 1Gi
-              limits:
                 memory: 4Gi
+              limits:
+                memory: 6Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

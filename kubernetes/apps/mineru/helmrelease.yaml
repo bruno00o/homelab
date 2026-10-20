@@ -45,6 +45,8 @@ spec:
               # Clients fetch the result as soon as the job ends: no reason to keep the
               # files in the emptyDir for a day.
               MINERU_API_RETENTION_SECONDS: "3600"
+              # onnxruntime reports usage to Microsoft by default, and keeps a device id.
+              ORT_DISABLE_TELEMETRY: "1"
             probes:
               liveness:
                 enabled: true
@@ -90,12 +92,14 @@ spec:
       app:
         controller: mineru
         # Shared with clients outside the cluster. The API has no authentication that
-        # Open WebUI can send, so the address is only reachable from the homelab VLAN.
+        # Open WebUI can send, so the address is only reachable from the homelab VLAN and
+        # from the Mac that runs Gaspard.
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: ${LB_MINERU}
         loadBalancerSourceRanges:
           - 10.0.20.0/24
+          - 10.0.10.202/32
         ports:
           http:
             port: 8000

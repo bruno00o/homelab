@@ -107,3 +107,8 @@ spec:
         sizeLimit: 5Gi
         globalMounts:
           - path: /tmp
+      # Loading a model takes a file lock next to it, even when there is nothing to download.
+      locks:
+        type: emptyDir
+        globalMounts:
+          - path: /opt/mineru/models/.locks

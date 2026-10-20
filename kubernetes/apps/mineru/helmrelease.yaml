@@ -31,6 +31,9 @@ spec:
               - "2"
               - --vlm-max-concurrency
               - "4"
+              # Defaults to the working directory, which the read-only root refuses.
+              - --upload-dir
+              - /tmp
             env:
               MINERU_MODEL_VLM_SERVER_URL: http://${JINBE_IP}:8080/v1
               MINERU_MODEL_VLM_MODEL: mineru2.5-pro

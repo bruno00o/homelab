@@ -1,0 +1,60 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-clients
+  namespace: mineru
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mineru
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: open-webui
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: uptime-kuma
+      ports:
+        - { protocol: TCP, port: 8000 }
+
+---
+# The LoadBalancer address. Who may reach it is decided by the Service's
+# loadBalancerSourceRanges; once through, the traffic arrives with no pod identity.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-lb-ingress
+  namespace: mineru
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: mineru
+  ingress:
+    - fromEntities:
+        - world
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - { port: "8000", protocol: TCP }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-mineru
+  namespace: mineru
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mineru
+  policyTypes: [Egress]
+  egress:
+    # The VLM, on jinbe, outside the cluster.
+    - to:
+        - ipBlock: { cidr: "${JINBE_IP}/32" }
+      ports:
+        - { protocol: TCP, port: 8080 }

@@ -82,6 +82,14 @@ spec:
                     key: RAG_OPENAI_API_KEY
               RAG_TOP_K: "20"
               RAG_TOP_K_RERANKER: "5"
+              # Documents are read by MinerU, which keeps tables and reading order.
+              CONTENT_EXTRACTION_ENGINE: mineru
+              MINERU_API_MODE: local
+              MINERU_API_URL: http://mineru.mineru.svc.cluster.local:8000
+              MINERU_PARAMS: '{"tier": "standard"}'
+              MINERU_FILE_EXTENSIONS: pdf,png,jpg,jpeg,docx,pptx,xlsx
+              # Covers the whole job, and a long scan goes to the VLM page by page.
+              MINERU_API_TIMEOUT: "1800"
               ENABLE_SIGNUP: "false"
               ENABLE_LOGIN_FORM: "false"
               ENABLE_OAUTH_SIGNUP: "true"

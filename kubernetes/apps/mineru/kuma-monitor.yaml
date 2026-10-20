@@ -1,0 +1,15 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: mineru
+  namespace: mineru
+spec:
+  config:
+    type: http
+    name: MinerU
+    url: http://mineru.mineru.svc.cluster.local:8000/v1/health
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

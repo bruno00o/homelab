@@ -1,0 +1,106 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mineru
+  namespace: mineru
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      mineru:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              # Built from images/mineru by the Images workflow.
+              # renovate: datasource=docker depName=ghcr.io/bruno00o/mineru
+              repository: ghcr.io/bruno00o/mineru
+              tag: 4.0.12
+            # Layout, OCR and tables run here on CPU; the page reading goes to
+            # mineru2.5-pro on jinbe, loaded there on demand.
+            args:
+              - --tier
+              - standard
+              - --concurrency
+              - "2"
+              - --vlm-max-concurrency
+              - "4"
+            env:
+              MINERU_MODEL_VLM_SERVER_URL: http://${JINBE_IP}:8080/v1
+              MINERU_MODEL_VLM_MODEL: mineru2.5-pro
+              MINERU_MODEL_VLM_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: mineru-secrets
+                    key: VLM_API_KEY
+              # Clients fetch the result as soon as the job ends: no reason to keep the
+              # files in the emptyDir for a day.
+              MINERU_API_RETENTION_SECONDS: "3600"
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /v1/health
+                port: 8000
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /v1/health
+                port: 8000
+              startup:
+                enabled: true
+                type: HTTP
+                path: /v1/health
+                port: 8000
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 200m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: mineru
+        # Shared with clients outside the cluster. The API has no authentication that
+        # Open WebUI can send, so the address is only reachable from the homelab VLAN.
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: ${LB_MINERU}
+        loadBalancerSourceRanges:
+          - 10.0.20.0/24
+        ports:
+          http:
+            port: 8000
+
+    persistence:
+      # Uploads, job outputs and HOME.
+      tmp:
+        type: emptyDir
+        sizeLimit: 5Gi
+        globalMounts:
+          - path: /tmp

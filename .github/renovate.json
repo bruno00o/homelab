@@ -88,6 +88,16 @@
       ],
       "depNameTemplate": "alex1989hu/kubelet-serving-cert-approver",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "Versions pinned by an ARG in the images we build (images/)",
+      "managerFilePatterns": [
+        "/images/.+/Dockerfile$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)\\nARG\\s+[A-Z_]+=(?<currentValue>[^\\s]+)"
+      ]
     }
   ],
 

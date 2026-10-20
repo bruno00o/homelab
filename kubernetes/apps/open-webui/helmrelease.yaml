@@ -69,6 +69,19 @@ spec:
               # embeddinggemma expects its task prompts, prepended as is: keep the trailing space.
               RAG_EMBEDDING_QUERY_PREFIX: "task: search result | query: "
               RAG_EMBEDDING_CONTENT_PREFIX: "title: none | text: "
+              # Keyword and vector hits together, then reordered by the reranker on jinbe:
+              # retrieve wide, keep the few it ranks best.
+              ENABLE_RAG_HYBRID_SEARCH: "true"
+              RAG_RERANKING_ENGINE: external
+              RAG_RERANKING_MODEL: qwen3-reranker-0.6b
+              RAG_EXTERNAL_RERANKER_URL: http://${JINBE_IP}:8080/v1/rerank
+              RAG_EXTERNAL_RERANKER_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: open-webui-secrets
+                    key: RAG_OPENAI_API_KEY
+              RAG_TOP_K: "20"
+              RAG_TOP_K_RERANKER: "5"
               ENABLE_SIGNUP: "false"
               ENABLE_LOGIN_FORM: "false"
               ENABLE_OAUTH_SIGNUP: "true"

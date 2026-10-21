@@ -97,7 +97,9 @@ spec:
         annotations:
           io.cilium/lb-ipam-ips: ${LB_SEARXNG}
         loadBalancerSourceRanges:
+          # The Mac, over Wi-Fi and over Ethernet.
           - 10.0.10.202/32
+          - 10.0.10.213/32
           - ${JINBE_IP}/32
         ports:
           http:

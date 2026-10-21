@@ -101,7 +101,9 @@ spec:
           io.cilium/lb-ipam-ips: ${LB_MINERU}
         loadBalancerSourceRanges:
           - 10.0.20.0/24
+          # The Mac, over Wi-Fi and over Ethernet.
           - 10.0.10.202/32
+          - 10.0.10.213/32
         ports:
           http:
             port: 8000

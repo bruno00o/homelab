@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - searxng-secrets.sops.yaml
   - helmrelease.yaml
+  - httproute.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:

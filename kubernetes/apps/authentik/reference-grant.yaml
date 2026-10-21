@@ -21,6 +21,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: rustfs
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: searxng
   to:
     - group: ""
       kind: Service

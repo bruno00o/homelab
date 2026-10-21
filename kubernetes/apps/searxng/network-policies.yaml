@@ -17,6 +17,10 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: uptime-kuma
+        # The UI, through the embedded outpost.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
       ports:
         - { protocol: TCP, port: 8080 }
 

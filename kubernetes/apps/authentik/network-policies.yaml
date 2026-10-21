@@ -408,6 +408,13 @@ spec:
       ports:
         - protocol: TCP
           port: 9001
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: searxng
+      ports:
+        - protocol: TCP
+          port: 8080
     # jinbe, outside the cluster, for the llama-swap UI.
     - to:
         - ipBlock:

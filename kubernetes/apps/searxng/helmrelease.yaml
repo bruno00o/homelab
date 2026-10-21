@@ -80,6 +80,7 @@ spec:
             server:
               # Reached only from inside: no rate limiting, so no Valkey either.
               limiter: false
+              base_url: https://search.${CLUSTER_DOMAIN}/
               public_instance: false
               image_proxy: false
             ui:

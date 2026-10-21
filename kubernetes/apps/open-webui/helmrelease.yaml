@@ -90,6 +90,16 @@ spec:
               MINERU_FILE_EXTENSIONS: pdf,png,jpg,jpeg,docx,pptx,xlsx
               # Covers the whole job, and a long scan goes to the VLM page by page.
               MINERU_API_TIMEOUT: "1800"
+              # Web search goes through SearXNG, the only thing allowed out. The pages
+              # themselves are not fetched: this namespace has no internet, so the model
+              # reads the snippets.
+              ENABLE_WEB_SEARCH: "true"
+              WEB_SEARCH_ENGINE: searxng
+              SEARXNG_QUERY_URL: http://searxng.searxng.svc.cluster.local:8080/search
+              SEARXNG_LANGUAGE: fr
+              WEB_SEARCH_RESULT_COUNT: "5"
+              BYPASS_WEB_SEARCH_WEB_LOADER: "true"
+              BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL: "true"
               ENABLE_SIGNUP: "false"
               ENABLE_LOGIN_FORM: "false"
               ENABLE_OAUTH_SIGNUP: "true"

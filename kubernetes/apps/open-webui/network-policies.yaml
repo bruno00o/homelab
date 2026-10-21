@@ -55,6 +55,13 @@ spec:
               kubernetes.io/metadata.name: mineru
       ports:
         - { protocol: TCP, port: 8000 }
+    # Web search.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: searxng
+      ports:
+        - { protocol: TCP, port: 8080 }
     # OIDC discovery and the token exchange. Port 9000 is authentik's pod targetPort — the
     # Service's 80 would never match, Cilium evaluates egress after DNAT.
     - to:

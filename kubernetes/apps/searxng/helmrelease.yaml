@@ -1,0 +1,120 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: searxng
+  namespace: searxng
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      searxng:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              # renovate: datasource=docker depName=docker.io/searxng/searxng
+              repository: docker.io/searxng/searxng
+              tag: 2026.10.19-81371861f
+            env:
+              # Overrides the key in settings.yml, which stays out of the secret.
+              SEARXNG_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: searxng-secrets
+                    key: SEARXNG_SECRET
+              # The entrypoint would chown its volumes, which only root can do.
+              FORCE_OWNERSHIP: "false"
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /healthz
+                port: 8080
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /healthz
+                port: 8080
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 977
+        runAsGroup: 977
+        fsGroup: 977
+        seccompProfile:
+          type: RuntimeDefault
+
+    configMaps:
+      config:
+        data:
+          settings.yml: |
+            use_default_settings:
+              engines:
+                # Google and Qwant refuse this address, Startpage is switched off upstream.
+                keep_only: [duckduckgo, brave, bing, wikipedia]
+            general:
+              instance_name: SearXNG
+            search:
+              safe_search: 0
+              default_lang: fr
+              formats: [html, json]
+            server:
+              # Reached only from inside: no rate limiting, so no Valkey either.
+              limiter: false
+              public_instance: false
+              image_proxy: false
+            ui:
+              default_locale: fr
+            engines:
+              - name: bing
+                disabled: false
+
+    service:
+      app:
+        controller: searxng
+        # The JSON API answers anyone who reaches it, so the address is only open to the
+        # two machines whose coding agents search through it.
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: ${LB_SEARXNG}
+        loadBalancerSourceRanges:
+          - 10.0.10.202/32
+          - ${JINBE_IP}/32
+        ports:
+          http:
+            port: 8080
+
+    persistence:
+      config:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /etc/searxng
+            readOnly: true
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /var/cache/searxng
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

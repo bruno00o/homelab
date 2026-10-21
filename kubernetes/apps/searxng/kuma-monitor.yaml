@@ -1,0 +1,15 @@
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: searxng
+  namespace: searxng
+spec:
+  config:
+    type: http
+    name: SearXNG
+    url: http://searxng.searxng.svc.cluster.local:8080/healthz
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

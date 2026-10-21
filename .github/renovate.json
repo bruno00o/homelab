@@ -114,6 +114,12 @@
       "schedule": ["* 0-6 1 * *"]
     },
     {
+      "description": "SearXNG tags are a date and a commit. Docker versioning reads the commit as a compatibility suffix and would never move, so the date is read as the version. Weekly, since upstream builds several times a day",
+      "matchPackageNames": ["docker.io/searxng/searxng"],
+      "versioning": "regex:^(?<major>\\d{4})\\.(?<minor>\\d{1,2})\\.(?<patch>\\d{1,2})-[0-9a-f]+$",
+      "schedule": ["* 0-6 * * 1"]
+    },
+    {
       "description": "The Python of an image we build changes only by hand: a project caps the versions it supports, and docker versioning reads 3.13 to 3.15 as a minor bump. It automerged once and broke the MinerU build, which requires <3.15. Patches and digests still flow",
       "matchFileNames": [
         "images/**"

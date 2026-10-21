@@ -21,6 +21,7 @@ resources:
   - portfolio-previews/ks.yaml
   - qdrant/ks.yaml
   - random-gif/ks.yaml
+  - searxng/ks.yaml
   - umami/ks.yaml
   - open-webui/ks.yaml
   - uptime-kuma/ks.yaml

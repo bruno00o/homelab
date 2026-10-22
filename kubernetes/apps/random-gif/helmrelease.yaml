@@ -21,7 +21,7 @@ spec:
             # renovate: datasource=docker depName=ghcr.io/bruno00o/random-gif
             image:
               repository: ghcr.io/bruno00o/random-gif
-              tag: "1.2.2"
+              tag: "1.2.3"
             env:
               TZ: ${TIMEZONE}
               PORT: "8080"

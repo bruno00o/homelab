@@ -1,0 +1,25 @@
+# Releases only, as for ekineko. The range starts at 0.1.0 because the project is still
+# in 0.x, where a plain >=1.0.0 would match nothing.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: gaspard
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/gaspard
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: gaspard
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: gaspard
+  policy:
+    semver:
+      range: ">=0.1.0"

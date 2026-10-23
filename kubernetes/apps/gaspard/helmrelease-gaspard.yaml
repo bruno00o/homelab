@@ -1,0 +1,93 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gaspard
+  namespace: gaspard
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      gaspard:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: RollingUpdate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/bruno00o/gaspard
+              tag: 0.1.0 # {"$imagepolicy": "flux-system:gaspard:tag"}
+            env:
+              TZ: ${TIMEZONE}
+              GASPARD_DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-postgres-app
+                    key: uri
+              GASPARD_MCP_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-v2
+                    key: GASPARD_MCP_TOKEN
+              LLAMA_SWAP_KEY_GASPARD:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-v2
+                    key: LLAMA_SWAP_KEY_GASPARD
+            probes:
+              liveness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 8000
+              readiness:
+                enabled: true
+                type: HTTP
+                path: /health
+                port: 8000
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      enableServiceLinks: false
+      imagePullSecrets:
+        - name: ghcr-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: gaspard
+        ports:
+          http:
+            port: 8000
+
+    persistence:
+      # A secret rather than a ConfigMap: the repository is public.
+      config:
+        type: secret
+        name: gaspard-v2
+        items:
+          - key: gaspard.toml
+            path: gaspard.toml
+        globalMounts:
+          - path: /etc/gaspard
+            readOnly: true

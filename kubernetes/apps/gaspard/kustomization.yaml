@@ -9,8 +9,14 @@ resources:
   - helmrelease-llamacpp.yaml
   - helmrelease-lightrag.yaml
   - helmrelease-mcp.yaml
+  - ghcr-pull.sops.yaml
+  - rustfs-s3-credentials.sops.yaml
+  - gaspard-v2.sops.yaml
+  - postgres-cluster.yaml
+  - helmrelease-gaspard.yaml
   - httproute.yaml
   - network-policies.yaml
+  - network-policies-v2.yaml
   - kuma-monitor.yaml
 components:
   - ../../components/network-policies/base

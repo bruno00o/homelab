@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: ENC[AES256_GCM,data:JpQd6wvJbUdZEyJe9Z2UZK1pUWD0jvpEO0As729QEGQP5wYa8Bd+5fz0rH3Yo7cgf6GA38Il7SqdPraW5D3H4jktDsfr2RLzj3Gc8Mya7W7BlHqL5gVfAm/RCavmnM5jLD5hnVEKfW2ZKtPSkgS8DxBJqAa2Y6Lbm6fKUcNkKWAMcYEM853vPvop+2hsrfsixZBbgDegTJA+3zjWbeqJtl4pHZhtaPV6f/IBdDU9IEtylF/ED2vguiCFCpw3ITCA2RAzTcgLIDWiO9IkU5DdVsCGJRprB2t85XFNXkrbl4mM37+/KujrT4lx+YM=,iv:b7CWNEnSuu8q/ZD9Y0e0w26kzlO2i8uH7IiraeriVtU=,tag:4sE9cd4RyOniuOxZ+grMtg==,type:str]
+kind: Secret
+metadata:
+  name: ghcr-pull
+  namespace: gaspard
+type: kubernetes.io/dockerconfigjson
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBQZXdTamp6WS8xckdYWXph
+        STFwU09XTlY1bHZFR2g5RitQSFIzZjhON2dnCmRHelIwNlI5YzVIRGhvSDk3SFFp
+        d0I4R2lWMXlRRERzS0xnbkdWZUlTM1EKLS0tIC9LT2tMUzJNTFhDdkhRdzdRL0R6
+        cTM3aHpFWE0wblBJV0NYb0NGc0pwOWMKli8+7UF7DNZ0aVpk7xPJsHTFlGDFE/Yd
+        S955E0mCEltsuoJC1fCjIPnuCi+eqK3x9IOjU5j7C74PedaPA5ueGg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBaalduZWYwdlpTcHBFUXE4
+        d043elVkM2w5T2VnYVU1SE16WTdRNVk5NmdjCktlTWJtTEtYZDlIQjA1dU9tTHZK
+        MWxDTmVzMFVLUkc4NkpzZWJOR0Z5VGsKLS0tIDg4QkhxY0hIWlJCV3pYbkVzbzRa
+        MkpRY0hUSDRGL0tnN1JDOUEyeGJ2V3MKELpckrG2VWeIv0ZFlC+SHEssJCdAnJug
+        jCl9yvbnFCS28YQhw0tJ0fPSCCi7puSC2PDLG8BJwYNsb5Z9+W3zLA==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-23T15:52:10Z"
+  mac: ENC[AES256_GCM,data:+dMBvGNKNSrbWJpHNXbKw8GiajWukwFGkHFy2aO7pMv+2OMVjotpjjGA3hZGuWjjfwtCT9JFiD5TkZ1QVI7g3nydqkDtHcTQBX1wsIYKHnvxO41mK4C+iKwY/GhSuQKlcHXxFuDEWXZ3UgGS2WJe8iNLNpwQawRN3SSsOKsBIV4=,iv:Tx02ZtxDwZ4DbG5tCMuWJNZuix6rssSQvUBBTAIyaVo=,tag:jWbzX0yIZjtnacE22Y6scw==,type:str]
+  version: 3.13.3

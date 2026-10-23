@@ -38,6 +38,8 @@ data:
         service: http://mcp.gaspard.svc.cluster.local:8000
         originRequest:
           httpHostHeader: localhost:8000
+      - hostname: gaspard.${PROJECTS_DOMAIN}
+        service: http://gaspard.gaspard.svc.cluster.local:8000
       - hostname: bruno.${PROJECTS_DOMAIN}
         service: http://portfolio.portfolio.svc.cluster.local:8080
       - hostname: doublons.${PROJECTS_DOMAIN}

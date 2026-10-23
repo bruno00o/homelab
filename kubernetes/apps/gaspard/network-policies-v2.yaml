@@ -1,0 +1,155 @@
+---
+# claude.ai reaches the MCP endpoint through the tunnel, as with v1.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cloudflare-tunnel-gaspard
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gaspard
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gaspard-egress
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gaspard
+  policyTypes: [Egress]
+  egress:
+    # Embeddings and reranking, on jinbe, outside the cluster.
+    - to:
+        - ipBlock: { cidr: "${JINBE_IP}/32" }
+      ports:
+        - { protocol: TCP, port: 8080 }
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: gaspard-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cnpg-operator
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-ingress
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gaspard
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: gaspard-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+        # The instance manager status port the replicas poll each other on.
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape-postgres
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - { protocol: TCP, port: 9187 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-egress
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: gaspard-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+    # WAL archiving and base backups, through the barman sidecar.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - { protocol: TCP, port: 9000 }
+
+---
+# Deliberately not a `ports:` block with no `to:` — that reads as "to anywhere" and would
+# open the database pods to the whole internet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: gaspard
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  egress:
+    - toEntities:
+        - kube-apiserver

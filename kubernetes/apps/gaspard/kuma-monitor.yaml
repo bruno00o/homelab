@@ -14,3 +14,19 @@ spec:
       - "200-299"
     notification_name_list:
       - discord
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: gaspard
+  namespace: gaspard
+spec:
+  config:
+    type: http
+    name: Gaspard
+    url: https://gaspard.${PROJECTS_DOMAIN}/health
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

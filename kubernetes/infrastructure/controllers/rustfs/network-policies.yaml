@@ -36,6 +36,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: ekineko
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gaspard
       ports:
         - { protocol: TCP, port: 9000 }
 

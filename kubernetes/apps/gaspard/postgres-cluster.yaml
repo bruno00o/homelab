@@ -62,11 +62,10 @@ spec:
   name: gaspard
   owner: gaspard
   extensions:
-    # A version here is what makes the operator run ALTER EXTENSION ... UPDATE when the
-    # image brings a new one; bump it with the image.
+    # No version: the image tag is republished in place, so nodes can hold builds with
+    # different pgvector releases, and a pinned one may not exist on the node.
     - name: vector
       ensure: present
-      version: "0.8.7"
 ---
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore

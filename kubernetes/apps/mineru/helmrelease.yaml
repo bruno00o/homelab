@@ -67,11 +67,13 @@ spec:
                   failureThreshold: 30
                   periodSeconds: 5
             # The process keeps what it allocates between jobs: two jobs of a few pages each
-            # already brought it to the edge of a 4Gi limit.
+            # already brought it to the edge of a 4Gi limit. The request matches the limit: a
+            # long run climbs to it, and on a node with less free than that it took the whole
+            # node down instead of the container.
             resources:
               requests:
                 cpu: 200m
-                memory: 4Gi
+                memory: 6Gi
               limits:
                 memory: 6Gi
             securityContext:

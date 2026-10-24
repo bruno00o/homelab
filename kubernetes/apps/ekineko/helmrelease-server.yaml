@@ -37,6 +37,8 @@ spec:
               EKINEKO_GTFS_MOTIS: sidecar
               EKINEKO_MOTIS_URL: http://127.0.0.1:8080
               EKINEKO_CLIENT_IP_HEADER: cf-connecting-ip
+              # /api/status reports memory only to these hosts, never through Cloudflare.
+              EKINEKO_STATUS_INTERNAL_HOSTS: ekineko.${CLUSTER_DOMAIN},localhost,127.0.0.1,::1
               EKINEKO_DATABASE_URL:
                 valueFrom:
                   secretKeyRef:

@@ -337,6 +337,32 @@ spec:
               protocol: TCP
 
 ---
+# Gaspard reads its OAuth JWKS here, on the pod port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gaspard
+  namespace: authentik
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: authentik
+      app.kubernetes.io/component: server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gaspard
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gaspard
+      ports:
+        - protocol: TCP
+          port: 9000
+
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

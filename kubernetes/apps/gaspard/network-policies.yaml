@@ -41,6 +41,17 @@ spec:
               cnpg.io/cluster: gaspard-postgres
       ports:
         - { protocol: TCP, port: 5432 }
+    # The JWKS that OAuth access tokens are verified against, read in-cluster.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: authentik
+              app.kubernetes.io/component: server
+      ports:
+        - { protocol: TCP, port: 9000 }
 
 ---
 apiVersion: networking.k8s.io/v1

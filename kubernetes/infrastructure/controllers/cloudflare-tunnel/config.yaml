@@ -34,10 +34,6 @@ data:
         service: http://aroma-app.aroma.svc.cluster.local:3000
       - hostname: pb-aroma.${PROJECTS_DOMAIN}
         service: http://aroma-pocketbase.aroma.svc.cluster.local:8090
-      - hostname: gaspard-mcp.${PROJECTS_DOMAIN}
-        service: http://mcp.gaspard.svc.cluster.local:8000
-        originRequest:
-          httpHostHeader: localhost:8000
       - hostname: gaspard.${PROJECTS_DOMAIN}
         service: http://gaspard.gaspard.svc.cluster.local:8000
       - hostname: bruno.${PROJECTS_DOMAIN}

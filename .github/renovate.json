@@ -108,12 +108,6 @@
       "enabled": false
     },
     {
-      "description": "llama.cpp tags carry no version, only a build number behind a variant prefix. Default docker versioning finds nothing to compare, so the tag never moved: the pod ran a May build until 2026-07-31. The build number is read as a patch so the update automerges, and the monthly schedule is what keeps that bearable - upstream ships several builds a day",
-      "matchPackageNames": ["ghcr.io/ggml-org/llama.cpp"],
-      "versioning": "regex:^server-vulkan-b(?<patch>\\d+)$",
-      "schedule": ["* 0-6 1 * *"]
-    },
-    {
       "description": "SearXNG tags are a date and a commit. Docker versioning reads the commit as a compatibility suffix and would never move, so the date is read as the version. Weekly, since upstream builds several times a day",
       "matchPackageNames": ["docker.io/searxng/searxng"],
       "versioning": "regex:^(?<major>\\d{4})\\.(?<minor>\\d{1,2})\\.(?<patch>\\d{1,2})-[0-9a-f]+$",

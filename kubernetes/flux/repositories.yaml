@@ -163,15 +163,6 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: qdrant
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://qdrant.github.io/qdrant-helm
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
   name: immich
   namespace: flux-system
 spec:

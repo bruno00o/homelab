@@ -5,14 +5,6 @@ metadata:
   namespace: gaspard
 spec:
   endpoints:
-    - dnsName: gaspard-mcp.${PROJECTS_DOMAIN}
-      recordType: CNAME
-      targets:
-        - ${CF_TUNNEL_HOSTNAME}
-      providerSpecific:
-        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-          value: "true"
-    # v2, beside v1 until the connector moves over.
     - dnsName: gaspard.${PROJECTS_DOMAIN}
       recordType: CNAME
       targets:

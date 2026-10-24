@@ -1,172 +1,14 @@
 ---
+# claude.ai reaches the MCP endpoint through the tunnel.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-llamacpp-internet-egress
+  name: allow-ingress-from-cloudflare-tunnel-gaspard
   namespace: gaspard
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: llamacpp
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-            except:
-              - 10.0.0.0/8
-              - 172.16.0.0/12
-              - 192.168.0.0/16
-      ports:
-        - { protocol: TCP, port: 443 }
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-llamacpp-from-lightrag
-  namespace: gaspard
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: llamacpp
-  policyTypes: [Ingress]
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: lightrag
-      ports:
-        - { protocol: TCP, port: 1234 }
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-lightrag-egress
-  namespace: gaspard
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: lightrag
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: llamacpp
-      ports:
-        - { protocol: TCP, port: 1234 }
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: qdrant
-      ports:
-        - { protocol: TCP, port: 6333 }
-        - { protocol: TCP, port: 6334 }
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: dozerdb
-      ports:
-        - { protocol: TCP, port: 7687 }
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: valkey-system
-      ports:
-        - { protocol: TCP, port: 6379 }
-    - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-            except:
-              - 10.0.0.0/8
-              - 172.16.0.0/12
-              - 192.168.0.0/16
-      ports:
-        - { protocol: TCP, port: 443 }
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-lightrag-from-mcp
-  namespace: gaspard
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: lightrag
-  policyTypes: [Ingress]
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: mcp
-      ports:
-        - { protocol: TCP, port: 9621 }
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-ingress-from-gateway-lightrag
-  namespace: gaspard
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: lightrag
-  policyTypes: [Ingress]
-  ingress:
-    - from:
-        - ipBlock: { cidr: 10.0.20.0/24 }
-      ports:
-        - { protocol: TCP, port: 9621 }
-
----
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-gateway-proxy-ingress-lightrag
-  namespace: gaspard
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: lightrag
-  ingress:
-    - fromEntities: [ingress]
-      toPorts:
-        - ports:
-            - { port: "9621", protocol: TCP }
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-mcp-egress-lightrag
-  namespace: gaspard
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: mcp
-  policyTypes: [Egress]
-  egress:
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: lightrag
-      ports:
-        - { protocol: TCP, port: 9621 }
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-ingress-from-cloudflare-tunnel-mcp
-  namespace: gaspard
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: mcp
+      app.kubernetes.io/name: gaspard
   policyTypes: [Ingress]
   ingress:
     - from:
@@ -175,3 +17,139 @@ spec:
               kubernetes.io/metadata.name: cloudflare-tunnel
       ports:
         - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gaspard-egress
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gaspard
+  policyTypes: [Egress]
+  egress:
+    # Embeddings and reranking, on jinbe, outside the cluster.
+    - to:
+        - ipBlock: { cidr: "${JINBE_IP}/32" }
+      ports:
+        - { protocol: TCP, port: 8080 }
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: gaspard-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-cnpg-operator
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-ingress
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gaspard
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: gaspard-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+        # The instance manager status port the replicas poll each other on.
+        - { protocol: TCP, port: 8000 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape-postgres
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - { protocol: TCP, port: 9187 }
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-egress
+  namespace: gaspard
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: gaspard-postgres
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 8000 }
+    # WAL archiving and base backups, through the barman sidecar.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - { protocol: TCP, port: 9000 }
+
+---
+# Deliberately not a `ports:` block with no `to:` — that reads as "to anywhere" and would
+# open the database pods to the whole internet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: gaspard
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: gaspard-postgres
+  egress:
+    - toEntities:
+        - kube-apiserver

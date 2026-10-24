@@ -331,6 +331,11 @@ kind: KubeAPIServerConfig
 image: registry.k8s.io/kube-apiserver:{{ kubernetesVersion }}
 certExtraSANs:
   - 10.0.20.10
+{# Go lets the heap grow to twice what is live before collecting, and the apiserver was holding
+   most of a control plane's memory that way. A soft limit: past it Go collects more often,
+   it does not kill the process. #}
+env:
+  GOMEMLIMIT: 3GiB
 {# Talos's default let every reboot's dead pods pile up. A count, not an age: it caps how many
    terminated pods are kept and collects the oldest, it does not empty them. #}
 ---

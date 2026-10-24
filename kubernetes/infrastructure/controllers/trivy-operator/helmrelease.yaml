@@ -40,6 +40,9 @@ spec:
       builtInTrivyServer: true
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true
+      # Nothing reads the SBOM reports, yet they were most of what etcd held, and every
+      # apiserver kept them in memory. Vulnerability reports do not need them.
+      sbomGenerationEnabled: false
       # One series per (image, package, CVE), carrying a `fixed_version` label. This is
       # what splits "vulnerable" from "actionable" without touching the scan itself:
       # trivy.ignoreUnfixed would give the same split by deleting the unfixed findings

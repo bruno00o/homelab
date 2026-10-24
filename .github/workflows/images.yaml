@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - images/mineru/**
+      - images/**
       - .github/workflows/images.yaml
   workflow_dispatch:
 
@@ -12,8 +12,37 @@ permissions:
   contents: read
 
 jobs:
+  # Each image rebuilds only when its own folder changed, so a bump of one does not
+  # republish the other under the same tag. A manual run rebuilds both.
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    outputs:
+      mineru: ${{ steps.diff.outputs.mineru }}
+      chatterbox: ${{ steps.diff.outputs.chatterbox }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Diff
+        id: diff
+        env:
+          BEFORE: ${{ github.event.before }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          for image in mineru chatterbox; do
+            if [ "$EVENT" != push ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
+              || ! git diff --quiet "$BEFORE" HEAD -- "images/$image"; then
+              echo "$image=true" >> "$GITHUB_OUTPUT"
+            fi
+          done
+
   mineru:
     name: MinerU
+    needs: changes
+    if: needs.changes.outputs.mineru == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,4 +73,50 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/mineru:${{ steps.version.outputs.tag }}
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+  chatterbox:
+    name: Chatterbox
+    needs: changes
+    if: needs.changes.outputs.chatterbox == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Several gigabytes of ROCm PyTorch, built and pushed from the runner's own disk.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h /
+
+      # Chatterbox has no releases: the tag is its commit, then this repository's, so a
+      # change to the server or a dependency never overwrites a published tag.
+      - name: Read version
+        id: version
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          commit=$(grep -oP '(?<=^ARG CHATTERBOX_COMMIT=)\S+' images/chatterbox/Dockerfile)
+          echo "tag=${commit:0:7}-${SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: images/chatterbox
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/chatterbox:${{ steps.version.outputs.tag }}
           labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}

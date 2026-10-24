@@ -82,10 +82,11 @@ spec:
                     key: RAG_OPENAI_API_KEY
               RAG_TOP_K: "20"
               RAG_TOP_K_RERANKER: "5"
-              # Documents are read by MinerU, which keeps tables and reading order.
+              # Documents are read by MinerU, which keeps tables and reading order. It runs on
+              # jinbe, next to the model that reads the pages.
               CONTENT_EXTRACTION_ENGINE: mineru
               MINERU_API_MODE: local
-              MINERU_API_URL: http://mineru.mineru.svc.cluster.local:8000
+              MINERU_API_URL: http://${JINBE_IP}:8000
               MINERU_PARAMS: '{"tier": "standard"}'
               MINERU_FILE_EXTENSIONS: pdf,png,jpg,jpeg,docx,pptx,xlsx
               # Covers the whole job, and a long scan goes to the VLM page by page.

@@ -41,3 +41,20 @@ spec:
       - "200-299"
     notification_name_list:
       - discord
+
+---
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: jinbe-mineru
+  namespace: authentik
+spec:
+  config:
+    type: http
+    name: MinerU
+    url: http://${JINBE_IP}:8000/v1/health
+    interval: 60
+    accepted_statuscodes:
+      - "200-299"
+    notification_name_list:
+      - discord

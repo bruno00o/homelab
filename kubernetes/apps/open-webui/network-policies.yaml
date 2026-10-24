@@ -43,17 +43,11 @@ spec:
       app.kubernetes.io/name: open-webui
   policyTypes: [Egress]
   egress:
-    # Chat, tasks and embeddings, all on jinbe, outside the cluster.
+    # Chat, tasks, embeddings and document extraction, all on jinbe, outside the cluster.
     - to:
         - ipBlock: { cidr: "${JINBE_IP}/32" }
       ports:
         - { protocol: TCP, port: 8080 }
-    # Document extraction.
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: mineru
-      ports:
         - { protocol: TCP, port: 8000 }
     # Web search.
     - to:

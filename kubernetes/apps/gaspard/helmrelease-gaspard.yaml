@@ -37,6 +37,26 @@ spec:
                   secretKeyRef:
                     name: gaspard-v2
                     key: LLAMA_SWAP_KEY_GASPARD
+              GASPARD_S3_ENDPOINT:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-v2
+                    key: GASPARD_S3_ENDPOINT
+              GASPARD_S3_BUCKET:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-v2
+                    key: GASPARD_S3_BUCKET
+              GASPARD_S3_ACCESS_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-v2
+                    key: GASPARD_S3_ACCESS_KEY
+              GASPARD_S3_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: gaspard-v2
+                    key: GASPARD_S3_SECRET_KEY
             probes:
               liveness:
                 enabled: true

@@ -52,6 +52,16 @@ spec:
               app.kubernetes.io/component: server
       ports:
         - { protocol: TCP, port: 9000 }
+    # The gaspard bucket, which holds the figures it serves.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rustfs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rustfs
+      ports:
+        - { protocol: TCP, port: 9000 }
 
 ---
 apiVersion: networking.k8s.io/v1

@@ -219,6 +219,17 @@
       "groupName": "Flux",
       "labels": ["gitops"]
     },
+    {
+      "description": "Flux controllers ship ahead of the Flux release that carries their CRDs: bumped alone, notification-controller v1.10.0 expected Provider and Alert in v1 against v1beta3 CRDs and crashlooped, taking every alert with it. gotk-components.yaml is regenerated whole with flux install --export instead",
+      "matchFileNames": ["kubernetes/flux/flux-system/gotk-components.yaml"],
+      "enabled": false
+    },
+    {
+      "description": "The flux2 CLI is the signal to regenerate gotk-components.yaml, so it waits for a person",
+      "matchPackageNames": ["flux2"],
+      "automerge": false,
+      "labels": ["gitops", "review-required"]
+    },
 
     {
       "description": "Talos - review manually",

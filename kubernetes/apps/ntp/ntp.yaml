@@ -41,8 +41,13 @@ spec:
           # The image's own entrypoint generates a chrony.conf from environment
           # variables and runs it as root so it can chown its state directories. The
           # config is ten lines and belongs in git, so only the binary is used here.
+          # The pid file outlives a container restart in the emptyDir, and chronyd,
+          # pid 1 again, reads it as another chronyd already running.
           command:
-            - /usr/sbin/chronyd
+            - /bin/sh
+            - -c
+            - rm -f /run/chrony/chronyd.pid && exec /usr/sbin/chronyd "$@"
+            - chronyd
           args:
             - -d                        # foreground, log to stderr
             - -x                        # never touch the system clock

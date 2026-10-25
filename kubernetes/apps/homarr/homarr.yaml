@@ -89,7 +89,7 @@ spec:
         # start if nginx cannot load it, so that directory has to be writable. An emptyDir
         # would hide the template, hence the copy. Same image as the app, already on the node.
         - name: nginx-etc
-          image: ghcr.io/homarr-labs/homarr:v2.9.0
+          image: ghcr.io/homarr-labs/homarr:v2.9.1
           command: ["cp", "-a", "/etc/nginx/.", "/mnt/nginx-etc/"]
           securityContext:
             allowPrivilegeEscalation: false
@@ -105,7 +105,7 @@ spec:
               memory: 64Mi
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:v2.9.0
+          image: ghcr.io/homarr-labs/homarr:v2.9.1
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

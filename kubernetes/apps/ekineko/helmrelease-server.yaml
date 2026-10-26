@@ -39,7 +39,6 @@ spec:
               EKINEKO_CLIENT_IP_HEADER: cf-connecting-ip
               # /api/status reports memory only to these hosts, never through Cloudflare.
               EKINEKO_STATUS_INTERNAL_HOSTS: ekineko.${CLUSTER_DOMAIN},localhost,127.0.0.1,::1
-              EKINEKO_FEATURES: bus
               EKINEKO_DATABASE_URL:
                 valueFrom:
                   secretKeyRef:

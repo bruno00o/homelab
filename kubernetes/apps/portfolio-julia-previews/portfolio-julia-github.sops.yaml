@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: portfolio-julia-github
+  namespace: portfolio-julia-previews
+type: Opaque
+stringData:
+  username: ENC[AES256_GCM,data:tJ6IgA==,iv:+epomg5SQPsy9E86p23eC/fs3SykpDSpsrjch3QBMDg=,tag:1c6GYk6hcsfNU2sIuJXO/A==,type:str]
+  password: ENC[AES256_GCM,data:GhfWID7mRuRI0QenPRGxmJvGKQjwq5ynyvJrFE30OtgX5aqVASMrdHudIPi5gTWV/BAReG//P/UkMJH2xOkmRJisWY+UKPRQPoQv5ucNnok7S+cksTrKB20+LExu,iv:QO9J8olsoMdB/aEPKGoGzlkna1oMYv9oUVhtpx+jFBE=,tag:x/HnEbEtcGRvtxWgdMaGwQ==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzRGsxNE9ZSkhJRU1LbWNZ
+        YmorbCtFSEx0eExEZy96VnNuYW0wUlhxZTMwCkt1RjF3NjdpK3Jxdm40OUl5MWVY
+        a1lxK3NlWHFTYzFBMUJ6N1FUYkdPMmMKLS0tIDh1bUE1L0o2SzdUYmJIdTRVOTk1
+        ZEcvZ1dkeGQ3T0QzM29hMWJhczFBdkkKAZJZ/etOwpeOvbA93CnNOwTQG3jBa4qb
+        dTwd5/snwG96IzEbBd9RZX9W54bRdDxmOGYnRjqlG7oWjcCtuhAPxg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBQUkhneDJwVFkrM2liRjdo
+        NVFmVFlDc0cyby9pYVVYdGtlbnIvMXQ4MVhFCmo4ajVlZklCTzNvb2JWOVBOSU1h
+        c2pvKzlnSTJUV3VCQk9oYWpXdVEzQ2cKLS0tIDgyRG5kRnVLWHkrSGVaM29PN3lR
+        RHBoUEZYZHYrR3JuYUduS3JrQ0pkdm8K97GiUWLgdm2G8lsQUkDmAZGWJSC1pwvf
+        7JWwP+6DOcIfBFMqFYG16GtVwIzRq/qcNNxBKQ86vuUHSJJmiQmt+w==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-26T21:12:39Z"
+  mac: ENC[AES256_GCM,data:PiMAqRFxlK3jVZFJa7XjrcK4DsC90MDKUi1NCrDPoZKsSuX/k7ks+yFiIrtCFa98WoJYyl3UQ8jEmhSlBaneY3jtsjg4eZdUc/drSWcQGtuUAIZJVym8eIKYrV+Hbm2n6wjbgX+ZbjDQH2plkKZU4JGv8Zz+lIgtTUOBtxQa6Qo=,iv:Rdv5BENSDgBT3MQndcKuNOR2EEMv74PTGGwGu7yA+FE=,tag:ctt868a0rUOjFzzUpcFvrw==,type:str]
+  version: 3.13.3

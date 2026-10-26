@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: ENC[AES256_GCM,data:HUybJoRkCvLwOUY3/kh9ePerLSrcVHPixSyCifF6R6twAgssYmDoIteUciRFLZQn/aCn1hI3gT0Ku/Z4LZjyKTnsTx2a1dzvOwGvB2Zsl896PNnwpkF1XjSLfdR1AsoFyh7tKasdIO8oeMyoStmJ7nYs2j2yLL9DHKPtycjKBDe2PX8m/WJODj3l8SmlxximG6n2NkY8otF0Ze/62S8hpCo4/scB7+dhsFiYiU3Mw7eKxDp9q8fJiS1AEqKu4RAk6ew0KdomMJDD4oVYMgmkm3u1gOFWuDoJrXHFRecbGv/JHe/whsK0uRPqnS0=,iv:84MnelHIBQUDODkkeraMaOC39hKY9NRBgokbDC+ZJ6c=,tag:tiLBH3rGpbHfv+SmYjYLtA==,type:str]
+kind: Secret
+metadata:
+  name: ghcr-pull
+  namespace: portfolio-julia-previews
+type: kubernetes.io/dockerconfigjson
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDZk5XTnBMUE1FcktwNnp6
+        RXJCMGEyRk5WdFNyZTluaGJWWXFDWXhDQUF3ClZla0RPNEgxck5idkNqL0ZDSkZ4
+        MThqS1lSazZ6azN0eEQ0R1hDTk92aVEKLS0tIGFNOTV3bUUwSTRUQjdYZVVRWjdH
+        eXFGMUNOVWNBa2ppWUdGVndGM2FqdkkKEGyDTlCnRZkxjA3yUugIQlBKxw4skx3h
+        ouT9q6LNVxBRl1nNbpQl4vzY38vbRrkFhX3PJQ3XUwLW50qVhfABsw==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBKSVFYSEFodS8wTXF5SEda
+        Y24zN3lDSXJCMnVyTk5DbER6NG5UWGxlN0I0CmdKOUt2N25TakFXNTMrM0RKU096
+        QlBlMEExVTdseGY4blNzamNGR1BNZFEKLS0tIFg3eG10NFU0WVV5WC92d0xzT3hl
+        SXpCdXBwZUxFeHZQRGFtcUFjK2hSS1EK9hCYbuH3oaF6hAMB3DOtfH6fesxfOih0
+        K6u2d3pvDIre6QDunNGLd+JD2wqK4DwjiQp5Wspk8F4tZxeqbLYqKg==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-26T21:05:30Z"
+  mac: ENC[AES256_GCM,data:OvtlKp1nuysFBQLxyEiEfGqIMxsxLj1da6qXlC2LwhY1GA0bSW0TYmf7e0/r4OtN45WFjc2pMr2/vAhuK/wWq7ZrLTi991O+3JHIqqc9W1zdCBzkn0y4UGzPuFLA4AJuwrlYLUiv372hBXLav3pSRKrCMN/+0llmVlhzypLN0HU=,iv:sBJdRrcV9uPKtAyRROQCzLC8JjdxjLkvu1GnFccuWFY=,tag:mAuhTUiF//xVqL6+1WWVEQ==,type:str]
+  version: 3.13.3

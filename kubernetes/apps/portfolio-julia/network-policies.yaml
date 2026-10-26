@@ -1,0 +1,35 @@
+---
+# Both halves of the gateway ingress: the ipBlock for same-node host traffic, the Cilium
+# rule for the cross-node proxy identity an ipBlock cannot match. No egress beyond DNS:
+# the site serves from its own volume.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway
+  namespace: portfolio-julia
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio-julia
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 4321 }
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: portfolio-julia
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio-julia
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "4321", protocol: TCP }

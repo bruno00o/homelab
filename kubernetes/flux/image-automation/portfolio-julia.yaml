@@ -1,0 +1,24 @@
+# Releases only: the sha-* tags belong to the pull request previews.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: portfolio-julia
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/portfolio-julia
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: portfolio-julia
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: portfolio-julia
+  policy:
+    semver:
+      range: ">=1.0.0"

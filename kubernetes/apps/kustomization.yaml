@@ -17,6 +17,8 @@ resources:
   - paperless/ks.yaml
   - portfolio/ks.yaml
   - portfolio-previews/ks.yaml
+  - portfolio-julia/ks.yaml
+  - portfolio-julia-previews/ks.yaml
   - random-gif/ks.yaml
   - searxng/ks.yaml
   - umami/ks.yaml

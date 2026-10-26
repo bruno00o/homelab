@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - rbac.yaml
+  - portfolio-julia-previews-secrets.sops.yaml
+  - portfolio-julia-github.sops.yaml
+  - ghcr-pull.sops.yaml
+  - previews.yaml
+  - network-policies.yaml
+components:
+  - ../../components/network-policies/base
+namespace: portfolio-julia-previews

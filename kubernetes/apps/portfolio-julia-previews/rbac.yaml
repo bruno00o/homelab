@@ -1,0 +1,33 @@
+---
+# The operator itself is cluster-admin. Generated previews run with this account instead, so
+# a template mistake cannot write outside the namespace or create anything but its two kinds.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: previews
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: previews
+rules:
+  - apiGroups: [helm.toolkit.fluxcd.io]
+    resources: [helmreleases]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [gateway.networking.k8s.io]
+    resources: [httproutes]
+    verbs: [get, list, watch, create, update, patch, delete]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: previews
+subjects:
+  - kind: ServiceAccount
+    name: previews
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: previews

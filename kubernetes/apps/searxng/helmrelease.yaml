@@ -20,7 +20,7 @@ spec:
             image:
               # renovate: datasource=docker depName=docker.io/searxng/searxng
               repository: docker.io/searxng/searxng
-              tag: 2026.10.19-81371861f
+              tag: 2026.10.25-54ca1d9cf
             env:
               # Overrides the key in settings.yml, which stays out of the secret.
               SEARXNG_SECRET:

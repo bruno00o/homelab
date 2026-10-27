@@ -1,5 +1,4 @@
-# Releases only, as for ekineko. The range starts at 0.1.0 because the project is still
-# in 0.x, where a plain >=1.0.0 would match nothing.
+# Releases only, as for ekineko.
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
@@ -22,4 +21,4 @@ spec:
     name: gaspard
   policy:
     semver:
-      range: ">=0.1.0"
+      range: ">=1.0.0"

@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bruno00o/portfolio-julia
-              tag: 1.1.0 # {"$imagepolicy": "flux-system:portfolio-julia:tag"}
+              tag: 1.2.0 # {"$imagepolicy": "flux-system:portfolio-julia:tag"}
             env:
               TZ: ${TIMEZONE}
               HOST: 0.0.0.0

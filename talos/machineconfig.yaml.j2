@@ -48,8 +48,11 @@ machine:
           - rshared
           - rw
 {% endif %}
+    {# Image GC must start below the eviction threshold, not on it as the upstream default does. #}
     extraConfig:
       serializeImagePulls: false
+      imageGCHighThresholdPercent: 75
+      imageGCLowThresholdPercent: 65
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
   features:

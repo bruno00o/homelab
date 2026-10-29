@@ -443,6 +443,8 @@ tasks:
       # exactly the image the machine config names.
       INSTALLER_IMAGE:
         sh: ./scripts/talos-render.sh {{.NODE}} | yq 'select(.kind == "UnattendedInstallConfig") | .installer.image'
+      # upgrade-all takes one snapshot for the whole run and passes false.
+      SNAPSHOT: '{{.SNAPSHOT | default "true"}}'
     preconditions:
       - sh: test -n "{{.NODE_IP}}"
         msg: "{{.NODE}} is not in talos/nodes.yaml"
@@ -451,14 +453,18 @@ tasks:
     prompt: "Upgrade {{.NODE}} ({{.NODE_IP}}) to Talos {{.TALOS_VERSION}}?"
     cmds:
       - echo "Upgrading {{.NODE}} to Talos {{.TALOS_VERSION}}..."
+      - task: talos:etcd-snapshot
+        if: '[ "{{.SNAPSHOT}}" = "true" ]'
+      # talosctl upgrade does not rewrite the installer image in the node's config, so
+      # apply first or the node drifts from git.
+      - task: talos:apply
+        vars: { NODE: "{{.NODE}}" }
       # Cordon manually and skip talosctl's drain: the kubectl-based drain
       # deadlocks on Longhorn (evicting instance-manager vs. unmounting volumes).
       # instance-manager pods are owned by an InstanceManager CRD, not a DaemonSet, so
       # --ignore-daemonsets does not spare them, and their PDB allows no disruption.
-      # --preserve keeps replica data across the reboot, so pods are simply
-      # rescheduled and volumes reattach when the node returns.
       - kubectl cordon {{.NODE}}
-      - talosctl upgrade --nodes {{.NODE_IP}} --image {{.INSTALLER_IMAGE}} --preserve --drain=false --talosconfig {{.TALOS_DIR}}/clusterconfig/talosconfig
+      - talosctl upgrade --nodes {{.NODE_IP}} --image {{.INSTALLER_IMAGE}} --drain=false --talosconfig {{.TALOS_DIR}}/clusterconfig/talosconfig
       # Uncordon BEFORE the health check: talosctl 1.13.4+ added a
       # "all k8s nodes schedulable" check, which deadlocks against our own
       # cordon (health never passes -> wait-healthy loops forever).
@@ -471,18 +477,19 @@ tasks:
     desc: Upgrade Talos on all nodes sequentially
     prompt: "Upgrade ALL nodes to the new Talos version?"
     cmds:
+      - task: talos:etcd-snapshot
       - task: talos:upgrade
-        vars: { NODE: luffy }
+        vars: { NODE: luffy, SNAPSHOT: "false" }
       - task: talos:upgrade
-        vars: { NODE: zoro }
+        vars: { NODE: zoro, SNAPSHOT: "false" }
       - task: talos:upgrade
-        vars: { NODE: nami }
+        vars: { NODE: nami, SNAPSHOT: "false" }
       - task: talos:upgrade
-        vars: { NODE: usopp }
+        vars: { NODE: usopp, SNAPSHOT: "false" }
       - task: talos:upgrade
-        vars: { NODE: sanji }
+        vars: { NODE: sanji, SNAPSHOT: "false" }
       - task: talos:upgrade
-        vars: { NODE: chopper }
+        vars: { NODE: chopper, SNAPSHOT: "false" }
 
   talos:upgrade-k8s:
     desc: Upgrade Kubernetes version
@@ -493,6 +500,9 @@ tasks:
     prompt: "Upgrade Kubernetes to {{.K8S_VERSION}}?"
     cmds:
       - echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
+      - task: talos:etcd-snapshot
+      # Stops here if the pre-upgrade checks find a removed flag or API version.
+      - talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}} --dry-run
       - talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}}
       # talosctl upgrade-k8s re-applies its bootstrap manifests and reverts the
       # Flux-managed CoreDNS ConfigMap to the Talos default. Reconcile it back.

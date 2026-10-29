@@ -28,6 +28,17 @@ spec:
             summary: "Node not ready"
             description: "Node {{ $labels.node }} has been in a NotReady state for more than 5 minutes."
 
+        # A counter, so flaps shorter than the scrape interval still count. The chart's
+        # NodeNetworkInterfaceFlapping samples node_network_up and misses them.
+        - alert: NodeLinkFlapping
+          expr: increase(node_network_carrier_changes_total{job="node-exporter",device=~"en.+|eth.+"}[1h]) > 4
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Network link flapping"
+            description: "{{ $labels.device }} on {{ $labels.instance }} changed carrier {{ $value | humanize }} times in the last hour."
+
         - alert: PodCrashLooping
           expr: increase(kube_pod_container_status_restarts_total[1h]) > 5
           for: 10m

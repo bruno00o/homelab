@@ -232,9 +232,10 @@
     },
 
     {
-      "description": "Talos - review manually",
+      "description": "Talos - review manually. Patches get their own PR, or a held-back minor hides them",
       "matchPackageNames": ["siderolabs/talos"],
       "labels": ["talos", "infrastructure"],
+      "separateMinorPatch": true,
       "automerge": false
     },
     {
@@ -244,9 +245,10 @@
       "automerge": false
     },
     {
-      "description": "Kubernetes - review manually (kubectl must follow the cluster)",
+      "description": "Kubernetes - review manually (kubectl must follow the cluster). Patches get their own PR, or a held-back minor hides them",
       "matchPackageNames": ["kubernetes/kubernetes", "kubectl", "kubernetes/kubectl"],
       "labels": ["kubernetes", "infrastructure"],
+      "separateMinorPatch": true,
       "automerge": false
     },
 

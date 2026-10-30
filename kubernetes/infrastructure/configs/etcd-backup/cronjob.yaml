@@ -38,9 +38,10 @@ spec:
                   # backupstore, and a recursive find would walk all of it over NFS.
                   mkdir -p /backup/etcd
                   name="etcd-$(date +%Y%m%d-%H%M%S).snapshot"
-                  # Any member gives the whole keyspace; the next one is tried if one is down.
+                  # Any member gives the whole keyspace; the next one is tried if one is down
+                  # or hangs.
                   for node in ${NODE_LUFFY} ${NODE_ZORO} ${NODE_NAMI}; do
-                    if /opt/talosctl/talosctl -n "$node" etcd snapshot "/tmp/$name"; then
+                    if timeout 300 /opt/talosctl/talosctl -n "$node" etcd snapshot "/tmp/$name"; then
                       gzip -c "/tmp/$name" > "/backup/etcd/$name.gz.part"
                       mv "/backup/etcd/$name.gz.part" "/backup/etcd/$name.gz"
                       echo "wrote /backup/etcd/$name.gz from $node ($(stat -c %s "/backup/etcd/$name.gz") bytes)"

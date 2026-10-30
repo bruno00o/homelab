@@ -70,10 +70,11 @@ spec:
               # images still ship 17. Keep the two tags in step on upgrade.
               image: ghcr.io/immich-app/postgres:18-vectorchord0.5.3
               command:
-                - sh
+                - bash
                 - -c
                 - |
-                  set -eu
+                  # pipefail, or a pg_dump failure is hidden by gzip and the job reports success.
+                  set -euo pipefail
                   # A subdirectory, and -maxdepth 1 on it: the share root also holds
                   # Longhorn's backupstore, and a recursive find walks its entire block
                   # tree over NFS. Measured on 2026-08-02 - the dump took 30 seconds, the

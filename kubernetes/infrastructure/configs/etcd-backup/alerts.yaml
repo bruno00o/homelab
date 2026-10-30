@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: etcd-backup-alerts
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: etcd-backup
+      rules:
+        # The job runs daily, so this also fires a few hours after a failed run. absent()
+        # covers a CronJob that never succeeded or no longer exists.
+        - alert: EtcdBackupStale
+          expr: >-
+            time() - kube_cronjob_status_last_successful_time{namespace="etcd-backup", cronjob="etcd-backup"} > 26 * 3600
+            or absent(kube_cronjob_status_last_successful_time{namespace="etcd-backup", cronjob="etcd-backup"})
+            or kube_cronjob_spec_suspend{namespace="etcd-backup", cronjob="etcd-backup"} == 1
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No recent etcd backup"
+            description: >-
+              No etcd snapshot has reached the NAS in over 26 hours, or the CronJob is gone or
+              suspended. Read the last job's log in etcd-backup.

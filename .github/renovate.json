@@ -81,6 +81,15 @@
     },
     {
       "customType": "regex",
+      "description": "Image volume reference, which the kubernetes manager does not read",
+      "managerFilePatterns": ["/kubernetes/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=docker\\s+depName=(?<depName>[^\\s]+)\\n\\s*reference:\\s*[^:]+:(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
       "description": "kubelet-serving-cert-approver in Talos extraManifests",
       "managerFilePatterns": ["/talos/machineconfig\\.yaml\\.j2$/"],
       "matchStrings": [
@@ -233,7 +242,7 @@
 
     {
       "description": "Talos - review manually. Patches get their own PR, or a held-back minor hides them",
-      "matchPackageNames": ["siderolabs/talos"],
+      "matchPackageNames": ["siderolabs/talos", "ghcr.io/siderolabs/talosctl"],
       "labels": ["talos", "infrastructure"],
       "separateMinorPatch": true,
       "automerge": false

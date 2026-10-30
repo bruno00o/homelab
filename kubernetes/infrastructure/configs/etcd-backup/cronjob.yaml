@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etcd-backup
+spec:
+  schedule: "30 1 * * *"
+  timeZone: ${TIMEZONE}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          # Selected by allow-talos-api-egress.
+          labels:
+            app.kubernetes.io/name: etcd-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: snapshot
+              image: docker.io/library/busybox:1.38.0
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  # A subdirectory, and -maxdepth 1 on it: the share root holds the Longhorn
+                  # backupstore, and a recursive find would walk all of it over NFS.
+                  mkdir -p /backup/etcd
+                  name="etcd-$(date +%Y%m%d-%H%M%S).snapshot"
+                  # Any member gives the whole keyspace; the next one is tried if one is down.
+                  for node in ${NODE_LUFFY} ${NODE_ZORO} ${NODE_NAMI}; do
+                    if /opt/talosctl/talosctl -n "$node" etcd snapshot "/tmp/$name"; then
+                      gzip -c "/tmp/$name" > "/backup/etcd/$name.gz.part"
+                      mv "/backup/etcd/$name.gz.part" "/backup/etcd/$name.gz"
+                      echo "wrote /backup/etcd/$name.gz from $node ($(stat -c %s "/backup/etcd/$name.gz") bytes)"
+                      find /backup/etcd -maxdepth 1 -name 'etcd-*' -mtime +14 -print -delete
+                      exit 0
+                    fi
+                  done
+                  exit 1
+              env:
+                - name: TALOSCONFIG
+                  value: /var/run/secrets/talos.dev/config
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: talosctl
+                  mountPath: /opt/talosctl
+                - name: talosconfig
+                  mountPath: /var/run/secrets/talos.dev
+                  readOnly: true
+                - name: backup
+                  mountPath: /backup
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            # The talosctl image has no shell, so its binary is mounted into busybox instead.
+            - name: talosctl
+              image:
+                # renovate: datasource=docker depName=ghcr.io/siderolabs/talosctl
+                reference: ghcr.io/siderolabs/talosctl:v1.14.5
+                pullPolicy: IfNotPresent
+            - name: talosconfig
+              secret:
+                secretName: etcd-backup
+            - name: backup
+              persistentVolumeClaim:
+                claimName: etcd-backup-nfs
+            - name: tmp
+              emptyDir:
+                sizeLimit: 1Gi

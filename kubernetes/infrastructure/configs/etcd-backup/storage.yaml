@@ -1,0 +1,29 @@
+# The NAS share that already holds the Longhorn backupstore, so the snapshots live off the
+# cluster they would restore.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: etcd-backup-nfs
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 10.0.10.113
+    path: /volume1/backups
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: etcd-backup-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: etcd-backup-nfs

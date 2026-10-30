@@ -11,4 +11,5 @@ resources:
   - prometheus-rules
   - dns-leak
   - policy-drift
+  - etcd-backup
   - flux-monitoring

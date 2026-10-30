@@ -3,9 +3,9 @@
 #
 # Renovate only updates what a manifest names. Roughly half the images in this cluster are
 # named by a chart instead, and for those there is no PR, no diff and no signal — the
-# release stays green on whatever the chart pinned. promtail is the standing example: its
-# chart is the newest published *and* deprecated, so the image it pins can never move, and
-# nothing anywhere says so.
+# release stays green on whatever the chart pinned. promtail was the standing example: its
+# chart was the newest published *and* deprecated, so the image it pinned could never move,
+# and nothing anywhere said so.
 #
 # Reads the cluster, not the repo, for the same reason `inventory` does: a chart-internal
 # image exists in no file. Each running image is then looked up in its own registry and

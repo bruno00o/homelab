@@ -51,7 +51,7 @@ spec:
         limits:
           memory: 512Mi
       configMap:
-        # Same labels as promtail's chart defaults, so existing queries keep working.
+        # Same labels as promtail's chart defaults had, so existing queries keep working.
         content: |
           discovery.kubernetes "pods" {
             role = "pod"
@@ -141,9 +141,8 @@ spec:
           }
 
           loki.source.file "pods" {
-            targets       = local.file_match.pods.targets
-            forward_to    = [loki.process.pods.receiver]
-            tail_from_end = true
+            targets    = local.file_match.pods.targets
+            forward_to = [loki.process.pods.receiver]
           }
 
           loki.process "pods" {

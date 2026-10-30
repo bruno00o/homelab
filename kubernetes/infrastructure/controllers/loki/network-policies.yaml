@@ -20,7 +20,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-promtail-ingress
+  name: allow-alloy-ingress
   namespace: loki-system
 spec:
   podSelector:
@@ -30,9 +30,6 @@ spec:
     - Ingress
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: promtail
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: alloy
@@ -66,20 +63,6 @@ spec:
 # anywhere" - the whole internet, not the apiserver. Only Cilium can name the apiserver: it
 # is reached through a ClusterIP that DNATs to host-network endpoints, which no ipBlock can
 # express.
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-promtail-apiserver-egress
-  namespace: loki-system
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: promtail
-  egress:
-    - toEntities:
-        - kube-apiserver
-
----
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -125,7 +108,5 @@ spec:
       ports:
         - protocol: TCP
           port: 3100
-        - protocol: TCP
-          port: 3101
         - protocol: TCP
           port: 12345

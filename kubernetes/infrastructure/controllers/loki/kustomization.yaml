@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helmrelease.yaml
-  - promtail.yaml
   - alloy.yaml
   - pdb.yaml
   - network-policies.yaml

@@ -33,6 +33,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: promtail
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy
       ports:
         - protocol: TCP
           port: 3100
@@ -80,6 +83,20 @@ spec:
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
+  name: allow-alloy-apiserver-egress
+  namespace: loki-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: alloy
+  egress:
+    - toEntities:
+        - kube-apiserver
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
   name: allow-loki-apiserver-egress
   namespace: loki-system
 spec:
@@ -110,3 +127,5 @@ spec:
           port: 3100
         - protocol: TCP
           port: 3101
+        - protocol: TCP
+          port: 12345

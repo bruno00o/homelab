@@ -55,6 +55,8 @@ spec:
         - protocol: TCP
           port: 3101 # Promtail metrics
         - protocol: TCP
+          port: 12345 # Alloy metrics
+        - protocol: TCP
           port: 2000 # cloudflared metrics
         - protocol: TCP
           port: 7979 # external-dns

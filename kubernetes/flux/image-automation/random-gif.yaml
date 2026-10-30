@@ -1,0 +1,25 @@
+# The image is public, so no pull secret. This repository also pushes X, X.Y and a bare
+# short sha: semver reads those as versions, and an all-digit sha would win.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: random-gif
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/random-gif
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: random-gif
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: random-gif
+  filterTags:
+    pattern: '^\d+\.\d+\.\d+$'
+  policy:
+    semver:
+      range: ">=1.0.0"

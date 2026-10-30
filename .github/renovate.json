@@ -166,7 +166,7 @@
     },
     {
       "description": "Flux image automation deploys these releases itself (kubernetes/flux/image-automation). Renovate would open the same bump a second time",
-      "matchPackageNames": ["ghcr.io/bruno00o/portfolio"],
+      "matchPackageNames": ["ghcr.io/bruno00o/portfolio", "ghcr.io/bruno00o/random-gif"],
       "enabled": false
     },
     {

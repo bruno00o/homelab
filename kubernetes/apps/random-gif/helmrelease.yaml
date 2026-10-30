@@ -18,10 +18,9 @@ spec:
         strategy: Recreate
         containers:
           app:
-            # renovate: datasource=docker depName=ghcr.io/bruno00o/random-gif
             image:
               repository: ghcr.io/bruno00o/random-gif
-              tag: "1.2.4"
+              tag: 1.2.4 # {"$imagepolicy": "flux-system:random-gif:tag"}
             env:
               TZ: ${TIMEZONE}
               PORT: "8080"

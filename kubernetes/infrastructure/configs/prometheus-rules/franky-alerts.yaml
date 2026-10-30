@@ -1,51 +1,51 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: rayleigh-alerts
+  name: franky-alerts
   namespace: monitoring
   labels:
     prometheus: kube-prometheus
     role: alert-rules
 spec:
   groups:
-    - name: rayleigh
+    - name: franky
       rules:
-        - alert: RayleighDown
-          expr: up{job="rayleigh"} == 0
+        - alert: FrankyDown
+          expr: up{job="franky"} == 0
           for: 5m
           labels:
             severity: critical
           annotations:
-            summary: "Rayleigh is down"
+            summary: "Franky is down"
             description: "The Pi stopped answering. Zigbee, Thread, Matter and the secondary DNS all run on it."
 
-        # A quick reboot never reaches RayleighDown's `for`.
-        - alert: RayleighRebooted
-          expr: node_time_seconds{job="rayleigh"} - node_boot_time_seconds{job="rayleigh"} < 3600
+        # A quick reboot never reaches FrankyDown's `for`.
+        - alert: FrankyRebooted
+          expr: node_time_seconds{job="franky"} - node_boot_time_seconds{job="franky"} < 3600
           labels:
             severity: warning
           annotations:
-            summary: "Rayleigh rebooted"
+            summary: "Franky rebooted"
             description: "The Pi restarted less than an hour ago. If nobody did that, read its journal."
 
-        - alert: RayleighServiceDown
-          expr: node_systemd_unit_state{job="rayleigh", name=~"docker.service|ser2net.service", state="active"} == 0
+        - alert: FrankyServiceDown
+          expr: node_systemd_unit_state{job="franky", name=~"docker.service|ser2net.service", state="active"} == 0
           for: 5m
           labels:
             severity: warning
           annotations:
-            summary: "Service down on Rayleigh"
+            summary: "Service down on Franky"
             description: "{{ $labels.name }} is not active on the Pi."
 
         # The script writes this timestamp last, so a failed run leaves it to go stale. absent()
         # covers a metric that disappeared, which is also what a lost disk looks like.
-        - alert: RayleighBackupStale
+        - alert: FrankyBackupStale
           expr: >-
-            time() - rayleigh_backup_last_success_timestamp_seconds > 26 * 3600
-            or absent(rayleigh_backup_last_success_timestamp_seconds)
+            time() - franky_backup_last_success_timestamp_seconds > 26 * 3600
+            or absent(franky_backup_last_success_timestamp_seconds)
           for: 1h
           labels:
             severity: warning
           annotations:
-            summary: "No recent Rayleigh backup"
-            description: "No archive has reached the NAS in over 26 hours. Run `journalctl -u rayleigh-backup` on the Pi."
+            summary: "No recent Franky backup"
+            description: "No archive has reached the NAS in over 26 hours. Run `journalctl -u franky-backup` on the Pi."

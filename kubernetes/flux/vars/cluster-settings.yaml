@@ -43,4 +43,4 @@ data:
   # 8080, behind an API key.
   JINBE_IP: "10.0.20.50"
   # The Pi outside the cluster: secondary AdGuard, Thread and Matter, ser2net for the Zigbee dongle.
-  RAYLEIGH_IP: "10.0.20.17"
+  FRANKY_IP: "10.0.20.17"

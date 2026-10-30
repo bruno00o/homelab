@@ -57,14 +57,14 @@ spec:
 apiVersion: autokuma.bigboot.dev/v1
 kind: KumaEntity
 metadata:
-  name: rayleigh-dns
+  name: franky-dns
   namespace: monitoring
 spec:
   config:
     type: dns
-    name: Rayleigh DNS
+    name: Franky DNS
     hostname: grafana.${CLUSTER_DOMAIN}
-    dns_resolve_server: ${RAYLEIGH_IP}
+    dns_resolve_server: ${FRANKY_IP}
     dns_resolve_type: A
     port: 53
     interval: 60
@@ -72,17 +72,17 @@ spec:
       - discord
 ---
 # No such monitor for ser2net: it kicks its current client on a new connection, and that client
-# is Zigbee2MQTT. RayleighServiceDown watches it instead.
+# is Zigbee2MQTT. FrankyServiceDown watches it instead.
 apiVersion: autokuma.bigboot.dev/v1
 kind: KumaEntity
 metadata:
-  name: rayleigh-matter
+  name: franky-matter
   namespace: monitoring
 spec:
   config:
     type: port
-    name: Rayleigh Matter
-    hostname: ${RAYLEIGH_IP}
+    name: Franky Matter
+    hostname: ${FRANKY_IP}
     port: 5580
     interval: 60
     notification_name_list:

@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - longhorn-alerts.yaml
   - cluster-alerts.yaml
-  - rayleigh-alerts.yaml
+  - franky-alerts.yaml

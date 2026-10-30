@@ -60,10 +60,17 @@ machine:
 cluster:
   token: {{ secrets.bootstraptoken }}
 {% if cp %}
+  {# Unpinned, etcd advertises the first address it finds, and rewrites its peer URL to the IPv6 ULA if the IPv4 goes away. #}
   etcd:
     ca:
       crt: {{ certs.etcd.crt }}
       key: {{ certs.etcd.key }}
+    advertisedSubnets:
+      - 10.0.20.0/24
+    {# Defaults to the list above, which also matches the VIP on the node holding it. An etcd told to bind it after it moved could not start. #}
+    listenSubnets:
+      - 10.0.20.0/24
+      - "!10.0.20.10/32"
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
 {% endif %}
@@ -92,6 +99,15 @@ nameservers:
 hostDNS:
   enabled: true
   forwardKubeDNSToHost: false
+{#
+  Etcd and the kubelet wait for the time before starting, forever by default. Past the timeout
+  the node boots on its hardware clock and keeps syncing, so a power cut that also takes the
+  internet down does not hold the cluster until it returns.
+#}
+---
+apiVersion: v1alpha1
+kind: TimeSyncConfig
+bootTimeout: 2m
 ---
 apiVersion: v1alpha1
 kind: FilesystemTrimConfig
@@ -170,6 +186,9 @@ port: 7445
 ---
 apiVersion: v1alpha1
 kind: KubeNodeConfig
+nodeIP:
+  validSubnets:
+    - 10.0.20.0/24
 {% if cp %}
 labels:
   node-role.kubernetes.io/control-plane: ""
@@ -367,10 +386,18 @@ allowedRoles:
 allowedKubernetesNamespaces:
   - etcd-backup
 {% endif %}
+{#
+  Static so a node needs no DHCP server to come back after a power cut, and keeps its address
+  when the link drops. Keep the DHCP reservations: a node in maintenance mode still uses them.
+#}
 ---
 apiVersion: v1alpha1
-kind: DHCPv4Config
+kind: LinkConfig
 name: enp1s0
+addresses:
+  - address: {{ this.ipAddress }}/24
+routes:
+  - gateway: 10.0.20.1
 {% if cp %}
 ---
 apiVersion: v1alpha1

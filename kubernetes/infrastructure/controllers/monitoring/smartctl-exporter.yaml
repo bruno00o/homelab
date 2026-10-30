@@ -19,6 +19,11 @@ spec:
 
   values:
     fullnameOverride: smartctl-exporter
+    # Autodiscovery also finds every Longhorn volume attached over iSCSI: a worker's scan
+    # outlasts the scrape, and those disks have no SMART data worth reading.
+    config:
+      devices:
+        - /dev/nvme0
     rbac:
       create: false
     resources:

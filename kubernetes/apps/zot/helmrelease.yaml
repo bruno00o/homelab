@@ -46,7 +46,7 @@ spec:
             resources:
               requests:
                 cpu: 20m
-                memory: 64Mi
+                memory: 128Mi
               limits:
                 # On an empty volume zot downloads the Trivy CVE database and builds its
                 # index before serving; the old limit only ever held because the volume was

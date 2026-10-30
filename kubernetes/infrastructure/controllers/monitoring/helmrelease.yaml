@@ -64,7 +64,7 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 512Mi
+          memory: 768Mi
         limits:
           # Was 512Mi and peaked at 497Mi over 7 days — 97% of its own limit, one dashboard
           # render away from being killed.
@@ -177,7 +177,7 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 2Gi
+            memory: 3Gi
           limits:
             # Peaked at 1988Mi against a 2Gi limit — 97%. Go sizes its heap to the limit, so
             # this was not "using what it needs" but "running as close to the wall as it
@@ -306,7 +306,7 @@ spec:
           cpu: 10m
           memory: 128Mi
         limits:
-          memory: 256Mi
+          memory: 384Mi
       # Flux objects as gotk_resource_info, the metric the Flux dashboards and the Flux
       # alerts read. Taken from fluxcd/flux2-monitoring-example, without its `collectors: []`
       # and --custom-resource-state-only: those turn off every standard metric, which the

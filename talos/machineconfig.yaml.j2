@@ -358,6 +358,14 @@ kind: KubeProxyConfig
 enabled: false
 image: registry.k8s.io/kube-proxy:{{ kubernetesVersion }}
 config: {}
+{# Lets the etcd-backup CronJob take a snapshot through the Talos API, and nothing else. #}
+---
+apiVersion: v1alpha1
+kind: KubeTalosAPIAccessConfig
+allowedRoles:
+  - os:etcd:backup
+allowedKubernetesNamespaces:
+  - etcd-backup
 {% endif %}
 ---
 apiVersion: v1alpha1

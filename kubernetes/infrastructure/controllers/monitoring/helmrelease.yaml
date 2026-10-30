@@ -214,6 +214,10 @@ spec:
             static_configs:
               - targets:
                   - ${JINBE_IP}:8080
+          - job_name: rayleigh
+            static_configs:
+              - targets:
+                  - ${RAYLEIGH_IP}:9100
 
     alertmanager:
       config:

@@ -1,0 +1,51 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rayleigh-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: rayleigh
+      rules:
+        - alert: RayleighDown
+          expr: up{job="rayleigh"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Rayleigh is down"
+            description: "The Pi stopped answering. Zigbee, Thread, Matter and the secondary DNS all run on it."
+
+        # A quick reboot never reaches RayleighDown's `for`.
+        - alert: RayleighRebooted
+          expr: node_time_seconds{job="rayleigh"} - node_boot_time_seconds{job="rayleigh"} < 3600
+          labels:
+            severity: warning
+          annotations:
+            summary: "Rayleigh rebooted"
+            description: "The Pi restarted less than an hour ago. If nobody did that, read its journal."
+
+        - alert: RayleighServiceDown
+          expr: node_systemd_unit_state{job="rayleigh", name=~"docker.service|ser2net.service", state="active"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Service down on Rayleigh"
+            description: "{{ $labels.name }} is not active on the Pi."
+
+        # The script writes this timestamp last, so a failed run leaves it to go stale. absent()
+        # covers a metric that disappeared, which is also what a lost disk looks like.
+        - alert: RayleighBackupStale
+          expr: >-
+            time() - rayleigh_backup_last_success_timestamp_seconds > 26 * 3600
+            or absent(rayleigh_backup_last_success_timestamp_seconds)
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No recent Rayleigh backup"
+            description: "No archive has reached the NAS in over 26 hours. Run `journalctl -u rayleigh-backup` on the Pi."

@@ -52,3 +52,38 @@ spec:
       - "300-399"
     notification_name_list:
       - discord
+---
+# A name AdGuard rewrites, so this does not depend on the internet being up.
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: rayleigh-dns
+  namespace: monitoring
+spec:
+  config:
+    type: dns
+    name: Rayleigh DNS
+    hostname: grafana.${CLUSTER_DOMAIN}
+    dns_resolve_server: ${RAYLEIGH_IP}
+    dns_resolve_type: A
+    port: 53
+    interval: 60
+    notification_name_list:
+      - discord
+---
+# No such monitor for ser2net: it kicks its current client on a new connection, and that client
+# is Zigbee2MQTT. RayleighServiceDown watches it instead.
+apiVersion: autokuma.bigboot.dev/v1
+kind: KumaEntity
+metadata:
+  name: rayleigh-matter
+  namespace: monitoring
+spec:
+  config:
+    type: port
+    name: Rayleigh Matter
+    hostname: ${RAYLEIGH_IP}
+    port: 5580
+    interval: 60
+    notification_name_list:
+      - discord

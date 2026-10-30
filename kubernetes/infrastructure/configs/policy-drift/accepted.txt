@@ -48,6 +48,9 @@ longhorn-system Deployment/longhorn-ui audit-*
 longhorn-system Deployment/longhorn-global-manager audit-disallow-privilege-escalation
 longhorn-system InstanceManager/instance-manager-* audit-*
 
+# smartctl needs the raw disk devices, and the chart hardcodes privileged.
+monitoring DaemonSet/smartctl-exporter-* audit-disallow-privilege-escalation
+
 # node-exporter reads the host's /proc and /sys. The two StatefulSets fail on the
 # config-reloader sidecar that prometheus-operator injects, which carries no limit.
 monitoring DaemonSet/kube-prometheus-stack-prometheus-node-exporter audit-disallow-privilege-escalation

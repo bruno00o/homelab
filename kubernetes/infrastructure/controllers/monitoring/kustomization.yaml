@@ -6,3 +6,4 @@ resources:
   - grafana-oauth-secret.sops.yaml
   - jinbe-metrics.sops.yaml
   - helmrelease.yaml
+  - smartctl-exporter.yaml

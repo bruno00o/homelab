@@ -58,6 +58,8 @@ spec:
           port: 2000 # cloudflared metrics
         - protocol: TCP
           port: 7979 # external-dns
+        - protocol: TCP
+          port: 9633 # smartctl-exporter
     # A ServiceMonitor whose port is missing from this list is green and scrapes nothing:
     # one had `max_over_time(up[7d]) == 0`, never scraped since it was created. Add the
     # port here at the same time as the ServiceMonitor, and check `up` afterwards.

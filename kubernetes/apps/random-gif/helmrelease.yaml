@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bruno00o/random-gif
-              tag: 1.3.0 # {"$imagepolicy": "flux-system:random-gif:tag"}
+              tag: 1.4.0 # {"$imagepolicy": "flux-system:random-gif:tag"}
             env:
               TZ: ${TIMEZONE}
               PORT: "8080"

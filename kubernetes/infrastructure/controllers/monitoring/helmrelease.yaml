@@ -566,5 +566,11 @@ spec:
     kubeProxy:
       enabled: false
 
+    # The chart's rules and dashboard only. The etcd job in additionalScrapeConfigs already
+    # matches their job selector, so no Service or Endpoints in kube-system.
     kubeEtcd:
-      enabled: false
+      enabled: true
+      service:
+        enabled: false
+      serviceMonitor:
+        enabled: false

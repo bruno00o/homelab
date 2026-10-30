@@ -57,15 +57,6 @@ spec:
             summary: "Persistent volume almost full"
             description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full."
 
-        - alert: EtcdHasMissingLeader
-          expr: etcd_server_has_leader == 0
-          for: 1m
-          labels:
-            severity: critical
-          annotations:
-            summary: "Etcd member has no leader"
-            description: "Etcd member {{ $labels.instance }} has no leader. The cluster may be unavailable."
-
         - alert: KubeAPIServerLatency
           expr: |
             histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{verb!~"WATCH|CONNECT"}[5m])) by (le, verb, resource)) > 1

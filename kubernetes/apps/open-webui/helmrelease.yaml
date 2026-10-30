@@ -25,7 +25,7 @@ spec:
             image:
               # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
               repository: ghcr.io/open-webui/open-webui
-              tag: v0.12.4-slim
+              tag: v0.12.5-slim
             command: ["cp", "-R", "/app/backend/open_webui/static/.", "/mnt/static/"]
             resources:
               requests:
@@ -45,7 +45,7 @@ spec:
               # runs on jinbe.
               # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
               repository: ghcr.io/open-webui/open-webui
-              tag: v0.12.4-slim
+              tag: v0.12.5-slim
             # Most of these only seed the first boot: the app then keeps its settings in its
             # own database and ignores the variable, unless it is about OAuth.
             env:

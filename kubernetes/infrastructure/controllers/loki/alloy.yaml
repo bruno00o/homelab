@@ -29,13 +29,14 @@ spec:
 
     alloy:
       enableReporting: false
-      # Positions on the node, or every restart would resend what the logs still hold.
-      storagePath: /var/lib/alloy/data
+      # Positions on the node, or every restart would resend what the logs still hold. Not
+      # under /var/lib/alloy: root without capabilities cannot enter the image's own directory.
+      storagePath: /positions
       mounts:
         varlog: true
         extra:
           - name: positions
-            mountPath: /var/lib/alloy/data
+            mountPath: /positions
       securityContext:
         runAsUser: 0
         runAsGroup: 0

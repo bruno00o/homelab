@@ -132,7 +132,7 @@ spec:
   egress:
     - to:
         - ipBlock:
-            cidr: 10.0.10.113/32
+            cidr: ${ROBIN_IP}/32
       ports:
         - protocol: TCP
           port: 2049

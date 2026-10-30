@@ -11,7 +11,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   nfs:
-    server: 10.0.10.113
+    server: ${ROBIN_IP}
     path: /volume1/frigate
 ---
 apiVersion: v1

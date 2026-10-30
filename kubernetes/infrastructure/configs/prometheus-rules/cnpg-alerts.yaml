@@ -19,3 +19,15 @@ spec:
           annotations:
             summary: "No recent PostgreSQL backup"
             description: "{{ $labels.job }} has no base backup newer than 26 hours. Check its ScheduledBackup and the barman plugin."
+        # WAL that cannot be archived stays on the volume until the disk fills and Postgres
+        # stops. The second test covers an archiver that hangs, which records no failure.
+        - alert: CnpgWalArchiveFailing
+          expr: >-
+            (cnpg_pg_stat_archiver_last_failed_time > cnpg_pg_stat_archiver_last_archived_time)
+            or cnpg_collector_pg_wal_archive_status{value="ready"} > 20
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PostgreSQL WAL archiving is failing"
+            description: "{{ $labels.pod }} ({{ $labels.job }}) has not archived its WAL for 30 minutes, and its volume is filling up. Check the barman sidecar log and the RustFS bucket."

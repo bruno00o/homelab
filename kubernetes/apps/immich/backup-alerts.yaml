@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: immich-backup-alerts
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: immich-backup
+      rules:
+        - alert: ImmichBackupStale
+          expr: >-
+            time() - kube_cronjob_status_last_successful_time{namespace="immich", cronjob="immich-postgres-backup"} > 26 * 3600
+            or absent(kube_cronjob_status_last_successful_time{namespace="immich", cronjob="immich-postgres-backup"})
+            or kube_cronjob_spec_suspend{namespace="immich", cronjob="immich-postgres-backup"} == 1
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No recent Immich database backup"
+            description: >-
+              No Immich database dump has reached the NAS in over 26 hours, or the CronJob is
+              gone or suspended. Read the last job's log in immich.

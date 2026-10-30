@@ -11,6 +11,7 @@ resources:
   - httproute.yaml
   - dnsendpoint.yaml
   - backup-cronjob.yaml
+  - backup-alerts.yaml
   - network-policies.yaml
   - kuma-monitor.yaml
 components:

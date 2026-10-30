@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: cnpg
+      rules:
+        - alert: CnpgBackupStale
+          expr: >-
+            time() - max by (namespace, job) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp) > 26 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No recent PostgreSQL backup"
+            description: "{{ $labels.job }} has no base backup newer than 26 hours. Check its ScheduledBackup and the barman plugin."

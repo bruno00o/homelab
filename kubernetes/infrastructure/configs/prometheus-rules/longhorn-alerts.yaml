@@ -58,21 +58,26 @@ spec:
             summary: "Longhorn storage critical"
             description: "Node {{ $labels.node }} is using {{ $value | printf \"%.1f\" }}% of storage. Immediate action required!"
 
-        # Backup alerts - based on recurring job schedule (daily at 2am)
-        # Alert if no backup completed in the last 26 hours (gives 2h buffer after 2am schedule)
-        # longhorn_backup_state: 0=Unknown, 1=InProgress, 2=Error, 3=Completed
-        - alert: LonghornBackupMissing
-          expr: |
-            (
-              count(longhorn_volume_robustness) > 0
-            )
-            unless on()
-            (
-              count(longhorn_backup_state == 3) > 0
-            )
-          for: 26h
+        # The job fails if any volume fails, so its last success covers them all.
+        - alert: LonghornBackupStale
+          expr: >-
+            time() - kube_cronjob_status_last_successful_time{namespace="longhorn-system", cronjob="backup-daily"} > 26 * 3600
+            or absent(kube_cronjob_status_last_successful_time{namespace="longhorn-system", cronjob="backup-daily"})
+            or kube_cronjob_spec_suspend{namespace="longhorn-system", cronjob="backup-daily"} == 1
+          for: 1h
           labels:
             severity: warning
           annotations:
             summary: "No recent Longhorn backup"
-            description: "No Longhorn backup has completed in the last 26 hours. Check NFS connectivity."
+            description: >-
+              The backup-daily job has not succeeded in over 26 hours, or the CronJob is gone or
+              suspended. Read the last job's log in longhorn-system and check the NAS.
+
+        - alert: LonghornBackupTargetUnavailable
+          expr: max(longhorn_backup_target_status{condition="unavailable"}) == 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn cannot reach its backup target"
+            description: "Longhorn reports its backup target as unavailable. Check the NAS and its NFS export."

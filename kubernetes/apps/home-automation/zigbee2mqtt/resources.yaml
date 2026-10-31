@@ -91,6 +91,7 @@ spec:
         app.kubernetes.io/name: zigbee2mqtt
         app.kubernetes.io/instance: zigbee2mqtt
     spec:
+      priorityClassName: homelab-essential
       securityContext:
         fsGroup: 1000
       initContainers:

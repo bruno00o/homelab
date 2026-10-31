@@ -56,6 +56,7 @@ spec:
                 drop: ["ALL"]
 
     defaultPodOptions:
+      priorityClassName: homelab-essential
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

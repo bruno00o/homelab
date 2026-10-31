@@ -52,6 +52,7 @@ spec:
         app.kubernetes.io/name: mosquitto
         app.kubernetes.io/instance: mosquitto
     spec:
+      priorityClassName: homelab-essential
       securityContext:
         fsGroup: 1883
       containers:

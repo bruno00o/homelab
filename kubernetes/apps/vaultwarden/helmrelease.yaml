@@ -16,6 +16,7 @@ spec:
         namespace: flux-system
       interval: 1h
   values:
+    priorityClassName: homelab-essential
     # The chart tracks its own appVersion, but a 0.x chart never automerges here, so the
     # image would sit on whatever the last manual chart bump shipped. Pinning it makes
     # vaultwarden its own Renovate dependency instead of a passenger of the chart.

@@ -254,6 +254,9 @@ spec:
           # emitted a keyframe every 3.3 seconds, which is where Frigate is forced to cut
           # its recording segments and the clips sent to the phone.
           ffmpeg:
+            # Trial with camera_2 as the control: its VAAPI detect process keeps failing
+            # with "Failed to sync surface".
+            hwaccel_args: preset-intel-qsv-h264
             inputs:
               - path: rtsp://admin:${FRIGATE_CAM1_PASSWORD}@10.0.30.2:554/Streaming/Channels/103
                 roles:

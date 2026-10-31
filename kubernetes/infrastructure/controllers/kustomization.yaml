@@ -29,3 +29,6 @@ resources:
   - rustfs
   - metrics-server
   - flux-operator
+  # configs/ declares monitors too, so the CRD cannot wait for the uptime-kuma app, which
+  # comes after it: a fresh bootstrap would fail the configs dry-run forever.
+  - autokuma-crd.yaml

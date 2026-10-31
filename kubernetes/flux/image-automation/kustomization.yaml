@@ -6,6 +6,7 @@ resources:
   - automation.yaml
   - ekineko.yaml
   - gaspard.yaml
+  - homelab-docs.yaml
   - portfolio.yaml
   - portfolio-julia.yaml
   - random-gif.yaml

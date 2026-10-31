@@ -1,0 +1,26 @@
+# Private image, and releases only: the workflow can also push a branch name.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: homelab-docs
+  namespace: flux-system
+spec:
+  image: ghcr.io/bruno00o/homelab-docs
+  interval: 5m
+  secretRef:
+    name: ghcr-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: homelab-docs
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: homelab-docs
+  filterTags:
+    pattern: '^\d+\.\d+\.\d+$'
+  policy:
+    semver:
+      range: ">=1.0.0"

@@ -1,0 +1,35 @@
+---
+# Both halves of the gateway ingress: the ipBlock for same-node host traffic, the Cilium
+# rule for the cross-node proxy identity an ipBlock cannot match. No egress beyond DNS:
+# the site serves from its image.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway
+  namespace: homelab-docs
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: homelab-docs
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.0.20.0/24 }
+      ports:
+        - { protocol: TCP, port: 3000 }
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-proxy-ingress
+  namespace: homelab-docs
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homelab-docs
+  ingress:
+    - fromEntities: [ingress]
+      toPorts:
+        - ports:
+            - { port: "3000", protocol: TCP }

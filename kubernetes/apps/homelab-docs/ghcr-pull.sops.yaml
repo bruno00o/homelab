@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: ENC[AES256_GCM,data:h2JSe0a2E4kNXT6UYIorRYlSXXQJNEmENdlw780u46MnehEr3DAOuY+GhWASYpazSJ3gr/g+hUgWMi/dF54savY8nfd2QEHS+6kTgJFrXjKG+rzDoA1j0mCEbFFFo+xwG7QZ+X/HZfTAR8Oib2mNKCxbeiq8G2ZIBLdSFydG5kHP2IjCrbkXXaSpoK4Xe0tKH+idyRtkmXSJZqFFLJo3PYRe6zcdPpN0JW2JNWSdShJxxgX/aGSQvhpl1t3PU9Jztq0o3PKJEarylV9ypQOmY9A7l7TCYcziTy4AO8ZmK7OcPazGt89vAuBSeuw=,iv:6z/Q+BdeX8JzMGdRDdr4m710Yx40YtBQeAO7uXQbHdQ=,tag:GeAGMk7Qm8U/xaw3EGhg3A==,type:str]
+kind: Secret
+metadata:
+  name: ghcr-pull
+  namespace: homelab-docs
+type: kubernetes.io/dockerconfigjson
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBTMzJUSkd1VGdQZUJkaksy
+        cXM3MVRDZnRpMHVpZGg2SHNndFNmS0lEblJzCndUeGF6NHl3MCtKLzFuTDRvSkN0
+        WE8vckk0cjhZMzRxUW9ZTm96OFl0TWMKLS0tIHZYVUFQemU5MThJclBtZW9IN2wx
+        c0xzNFBsZFl2NlJrdm9hMHlwZmZnNzQKvp1N8/sTzuOa18rZgF6XFV9AZfiZMue+
+        YcaFMlaM2PglupFqNihw2GAAv0qsCVxLdk9p5HFJ6EsWOdCaCoFGeQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBTWmFiMkRQYktWY0o2TGkv
+        eGZmRGR4ZWZLUmIrUWJJZXU1Rk0xQjVzZmpZClBCZHg5dERVMXIwZWFReGdiM09U
+        T2Q4V0VocndEREdmZXljVEI0OE5SV1EKLS0tIFhkUkdqODk1RitXeG9nVVo0VjRY
+        clVXYjdUY3F2bjJRZkhVcE1va3pBYjgKSNNFcG6SPAcoczaR6izZJfZfOj8ftm9G
+        c9GXbI6g+I/+qHnkSNpiEzeZk5Kgu240jPZHkjvqJ/blwdXilVp3qQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-10-31T08:35:43Z"
+  mac: ENC[AES256_GCM,data:o5j3IkGwgOfOEzP+qiR5Wsog+xAhulBmAB3Js3jvT3zm2Wu+A664MUZvRnHox1RLjZNidu9nDB/wgQwqGvcN9y5BkO2uob+9TuF+NofMWag1HflfLuATq7IboE59TDkBlar81LG/JQLKC5NTmeXuu9NhUSaS2fsYVWBSdbhFJpI=,iv:+dHceoROWEXQwnQroqgzlFt8538ranb2ORRWiG1N6aQ=,tag:MvsRwJGnNtVXfnuEWYYEqA==,type:str]
+  version: 3.13.3

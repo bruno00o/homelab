@@ -1,0 +1,22 @@
+---
+# LAN only: no DNSEndpoint and no tunnel route, so nothing outside resolves or reaches it.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: homelab-docs
+  namespace: homelab-docs
+spec:
+  parentRefs:
+    - name: internal-gateway
+      namespace: kube-system
+      sectionName: https-internal-wildcard
+  hostnames:
+    - docs.${CLUSTER_DOMAIN}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: homelab-docs
+          port: 3000

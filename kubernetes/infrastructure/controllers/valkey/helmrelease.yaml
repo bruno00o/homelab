@@ -28,6 +28,8 @@ spec:
         default:
           permissions: "~* &* +@all"
           passwordKey: default
+    readinessProbe:
+      enabled: true
     deploymentStrategy: Recreate
     podSecurityContext:
       fsGroup: 1000

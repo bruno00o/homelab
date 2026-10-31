@@ -170,6 +170,7 @@ spec:
 
     prometheus:
       prometheusSpec:
+        priorityClassName: homelab-essential
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
@@ -258,6 +259,7 @@ spec:
                   {{ .Annotations.description }}
                   {{ end }}
       alertmanagerSpec:
+        priorityClassName: homelab-essential
         # 2, not 1: a single Alertmanager means every alert is lost while its node reboots,
         # and the failure is silent by nature — nothing alerts about the alerting being
         # down. The two gossip their state, so a notification is not sent twice.

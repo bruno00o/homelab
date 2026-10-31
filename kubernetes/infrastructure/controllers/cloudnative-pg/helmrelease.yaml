@@ -28,6 +28,7 @@ spec:
     crds: CreateReplace
 
   values:
+    priorityClassName: system-cluster-critical
     monitoring:
       podMonitorEnabled: true
 

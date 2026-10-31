@@ -30,6 +30,7 @@ spec:
     crds: CreateReplace
 
   values:
+    priorityClassName: system-cluster-critical
     resources:
       requests:
         cpu: 10m

@@ -24,6 +24,7 @@ spec:
 
   values:
     admissionController:
+      priorityClassName: system-cluster-critical
       # 2, not 1: the resource webhook is failurePolicy: Fail, so while this pod is
       # unavailable every matching resource creation is rejected cluster-wide — which
       # happens on each node reboot.

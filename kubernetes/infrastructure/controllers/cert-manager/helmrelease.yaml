@@ -23,6 +23,8 @@ spec:
     crds: CreateReplace
 
   values:
+    global:
+      priorityClassName: system-cluster-critical
     installCRDs: true
     prometheus:
       enabled: true

@@ -52,6 +52,11 @@ for v in CLUSTER_DOMAIN PUBLIC_DOMAIN PROJECTS_DOMAIN; do
   [ -n "${!v}" ] || { echo "$v is empty in the cluster-settings ConfigMap." >&2; exit 1; }
 done
 
+# What external-dns manages is what has an owner, and it includes ekineko.app, a domain of its
+# own with no variable. Empty, the check below would flag every tunnel hostname.
+DNS_DOMAINS=$(kubectl -n external-dns get helmrelease external-dns -o json | jq -r '.spec.values.domainFilters[]')
+[ -n "$DNS_DOMAINS" ] || { echo "Could not read the external-dns domain filters." >&2; exit 1; }
+
 # One row per (hostname, route). A route carrying two hostnames is two rows: the hostname is
 # what you look up, so it is the key.
 jq -r '
@@ -110,15 +115,18 @@ echo
 echo "CHECKS"
 found=0
 
-# A hostname on none of the three declared domains has no owner: nothing manages its DNS
-# and no future domain change would find it. The three are all legitimate — an earlier
-# version of this check knew only two and flagged the seven PROJECTS_DOMAIN hostnames as
-# anomalies, which is how a check teaches you to ignore checks.
+# A hostname on none of the declared domains has no owner: nothing manages its DNS and no
+# future domain change would find it. They are all legitimate — an earlier version of this
+# check knew only two and flagged the seven PROJECTS_DOMAIN hostnames as anomalies, which is
+# how a check teaches you to ignore checks.
 while IFS=$'\t' read -r host _; do
-  case "$host" in
-    *".$CLUSTER_DOMAIN"|*".$PUBLIC_DOMAIN"|*".$PROJECTS_DOMAIN") ;;
-    *) echo "  tunnel hostname on an undeclared domain: $host"; found=1 ;;
-  esac
+  owned=0
+  for domain in "$CLUSTER_DOMAIN" $DNS_DOMAINS; do
+    case "$host" in
+      "$domain"|*".$domain") owned=1 ;;
+    esac
+  done
+  [ "$owned" -eq 1 ] || { echo "  tunnel hostname on an undeclared domain: $host"; found=1; }
 done < "$WORK/tunnel.tsv"
 
 # A route on a published domain with no tunnel entry answers on the LAN only, which is

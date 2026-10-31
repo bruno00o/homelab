@@ -1,0 +1,9 @@
+# Two workers cannot hold what three request, so losing one leaves pods Pending: this decides
+# which. What the whole cluster depends on uses system-cluster-critical instead.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: homelab-essential
+value: 1000000
+globalDefault: false
+description: Services the house relies on, scheduled ahead of ordinary apps.

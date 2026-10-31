@@ -1014,8 +1014,9 @@ tasks:
         kubectl get backups.longhorn.io -n longhorn-system -o json | \
           jq -r '.items[]
                  | select(.status.state == "Completed")
-                 | (.status.labels.KubernetesStatus | fromjson) as $k
-                 | "\($k.namespace)/\($k.pvcName) | \(.status.volumeSize | tonumber / 1073741824 | floor)GB | \(.status.backupCreatedAt) | \(.metadata.name)"' | \
+                 | (.status.labels.KubernetesStatus // "{}" | fromjson) as $k
+                 | (.status.volumeSize | tonumber / 1073741824 | floor) as $gb
+                 | "\($k.namespace // "no-pvc-label")/\($k.pvcName // .status.volumeName) | \($gb)GB | \(.status.backupCreatedAt) | \(.metadata.name)"' | \
           sort | uniq | column -t -s'|'
         echo ""
         echo "To restore a specific PVC, use:"
@@ -1057,30 +1058,33 @@ tasks:
         fi
       - echo "1. Finding latest backup for {{.PVC}}..."
       - |
-        # Find the backup URL for this PVC
-        BACKUP_URL=$(kubectl get backups.longhorn.io -n longhorn-system -o json | jq -r --arg ns "{{.NAMESPACE}}" --arg pvc "{{.PVC_NAME}}" '
-          .items[] |
-          select(.status.state == "Completed") |
-          select((.status.labels.KubernetesStatus | fromjson | .namespace) == $ns) |
-          select((.status.labels.KubernetesStatus | fromjson | .pvcName) == $pvc) |
-          .status.url
-        ' | tail -1)
+        # The API lists backups by name, which is random, so the newest has to be picked by date.
+        BACKUP=$(kubectl get backups.longhorn.io -n longhorn-system -o json | jq -r --arg ns "{{.NAMESPACE}}" --arg pvc "{{.PVC_NAME}}" '
+          [ .items[]
+            | select(.status.state == "Completed" and .status.labels.KubernetesStatus != null)
+            | select(.status.labels.KubernetesStatus | fromjson | .namespace == $ns and .pvcName == $pvc) ]
+          | max_by(.status.backupCreatedAt) // empty
+          | [.metadata.name, .status.volumeName, .status.volumeSize, .status.backupCreatedAt]
+          | @tsv
+        ')
 
-        if [ -z "$BACKUP_URL" ]; then
+        if [ -z "$BACKUP" ]; then
           echo "❌ No backup found for {{.PVC}}"
           exit 1
         fi
 
-        echo "   Found backup: $BACKUP_URL"
+        read -r BACKUP_NAME BACKUP_VOLUME VOLUME_SIZE BACKUP_DATE <<<"$BACKUP"
 
-        # Extract volume size
-        VOLUME_SIZE=$(kubectl get backups.longhorn.io -n longhorn-system -o json | jq -r --arg ns "{{.NAMESPACE}}" --arg pvc "{{.PVC_NAME}}" '
-          .items[] |
-          select(.status.state == "Completed") |
-          select((.status.labels.KubernetesStatus | fromjson | .namespace) == $ns) |
-          select((.status.labels.KubernetesStatus | fromjson | .pvcName) == $pvc) |
-          .status.volumeSize
-        ' | tail -1)
+        # A backup keeps the URL it was written with, so read the target instead: once the NAS
+        # has moved, the old URL points at nothing.
+        BACKUP_TARGET=$(kubectl -n longhorn-system get backuptarget default -o jsonpath='{.spec.backupTargetURL}')
+        if [ -z "$BACKUP_TARGET" ]; then
+          echo "❌ Could not read the Longhorn backup target"
+          exit 1
+        fi
+        BACKUP_URL="$BACKUP_TARGET?backup=$BACKUP_NAME&volume=$BACKUP_VOLUME"
+
+        echo "   Found backup: $BACKUP_NAME, written $BACKUP_DATE"
 
         SIZE_GI=$((VOLUME_SIZE / 1073741824))
         echo "   Volume size: ${SIZE_GI}Gi"
@@ -1173,8 +1177,14 @@ tasks:
         echo "=== Available PVC Restorations ==="
         echo "Run these commands to restore your data:"
         echo ""
-        kubectl get backups.longhorn.io -n longhorn-system -o json 2>/dev/null | \
-          jq -r '.items[] | select(.status.state == "Completed") | (.status.labels.KubernetesStatus | fromjson) as $k | "task dr:restore PVC=\($k.namespace)/\($k.pvcName)"' | \
+        BACKUPS=$(kubectl get backups.longhorn.io -n longhorn-system -o json 2>/dev/null)
+        echo "$BACKUPS" | \
+          jq -r '.items[] | select(.status.state == "Completed") | .status.labels.KubernetesStatus // empty | fromjson | "task dr:restore PVC=\(.namespace)/\(.pvcName)"' | \
           sort | uniq || echo "No backups found - is Longhorn running and connected to NAS?"
+        echo ""
+        # Taken by hand, so they name no PVC and dr:restore cannot find them.
+        echo "Backups with no PVC label, to restore by hand:"
+        echo "$BACKUPS" | \
+          jq -r '.items[] | select(.status.state == "Completed" and .status.labels.KubernetesStatus == null) | "  \(.metadata.name) (volume \(.status.volumeName))"'
         echo ""
         echo "Note: Restore PVCs BEFORE Flux creates the workloads, or suspend Flux first."

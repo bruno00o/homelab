@@ -4,8 +4,8 @@ metadata:
   name: cloudnative-pg
   namespace: cnpg-system
 spec:
-  # 1, not 0: with a single replica, maxUnavailable: 0 forbids every voluntary
-  # eviction, so `kubectl drain` blocks forever.
+  # 1, not 0: maxUnavailable: 0 forbids every voluntary eviction, so `kubectl drain`
+  # blocks forever.
   maxUnavailable: 1
   selector:
     matchLabels:

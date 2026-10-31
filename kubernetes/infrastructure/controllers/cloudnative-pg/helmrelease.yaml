@@ -28,6 +28,15 @@ spec:
     crds: CreateReplace
 
   values:
+    # Failover needs the operator, so it must not go down with a node that holds a primary.
+    replicaCount: 2
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: cloudnative-pg
+            topologyKey: kubernetes.io/hostname
     priorityClassName: system-cluster-critical
     monitoring:
       podMonitorEnabled: true

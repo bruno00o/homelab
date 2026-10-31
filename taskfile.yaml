@@ -144,6 +144,13 @@ tasks:
       # published anywhere would be noise within a week.
       - ./scripts/drift.sh
 
+  audit:
+    desc: One verdict over cluster, backups, versions, outside machines and silent failures
+    deps: [deps:verify]
+    cmds:
+      # Read-only. `task audit -- --full` adds task drift, which takes minutes.
+      - ./scripts/audit.sh {{.CLI_ARGS}}
+
   # =============================================================================
   # Talos - Configuration
   # =============================================================================

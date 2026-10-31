@@ -5,3 +5,4 @@ resources:
   - dns-egress.yaml
   - database.yaml
   - monitoring.yaml
+  - kubelet-serving-cert-approver.yaml

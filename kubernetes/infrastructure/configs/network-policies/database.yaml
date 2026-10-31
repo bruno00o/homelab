@@ -171,44 +171,6 @@ spec:
         - protocol: TCP
           port: 9121
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-ingress-from-lan
-  namespace: valkey-system
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: valkey
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - ipBlock:
-            cidr: 10.0.0.0/8
-      ports:
-        - protocol: TCP
-          port: 6379
----
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-lb-ingress
-  namespace: valkey-system
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: valkey
-  ingress:
-    - fromEntities:
-        - world
-        - remote-node
-        - host
-      toPorts:
-        - ports:
-            - port: "6379"
-              protocol: TCP
----
 # The CNPG operator watches its CRs and manages the instance pods through the apiserver.
 # Named as an entity because the apiserver is reached through a ClusterIP that DNATs to
 # host-network endpoints, which no ipBlock can express.

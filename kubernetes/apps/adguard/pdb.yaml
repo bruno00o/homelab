@@ -4,8 +4,7 @@ metadata:
   name: adguard-home
   namespace: adguard
 spec:
-  # 1, not 0: with a single replica, maxUnavailable: 0 forbids every voluntary
-  # eviction, so `kubectl drain` blocks forever.
+  # Keeps one of the two answering through a drain.
   maxUnavailable: 1
   selector:
     matchLabels:

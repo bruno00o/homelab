@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: loki-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: loki-ruler
+      rules:
+        # The alerts on logs say nothing when the ruler itself is broken.
+        - alert: LokiRulerNotEvaluating
+          expr: absent(loki_prometheus_rule_evaluations_total)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Loki evaluates no alert rule"
+            description: "No rule evaluation from Loki: it is down, or it did not load loki-alert-rules. Alerts on logs are off."
+        - alert: LokiRuleEvaluationFailing
+          expr: sum(rate(loki_prometheus_rule_evaluation_failures_total[15m])) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Loki alert rules fail to evaluate"
+            description: "Loki cannot evaluate its alert rules. Read the loki-0 log."
+        - alert: LokiCannotReachAlertmanager
+          expr: sum(rate(loki_prometheus_notifications_errors_total[15m])) + sum(rate(loki_prometheus_notifications_dropped_total[15m])) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Loki cannot send its alerts"
+            description: "Loki fails to send alerts to Alertmanager, so alerts on logs are lost."

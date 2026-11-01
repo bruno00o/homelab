@@ -13,6 +13,8 @@ spec:
   egress:
     - ports:
         - protocol: TCP
+          port: 3100 # Loki
+        - protocol: TCP
           port: 9090 # Prometheus / Spegel
         - protocol: TCP
           port: 9091 # Pushgateway

@@ -58,7 +58,10 @@ spec:
       structuredConfig:
         ruler:
           enable_api: true
-          alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+          # Every replica, as Prometheus does: the Service would pick one per send, and replicas
+          # do not share alerts.
+          enable_alertmanager_discovery: true
+          alertmanager_url: http://_http-web._tcp.alertmanager-operated.monitoring.svc.cluster.local
           # Not the default, /rules: the ruler rewrites its rules there, over the ones it reads.
           rule_path: /var/loki/ruler-scratch
           storage:

@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - longhorn-alerts.yaml
   - nvme-alerts.yaml
+  - loki-alerts.yaml
   - cnpg-alerts.yaml
   - cluster-alerts.yaml
   - franky-alerts.yaml

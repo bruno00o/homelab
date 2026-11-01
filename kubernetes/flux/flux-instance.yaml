@@ -11,7 +11,7 @@ metadata:
 spec:
   distribution:
     # The running flux-operator must ship this version: bump the two together.
-    version: "2.9.6"
+    version: "2.10.0"
     registry: ghcr.io/fluxcd
   components:
     - source-controller

@@ -93,7 +93,7 @@ spec:
       app:
         controller: searxng
         # The JSON API answers anyone who reaches it, so the address is only open to the
-        # two machines whose coding agents search through it.
+        # machines whose coding agents search through it.
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: ${LB_SEARXNG}
@@ -102,6 +102,8 @@ spec:
           - 10.0.10.202/32
           - 10.0.10.213/32
           - ${JINBE_IP}/32
+          # Kazimo's M900.
+          - 10.0.10.123/32
         ports:
           http:
             port: 8080

@@ -1,0 +1,39 @@
+---
+# Alerts on what only shows in the logs: both failures below leave every pod Ready. Loki reads
+# this file itself and sends to Alertmanager, so the routing is the same as Prometheus alerts.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-alert-rules
+  namespace: loki-system
+data:
+  homelab.yaml: |
+    groups:
+      - name: silent-failures
+        rules:
+          # Sustained, so that a short network cut on its own does not fire.
+          - alert: FrigateCameraCrashLoop
+            expr: |
+              sum by (camera) (count_over_time({namespace="home-automation", container="frigate"}
+                |= "Ffmpeg process crashed unexpectedly"
+                | regexp "for (?P<camera>camera_[0-9]+)" [15m])) > 1
+            for: 30m
+            labels:
+              severity: warning
+              namespace: home-automation
+            annotations:
+              description: >-
+                {{ $labels.camera }}: ffmpeg keeps crashing. Detection or recording is degraded.
+                Read the ffmpeg message: a decoding error or a network one.
+          # It never reconnects by itself, so this does not resolve without the fix.
+          - alert: AutokumaDisconnected
+            expr: |
+              sum(count_over_time({namespace="uptime-kuma", pod=~"autokuma.*"}
+                |= "EngineIO Error" [5m])) > 10
+            for: 10m
+            labels:
+              severity: warning
+              namespace: uptime-kuma
+            annotations:
+              description: >-
+                autokuma lost uptime-kuma, monitors no longer sync. Delete the autokuma pod.

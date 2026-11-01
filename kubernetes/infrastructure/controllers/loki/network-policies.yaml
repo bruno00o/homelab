@@ -77,18 +77,28 @@ spec:
         - kube-apiserver
 
 ---
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
-  name: allow-loki-apiserver-egress
+  name: allow-ruler-to-alertmanager
   namespace: loki-system
 spec:
-  endpointSelector:
+  podSelector:
     matchLabels:
       app.kubernetes.io/name: loki
+  policyTypes:
+    - Egress
   egress:
-    - toEntities:
-        - kube-apiserver
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alertmanager
+      ports:
+        - protocol: TCP
+          port: 9093
 
 ---
 apiVersion: networking.k8s.io/v1

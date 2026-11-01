@@ -6,6 +6,7 @@ resources:
   - alloy.yaml
   - pdb.yaml
   - network-policies.yaml
+  - alert-rules.yaml
 components:
   - ../../../components/network-policies/base
 namespace: loki-system

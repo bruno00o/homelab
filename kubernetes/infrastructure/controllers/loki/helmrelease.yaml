@@ -55,6 +55,16 @@ spec:
         retention_enabled: true
         delete_request_store: filesystem
         retention_delete_delay: 2h
+      structuredConfig:
+        ruler:
+          enable_api: true
+          alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+          # Not the default, /rules: the ruler rewrites its rules there, over the ones it reads.
+          rule_path: /var/loki/ruler-scratch
+          storage:
+            type: local
+            local:
+              directory: /rules
 
     singleBinary:
       replicas: 1
@@ -70,15 +80,21 @@ spec:
           memory: 256Mi
         limits:
           memory: 768Mi
+      # `fake` is the tenant Loki uses when auth is off.
+      extraVolumes:
+        - name: alert-rules
+          configMap:
+            name: loki-alert-rules
+      extraVolumeMounts:
+        - name: alert-rules
+          mountPath: /rules/fake
+          readOnly: true
 
-    # Sidecar for rules (k8s-sidecar)
+    # A mounted ConfigMap needs no watch on the apiserver, and this sidecar stopped without
+    # a sign while its pod stayed Ready.
     sidecar:
-      resources:
-        requests:
-          cpu: 10m
-          memory: 64Mi
-        limits:
-          memory: 256Mi
+      rules:
+        enabled: false
 
     # Disable components not needed in SingleBinary mode
     backend:
@@ -102,12 +118,14 @@ spec:
     resultsCache:
       enabled: false
 
-    # Disable self-monitoring
+    # Disable self-monitoring. Scraping stays on: nothing else says that the ruler is failing.
     monitoring:
       selfMonitoring:
         enabled: false
         grafanaAgent:
           installOperator: false
+      serviceMonitor:
+        enabled: true
 
     # Loki canary DaemonSet configuration. Top level, which is where the chart reads it — a
     # second copy under `monitoring` above did nothing.

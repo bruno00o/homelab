@@ -471,6 +471,7 @@ tasks:
       # instance-manager pods are owned by an InstanceManager CRD, not a DaemonSet, so
       # --ignore-daemonsets does not spare them, and their PDB allows no disruption.
       - kubectl cordon {{.NODE}}
+      - ./scripts/talos-evacuate.sh {{.NODE}}
       - talosctl upgrade --nodes {{.NODE_IP}} --image {{.INSTALLER_IMAGE}} --drain=false --talosconfig {{.TALOS_DIR}}/clusterconfig/talosconfig
       # Uncordon BEFORE the health check: talosctl 1.13.4+ added a
       # "all k8s nodes schedulable" check, which deadlocks against our own
@@ -479,6 +480,15 @@ tasks:
       - task: talos:wait-healthy
         vars: { NODE_IP: "{{.NODE_IP}}" }
       - task: talos:wait-storage-healthy
+
+  talos:evacuate:
+    desc: Cordon a worker and move its essential pods away, without rebooting it (uncordon by hand)
+    deps: [deps:verify]
+    requires:
+      vars: [NODE]
+    cmds:
+      - kubectl cordon {{.NODE}}
+      - ./scripts/talos-evacuate.sh {{.NODE}}
 
   talos:upgrade-all:
     desc: Upgrade Talos on all nodes sequentially

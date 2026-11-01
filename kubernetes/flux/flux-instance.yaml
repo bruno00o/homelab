@@ -1,0 +1,63 @@
+---
+# Deleting this object uninstalls Flux, CRDs and objects included. Keep the annotation, so
+# that a file removed by mistake is not pruned.
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  distribution:
+    # The running flux-operator must ship this version: bump the two together.
+    version: "2.9.6"
+    registry: ghcr.io/fluxcd
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+    - image-reflector-controller
+    - image-automation-controller
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: true
+    domain: cluster.local
+  kustomize:
+    patches:
+      # CPU limits throttle the controllers, which slows every reconciliation. Memory limits
+      # stay, sized on what each controller uses rather than one number for all of them.
+      - target:
+          kind: Deployment
+        patch: |-
+          - op: remove
+            path: /spec/template/spec/containers/0/resources/limits/cpu
+      - target:
+          kind: Deployment
+          name: helm-controller
+        patch: |-
+          - op: replace
+            path: /spec/template/spec/containers/0/resources/limits/memory
+            value: 768Mi
+      - target:
+          kind: Deployment
+          name: "(source-controller|kustomize-controller)"
+        patch: |-
+          - op: replace
+            path: /spec/template/spec/containers/0/resources/limits/memory
+            value: 512Mi
+      - target:
+          kind: Deployment
+          name: notification-controller
+        patch: |-
+          - op: replace
+            path: /spec/template/spec/containers/0/resources/limits/memory
+            value: 256Mi
+  sync:
+    kind: GitRepository
+    url: ssh://git@github.com/bruno00o/homelab
+    ref: refs/heads/main
+    path: ./kubernetes/flux
+    pullSecret: flux-system

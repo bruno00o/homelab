@@ -174,7 +174,7 @@ library=""
 unchecked=""
 
 for f in $(grep -rl "kind: HelmRelease" kubernetes --include="*.yaml" | sort); do
-  # One file can hold several documents; gotk-components.yaml matches the grep on a CRD.
+  # One file can hold several documents, and a CRD also matches the grep.
   count=$(yq -o=json 'select(.kind == "HelmRelease") | .metadata.name' "$f" 2>/dev/null | wc -l)
   [ "$count" -gt 0 ] || continue
 

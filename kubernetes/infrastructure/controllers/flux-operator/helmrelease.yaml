@@ -1,7 +1,6 @@
 ---
-# flux-operator for its web UI only. No FluxInstance exists, so it does not manage Flux:
-# it reads the bootstrap-installed controllers and reports on them. A FluxInstance would
-# take Flux over, and deleting it would then uninstall Flux, CRDs and objects included.
+# Runs Flux through kubernetes/flux/flux-instance.yaml, and serves its web UI. Installed by
+# bootstrap/helmfile.yaml before Flux exists, then adopted here.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

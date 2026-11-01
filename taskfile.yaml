@@ -717,13 +717,10 @@ tasks:
       # No `flux bootstrap github`: it needs a PAT with admin rights, writes to the repo
       # and creates the deploy key. Everything it would generate is already committed, so
       # a disaster recovery needs the Age key and nothing else.
-      # --force-conflicts so a re-run is idempotent: on a cluster where Flux is already
-      # installed the fields are owned by the "flux" field manager and a plain apply fails.
-      - kubectl apply --server-side --force-conflicts -f kubernetes/flux/flux-system/gotk-components.yaml
-      - kubectl wait --for=condition=established crd/kustomizations.kustomize.toolkit.fluxcd.io --timeout=120s
-      - kubectl -n flux-system rollout status deploy/source-controller --timeout=5m
-      - kubectl -n flux-system rollout status deploy/kustomize-controller --timeout=5m
-      - kubectl apply --server-side --force-conflicts -f kubernetes/flux/flux-system/gotk-sync.yaml
+      # The operator comes from bootstrap:helmfile and installs Flux from this one object.
+      - kubectl -n flux-system rollout status deploy/flux-operator --timeout=5m
+      - kubectl apply --server-side --force-conflicts -f kubernetes/flux/flux-instance.yaml
+      - kubectl -n flux-system wait fluxinstance/flux --for=condition=Ready --timeout=10m
       - echo "Flux installed. Watch with 'flux get kustomizations -w'"
 
   bootstrap:full:

@@ -100,6 +100,15 @@
     },
     {
       "customType": "regex",
+      "description": "Flux version in the FluxInstance",
+      "managerFilePatterns": ["/kubernetes/flux/flux-instance\\.yaml$/"],
+      "matchStrings": ["version:\\s*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "fluxcd/flux2",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
       "description": "Versions pinned by an ARG in the images we build (images/)",
       "managerFilePatterns": [
         "/images/.+/Dockerfile$/"
@@ -223,19 +232,14 @@
     },
 
     {
-      "description": "Group Flux components - keeps the gotk-components.yaml updates in one PR instead of five conflicting ones",
+      "description": "Group Flux: the CLI, the operator chart and the FluxInstance version move together, the operator has to ship the version the instance names",
       "matchPackageNames": ["/fluxcd/", "/^flux/"],
       "groupName": "Flux",
       "labels": ["gitops"]
     },
     {
-      "description": "Flux controllers ship ahead of the Flux release that carries their CRDs: bumped alone, notification-controller v1.10.0 expected Provider and Alert in v1 against v1beta3 CRDs and crashlooped, taking every alert with it. gotk-components.yaml is regenerated whole with flux install --export instead",
-      "matchFileNames": ["kubernetes/flux/flux-system/gotk-components.yaml"],
-      "enabled": false
-    },
-    {
-      "description": "The flux2 CLI is the signal to regenerate gotk-components.yaml, so it waits for a person",
-      "matchPackageNames": ["flux2"],
+      "description": "A Flux version replaces every controller and may migrate its CRDs, so it waits for a person",
+      "matchPackageNames": ["flux2", "fluxcd/flux2"],
       "automerge": false,
       "labels": ["gitops", "review-required"]
     },

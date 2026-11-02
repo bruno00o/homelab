@@ -448,23 +448,23 @@ provisioning:
   sensitive ports are listed, and a new host-network service stays open until it is added here.
 
   A rule naming only IPv4 subnets drops IPv6 on its port, and the nodes reach the API and Talos
-  over their ULA addresses. Apply with `--mode try` first: a wrong rule can lock out Talos API.
+  over their ULA addresses, so those rules set `ipv6` and also allow each node's `ipv6Address`.
+  Apply with `--mode try` first: a wrong rule can lock out Talos API.
 #}
 {% set pods = "10.244.0.0/16" %}
-{% set ula = "fd00:20::/64" %}
 {% set admins = ["10.0.20.17/32", "10.0.10.202/32", "10.0.10.213/32"] %}
 {% set rules = [
   {"name": "cni-vxlan", "ports": [8472], "protocol": "udp", "peers": nodes, "from": []},
   {"name": "cilium-and-metrics", "ports": [4240, 4244, 9100, "9962-9965"], "protocol": "tcp", "peers": nodes, "from": [pods]},
   {"name": "kubelet", "ports": [10250], "protocol": "tcp", "peers": nodes, "from": [pods]},
-  {"name": "talos-api", "ports": [50000], "protocol": "tcp", "peers": nodes, "from": [pods, ula] + admins},
+  {"name": "talos-api", "ports": [50000], "protocol": "tcp", "peers": nodes, "ipv6": true, "from": [pods] + admins},
 ] %}
 {% if cp %}
 {% set rules = rules + [
   {"name": "etcd-peers", "ports": ["2379-2380", 2383], "protocol": "tcp", "peers": nodes | selectattr("controlPlane") | list, "from": []},
   {"name": "etcd-metrics", "ports": [2381], "protocol": "tcp", "peers": nodes, "from": [pods]},
-  {"name": "trustd", "ports": [50001], "protocol": "tcp", "peers": nodes, "from": [ula]},
-  {"name": "kubernetes-api", "ports": [6443], "protocol": "tcp", "peers": nodes, "from": [pods, ula] + admins},
+  {"name": "trustd", "ports": [50001], "protocol": "tcp", "peers": nodes, "ipv6": true, "from": []},
+  {"name": "kubernetes-api", "ports": [6443], "protocol": "tcp", "peers": nodes, "ipv6": true, "from": [pods] + admins},
 ] %}
 {% endif %}
 ---
@@ -485,6 +485,9 @@ portSelector:
 ingress:
 {% for peer in rule.peers %}
   - subnet: {{ peer.ipAddress }}/32
+{% if rule.ipv6 | default(false) %}
+  - subnet: {{ peer.ipv6Address }}/128
+{% endif %}
 {% endfor %}
 {% for subnet in rule.from %}
   - subnet: {{ subnet }}

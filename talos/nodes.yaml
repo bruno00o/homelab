@@ -1,6 +1,10 @@
 ---
 # The nodes and the versions they run. machineconfig.yaml.j2 renders from this file, and the
 # talos:* tasks read roles and addresses from it rather than keeping their own copy.
+#
+# ipv6Address is not configured anywhere: the node builds it from the router's prefix and its
+# MAC, so it survives a reboot and changes with the network card. The firewall lets it reach the
+# APIs, so a new card means updating it here first.
 talosVersion: v1.14.5
 kubernetesVersion: v1.36.6
 
@@ -8,27 +12,33 @@ nodes:
   # --- Control Plane ---
   - hostname: luffy
     ipAddress: 10.0.20.11
+    ipv6Address: fd00:20::7a55:36ff:fe04:95ee
     controlPlane: true
     installDisk: CT500P310SSD8
   - hostname: zoro
     ipAddress: 10.0.20.12
+    ipv6Address: fd00:20::7a55:36ff:fe04:8e4e
     controlPlane: true
     installDisk: CT500P310SSD8
   - hostname: nami
     ipAddress: 10.0.20.13
+    ipv6Address: fd00:20::7a55:36ff:fe04:8ff4
     controlPlane: true
     installDisk: CT500P310SSD8
 
   # --- Workers ---
   - hostname: usopp
     ipAddress: 10.0.20.14
+    ipv6Address: fd00:20::4a21:bff:fe78:3143
     controlPlane: false
     installDisk: CT2000T500SSD8
   - hostname: sanji
     ipAddress: 10.0.20.15
+    ipv6Address: fd00:20::4a21:bff:fe78:322f
     controlPlane: false
     installDisk: CT2000T500SSD8
   - hostname: chopper
     ipAddress: 10.0.20.16
+    ipv6Address: fd00:20::4a21:bff:fe78:323d
     controlPlane: false
     installDisk: CT2000T500SSD8

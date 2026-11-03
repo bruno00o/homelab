@@ -151,6 +151,72 @@ spec:
             stage.cri {}
           }
 
+          // Talos writes its own services' and the kernel's logs to /var/log, outside any pod.
+          // The rotated .1 copies were read under their first name. auditd stays out: with
+          // SELinux permissive it logs every pod write to an unlabeled volume.
+          local.file_match "talos" {
+            path_targets = [{
+              "__path__"         = "/var/log/*.log",
+              "__path_exclude__" = "/var/log/auditd.log",
+              "job"              = "talos",
+              "node_name"        = sys.env("HOSTNAME"),
+            }]
+          }
+
+          loki.source.file "talos" {
+            targets    = local.file_match.talos.targets
+            forward_to = [loki.process.talos.receiver]
+          }
+
+          loki.process "talos" {
+            forward_to = [loki.write.default.receiver]
+
+            stage.regex {
+              source     = "filename"
+              expression = "/var/log/(?P<service>[^/]+)\\.log$"
+            }
+            stage.labels {
+              values = { service = "" }
+            }
+            stage.label_drop {
+              values = ["filename"]
+            }
+
+            // The console dashboard polls machined every second, and machined logs each call.
+            stage.drop {
+              expression = "match with service \"dashboard\""
+            }
+
+            // Each service has its own time format. Reading it puts what is shipped late,
+            // after a reboot or on a first run, at the time it was written.
+            stage.regex {
+              expression = "(?P<ts_rfc>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z)"
+            }
+            stage.timestamp {
+              source = "ts_rfc"
+              format = "RFC3339"
+            }
+            stage.regex {
+              expression = "^(?P<ts_go>\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}(\\.\\d+)?)"
+            }
+            stage.timestamp {
+              source = "ts_go"
+              format = "2006/01/02 15:04:05"
+            }
+            stage.regex {
+              expression = "^\\{\"ts\":(?P<ts_ms>\\d{13})"
+            }
+            stage.timestamp {
+              source = "ts_ms"
+              format = "UnixMs"
+            }
+
+            // Loki refuses what is older than its retention.
+            stage.drop {
+              older_than = "168h"
+            }
+          }
+
           loki.write "default" {
             endpoint {
               url = "http://loki:3100/loki/api/v1/push"

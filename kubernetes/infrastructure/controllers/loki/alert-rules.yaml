@@ -1,5 +1,5 @@
 ---
-# Alerts on what only shows in the logs: both failures below leave every pod Ready. Loki reads
+# Alerts on what only shows in the logs: the failures below leave every pod Ready. Loki reads
 # this file itself and sends to Alertmanager, so the routing is the same as Prometheus alerts.
 apiVersion: v1
 kind: ConfigMap
@@ -37,3 +37,16 @@ data:
             annotations:
               description: >-
                 autokuma lost uptime-kuma, monitors no longer sync. Delete the autokuma pod.
+          # Right after a reboot, the evacuation left a volume attached; otherwise a disk or a
+          # Longhorn volume failing mid-write. The window is long because a node going down
+          # ships its last kernel lines only once it is back.
+          - alert: NodeWritesLost
+            expr: |
+              sum by (node_name) (count_over_time({job="talos", service="kernel"}
+                |~ "EXT4-fs error|lost (a)?sync page write|Data will be lost|potential data loss|op 0x[0-9a-f]+:\\(WRITE\\)" [30m])) > 0
+            labels:
+              severity: warning
+            annotations:
+              description: >-
+                {{ $labels.node_name }}: the kernel lost writes on a disk or a Longhorn volume.
+                Read its kernel log in Loki around this time to see which device.

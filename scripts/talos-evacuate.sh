@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Moves what the house relies on off a cordoned worker before its reboot, one pod at a time.
+# Moves what the house relies on off a cordoned worker before its reboot, one pod at a time, then
+# stops the other pods holding a Longhorn volume, so that no volume is attached when it reboots.
 # Not a drain: the workers cannot hold everything with one of them gone, and draining Longhorn's
-# instance managers and strict-local replicas blocks. Everything else falls with the node.
+# instance managers and strict-local replicas blocks. What fits nowhere else waits for the uncordon.
 # Trouble with one pod is reported, not fatal: the pod then falls with the node, as it would have.
 set -uo pipefail
 
@@ -95,5 +96,80 @@ done <<<"$pods"
 if [ "$moved_uptime_kuma" = true ]; then
   kubectl -n uptime-kuma delete pod -l app.kubernetes.io/name=autokuma >/dev/null || warn "autokuma not restarted"
 fi
+
+# Talos stops every pod at once when it reboots, the Longhorn engine with the rest, so a volume
+# still mounted loses what sat in the page cache. Stop the pods that hold one: they start
+# elsewhere or wait for the uncordon, and their volumes are unmounted and detached first.
+attached_volumes() {
+  kubectl -n longhorn-system get volumes.longhorn.io -o json |
+    jq -c --arg node "$NODE" '[.items[] | select(.status.currentNodeID == $node)]'
+}
+volumes=$(attached_volumes) || { warn "could not read the Longhorn volumes"; volumes='[]'; }
+holders=$(kubectl get pods -A --field-selector "spec.nodeName=$NODE" -o json | jq -r --argjson volumes "$volumes" '
+  ($volumes | map(.status.kubernetesStatus | select(.pvcName) | {key: "\(.namespace)/\(.pvcName)", value: true})
+    | from_entries) as $claims
+  | .items[]
+  | select(.metadata.deletionTimestamp | not)
+  | select(.status.phase == "Running" or .status.phase == "Pending")
+  | select(.metadata.namespace != "longhorn-system")
+  | .metadata.namespace as $ns
+  | select(any(.spec.volumes[]?; .persistentVolumeClaim.claimName as $c | $c != null and $claims["\($ns)/\($c)"] == true))
+  | [.metadata.namespace, .metadata.name] | @tsv')
+
+start=$(date +%s)
+refused=""
+while IFS=$'\t' read -r ns pod; do
+  [ -n "$ns" ] || continue
+  body=$(jq -nc --arg ns "$ns" --arg pod "$pod" \
+    '{apiVersion: "policy/v1", kind: "Eviction", metadata: {name: $pod, namespace: $ns}}')
+  if kubectl create --raw "/api/v1/namespaces/$ns/pods/$pod/eviction" -f - <<<"$body" >/dev/null 2>&1; then
+    note "$ns/$pod stopped, its volume leaves $NODE"
+  else
+    refused+="$ns"$'\t'"$pod"$'\n'
+  fi
+done <<<"$holders"
+
+# A budget that still refuses after a minute is overruled: the reboot would stop the pod anyway,
+# only without unmounting its volume.
+deadline=$((start + 60))
+while [ -n "$refused" ]; do
+  read -r -t 10 </dev/zero
+  still=""
+  while IFS=$'\t' read -r ns pod; do
+    [ -n "$ns" ] || continue
+    # Gone meanwhile, or already replaced by a pod waiting elsewhere under the same name.
+    [ "$(kubectl -n "$ns" get pod "$pod" -o jsonpath='{.spec.nodeName}' 2>/dev/null)" = "$NODE" ] || continue
+    body=$(jq -nc --arg ns "$ns" --arg pod "$pod" \
+      '{apiVersion: "policy/v1", kind: "Eviction", metadata: {name: $pod, namespace: $ns}}')
+    if kubectl create --raw "/api/v1/namespaces/$ns/pods/$pod/eviction" -f - <<<"$body" >/dev/null 2>&1; then
+      note "$ns/$pod stopped, its volume leaves $NODE"
+    elif [ "$(date +%s)" -ge "$deadline" ]; then
+      if kubectl -n "$ns" delete pod "$pod" --wait=false >/dev/null 2>&1; then
+        note "$ns/$pod deleted despite its disruption budget"
+      else
+        warn "$ns/$pod could not be stopped, its volume falls with the node"
+      fi
+    else
+      still+="$ns"$'\t'"$pod"$'\n'
+    fi
+  done <<<"$refused"
+  refused="$still"
+done
+
+deadline=$(($(date +%s) + TIMEOUT))
+while :; do
+  left=$(attached_volumes | jq -r 'map(.status.kubernetesStatus.pvcName // .metadata.name) | join(" ")') ||
+    left="(unreadable)"
+  if [ -z "$left" ]; then
+    note "no Longhorn volume attached to $NODE after $(($(date +%s) - start)) s"
+    break
+  fi
+  if [ "$(date +%s)" -ge "$deadline" ]; then
+    warn "Longhorn volumes still attached to $NODE: $left"
+    break
+  fi
+  note "waiting for $(wc -w <<<"$left") Longhorn volumes to detach from $NODE"
+  read -r -t 10 </dev/zero
+done
 
 note "done, $problems problem(s)"

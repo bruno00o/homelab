@@ -482,7 +482,7 @@ tasks:
       - task: talos:wait-storage-healthy
 
   talos:evacuate:
-    desc: Cordon a worker and move its essential pods away, without rebooting it (uncordon by hand)
+    desc: Cordon a worker, move its essential pods and stop those holding a Longhorn volume, without rebooting it (uncordon by hand)
     deps: [deps:verify]
     requires:
       vars: [NODE]

@@ -318,13 +318,45 @@ configuration:
     runtimeClasses: []
     usernames: []
   kind: PodSecurityConfiguration
+{#
+  Audit: every write and every Secret access, never a request body. The rest is what controllers
+  repeat in a loop (leader election, reads, health checks, access reviews, events, Longhorn's
+  status reports): logged too, it rotated the whole log away within hours. The first rule that
+  matches wins, so the Secret rule has to come before the one dropping reads.
+#}
 ---
 apiVersion: v1alpha1
 kind: KubeAuditPolicyConfig
 configuration:
   apiVersion: audit.k8s.io/v1
   kind: Policy
+  omitStages:
+    - RequestReceived
   rules:
+    - level: None
+      resources:
+        - group: coordination.k8s.io
+          resources: ["leases"]
+    - level: None
+      nonResourceURLs: ["*"]
+    - level: Metadata
+      resources:
+        - group: ""
+          resources: ["secrets"]
+    - level: None
+      verbs: ["get", "list", "watch"]
+    - level: None
+      resources:
+        - group: ""
+          resources: ["events"]
+        - group: events.k8s.io
+        - group: authorization.k8s.io
+        - group: authentication.k8s.io
+    - level: None
+      verbs: ["update", "patch"]
+      resources:
+        - group: longhorn.io
+          resources: ["*/status"]
     - level: Metadata
 ---
 apiVersion: v1alpha1

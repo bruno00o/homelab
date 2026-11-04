@@ -59,7 +59,7 @@ spec:
     priorityClassName: homelab-essential
     image:
       # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-      tag: "2026.10.4"
+      tag: "2026.11.0"
 
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet

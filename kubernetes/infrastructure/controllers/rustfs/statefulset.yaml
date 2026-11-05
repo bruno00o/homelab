@@ -200,6 +200,8 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
+  # Immutable once created, and Flux fails on a change here: grow the PVC itself, then delete
+  # this StatefulSet with --cascade=orphan so Flux recreates it. The pod keeps running.
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -208,4 +210,4 @@ spec:
         storageClassName: ${DEFAULT_STORAGE_CLASS}
         resources:
           requests:
-            storage: 50Gi
+            storage: 100Gi

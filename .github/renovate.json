@@ -258,6 +258,12 @@
       "automerge": false
     },
     {
+      "description": "autokuma - review manually. Its 2.1.0 release candidates panic at start with the Kubernetes source (no TLS in the kube client), so a release still carrying that bug would stop monitor sync on merge",
+      "matchPackageNames": ["ghcr.io/bigboot/autokuma"],
+      "labels": ["review-required"],
+      "automerge": false
+    },
+    {
       "description": "Kubernetes - review manually (kubectl must follow the cluster). Patches get their own PR, or a held-back minor hides them",
       "matchPackageNames": ["kubernetes/kubernetes", "kubectl", "kubernetes/kubectl"],
       "labels": ["kubernetes", "infrastructure"],

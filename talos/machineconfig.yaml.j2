@@ -418,6 +418,15 @@ kind: KubeProxyConfig
 enabled: false
 image: registry.k8s.io/kube-proxy:{{ kubernetesVersion }}
 config: {}
+{#
+  CoreDNS is Flux's, in kubernetes/infrastructure/configs/coredns: every upgrade-k8s put the
+  default Corefile back over ours. Disabling it here alone would have upgrade-k8s delete the
+  running objects, which is why its entries left the bootstrap manifests inventory too.
+#}
+---
+apiVersion: v1alpha1
+kind: KubeCoreDNSConfig
+enabled: false
 {# Lets the etcd-backup CronJob take a snapshot through the Talos API, and nothing else. #}
 ---
 apiVersion: v1alpha1

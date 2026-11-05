@@ -528,12 +528,21 @@ tasks:
     cmds:
       - echo "Upgrading Kubernetes to {{.K8S_VERSION}}..."
       - task: talos:etcd-snapshot
-      # Stops here if the pre-upgrade checks find a removed flag or API version.
-      - talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}} --dry-run
+      # Stops here if the pre-upgrade checks find a removed flag or API version, or if the
+      # upgrade would delete anything. It deletes whatever Talos once applied and no longer
+      # renders, so a component disabled in the machine config without leaving the bootstrap
+      # manifests inventory would go: for CoreDNS, every lookup in the cluster.
+      - |
+        out=$(talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}} --dry-run 2>&1)
+        status=$?
+        echo "$out"
+        [ "$status" -eq 0 ] || exit "$status"
+        if echo "$out" | grep -qi '^ < pruned '; then
+          echo "The upgrade would delete the objects marked Pruned above. Remove them from the"
+          echo "talos-bootstrap-manifests-inventory ConfigMap first if something else owns them."
+          exit 1
+        fi
       - talosctl upgrade-k8s --nodes {{.NODE_LUFFY}} --to {{.K8S_VERSION}}
-      # talosctl upgrade-k8s re-applies its bootstrap manifests and reverts the
-      # Flux-managed CoreDNS ConfigMap to the Talos default. Reconcile it back.
-      - flux reconcile kustomization infrastructure-configs --with-source
 
   # =============================================================================
   # Talos - Status & Monitoring
@@ -678,7 +687,7 @@ tasks:
   # Bootstrap - Fresh Cluster Setup
   # =============================================================================
   bootstrap:helmfile:
-    desc: Install Cilium CNI + Prometheus CRDs via helmfile (required before Flux)
+    desc: Install Cilium CNI + Prometheus CRDs via helmfile, then CoreDNS (required before Flux)
     deps: [deps:verify]
     dir: bootstrap
     cmds:
@@ -692,7 +701,14 @@ tasks:
       - kubectl -n kube-system rollout status daemonset/cilium --timeout=5m
       # Talos nodes only go Ready once the CNI is up, so this is the real gate.
       - kubectl wait --for=condition=ready node --all --timeout=300s
-      - echo "Bootstrap complete - Cilium CNI + Prometheus CRDs installed"
+      # Talos does not deploy CoreDNS, Flux does, and Flux cannot reach GitHub without it.
+      # Same objects and same field manager as Flux, which then simply takes them over.
+      - |
+        eval "$(yq -r '.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' ../kubernetes/flux/vars/cluster-settings.yaml)"
+        kubectl kustomize ../kubernetes/infrastructure/configs/coredns | flux envsubst --strict \
+          | kubectl apply --server-side --field-manager=kustomize-controller -f -
+      - kubectl -n kube-system rollout status deployment/coredns --timeout=5m
+      - echo "Bootstrap complete - Cilium CNI, Prometheus CRDs and CoreDNS installed"
 
   bootstrap:sops-secret:
     desc: Create SOPS Age secret for Flux

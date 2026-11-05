@@ -42,6 +42,22 @@ spec:
                   secretKeyRef:
                     name: autokuma-secrets
                     key: password
+            # It holds one websocket to Uptime Kuma and never reopens it once Uptime Kuma
+            # restarts: no established connection to its port means a restart is due. The
+            # delay lets Uptime Kuma itself come back first.
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - awk '$4 == "01" && $3 ~ /:0BB9$/ {f = 1} END {exit !f}' /proc/net/tcp /proc/net/tcp6
+                  initialDelaySeconds: 120
+                  periodSeconds: 30
+                  failureThreshold: 6
             resources:
               requests:
                 cpu: 10m

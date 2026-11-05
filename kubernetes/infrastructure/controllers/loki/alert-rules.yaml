@@ -25,8 +25,7 @@ data:
               description: >-
                 {{ $labels.camera }}: ffmpeg keeps crashing. Detection or recording is degraded.
                 Read the ffmpeg message: a decoding error or a network one.
-          # It reconnects by itself and its liveness probe restarts it otherwise, so this firing
-          # means both failed.
+          # It never reconnects by itself, so this does not resolve without the fix.
           - alert: AutokumaDisconnected
             expr: |
               sum(count_over_time({namespace="uptime-kuma", pod=~"autokuma.*"}
@@ -37,8 +36,7 @@ data:
               namespace: uptime-kuma
             annotations:
               description: >-
-                autokuma lost uptime-kuma and neither its reconnect nor its probe brought it
-                back, monitors no longer sync. Read its log, then delete the autokuma pod.
+                autokuma lost uptime-kuma, monitors no longer sync. Delete the autokuma pod.
           # Right after a reboot, the evacuation left a volume attached; otherwise a disk or a
           # Longhorn volume failing mid-write. The window is long because a node going down
           # ships its last kernel lines only once it is back.

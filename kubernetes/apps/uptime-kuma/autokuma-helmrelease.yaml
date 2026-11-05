@@ -58,8 +58,8 @@ spec:
                       - sh
                       - -c
                       - >-
-                        f=/tmp/log/autokuma.log;
-                        [ -n "$(find "$f" -mmin -1 2>/dev/null)" ] || exit 0;
+                        f=$(ls -t /tmp/log/*.log 2>/dev/null | head -n 1);
+                        [ -n "$f" ] && [ -n "$(find "$f" -mmin -1)" ] || exit 0;
                         tail -n 12 "$f" | awk '/Encountered error during sync/ {e++} END {exit NR == 12 && e == 12}'
                   initialDelaySeconds: 60
                   periodSeconds: 30

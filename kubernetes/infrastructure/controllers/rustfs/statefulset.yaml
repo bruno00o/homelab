@@ -201,7 +201,8 @@ spec:
               - key: ca.crt
                 path: ca.crt
   # Immutable once created, and Flux fails on a change here: grow the PVC itself, then delete
-  # this StatefulSet with --cascade=orphan so Flux recreates it. The pod keeps running.
+  # this StatefulSet with --cascade=orphan so Flux recreates it. The pod still restarts once,
+  # since the new template lacks the variables Reloader had added to the old one.
   volumeClaimTemplates:
     - metadata:
         name: data

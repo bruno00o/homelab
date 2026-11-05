@@ -215,7 +215,7 @@ else
     else warn "$1: $hits in $4"; fi
   }
   log_check "Frigate ffmpeg crashes" '{namespace="home-automation",pod=~"frigate.*"}' "Ffmpeg process crashed" 24h
-  log_check "autokuma cut off from uptime-kuma" '{namespace="uptime-kuma",pod=~"autokuma.*"}' "EngineIO Error" 1h
+  log_check "autokuma cut off from uptime-kuma" '{namespace="uptime-kuma",pod=~"autokuma.*"}' "Encountered error during sync" 1h
 fi
 
 # Off can be deliberate, so this informs and does not count.

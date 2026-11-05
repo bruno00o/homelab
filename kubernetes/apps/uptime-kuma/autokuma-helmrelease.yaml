@@ -28,6 +28,8 @@ spec:
               TZ: ${TIMEZONE}
               HOME: /tmp
               RUST_LOG: info
+              # Also written to stderr, so Loki keeps every line; this copy is for the probe.
+              AUTOKUMA__LOG_DIR: /tmp/log
               AUTOKUMA__KUMA__URL: http://uptime-kuma:3001
               AUTOKUMA__KUBERNETES__ENABLED: "true"
               AUTOKUMA__DOCKER__ENABLED: "false"
@@ -42,9 +44,10 @@ spec:
                   secretKeyRef:
                     name: autokuma-secrets
                     key: password
-            # It holds one websocket to Uptime Kuma and never reopens it once Uptime Kuma
-            # restarts: no established connection to its port means a restart is due. The
-            # delay lets Uptime Kuma itself come back first.
+            # Once Uptime Kuma restarts, it can keep failing every sync without ever logging in
+            # again, the socket reconnected or not. It has no health endpoint, so this reads its
+            # own log: a full minute of failed syncs, still being written, calls for a restart.
+            # The threshold leaves Uptime Kuma itself time to come back.
             probes:
               liveness:
                 enabled: true
@@ -54,10 +57,13 @@ spec:
                     command:
                       - sh
                       - -c
-                      - awk '$4 == "01" && $3 ~ /:0BB9$/ {f = 1} END {exit !f}' /proc/net/tcp /proc/net/tcp6
-                  initialDelaySeconds: 120
+                      - >-
+                        f=/tmp/log/autokuma.log;
+                        [ -n "$(find "$f" -mmin -1 2>/dev/null)" ] || exit 0;
+                        tail -n 12 "$f" | awk '/Encountered error during sync/ {e++} END {exit NR == 12 && e == 12}'
+                  initialDelaySeconds: 60
                   periodSeconds: 30
-                  failureThreshold: 6
+                  failureThreshold: 4
             resources:
               requests:
                 cpu: 10m

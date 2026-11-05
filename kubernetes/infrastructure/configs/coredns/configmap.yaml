@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   name: coredns
   namespace: kube-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
 data:
   Corefile: |
     ${CLUSTER_DOMAIN}:53 {

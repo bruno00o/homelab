@@ -189,8 +189,8 @@ spec:
               mountPath: /run/nginx
             - name: nginx-log
               mountPath: /var/log/nginx
-            - name: nginx-tmp
-              mountPath: /var/lib/nginx/tmp
+            - name: nginx-lib
+              mountPath: /var/lib/nginx
           resources:
             requests:
               cpu: 100m
@@ -209,7 +209,7 @@ spec:
           emptyDir: {}
         - name: nginx-log
           emptyDir: {}
-        - name: nginx-tmp
+        - name: nginx-lib
           emptyDir: {}
         - name: ca-cert
           secret:

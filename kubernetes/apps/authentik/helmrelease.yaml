@@ -184,6 +184,17 @@ spec:
           memory: 768Mi
         limits:
           memory: 1536Mi
+      # Rescheduled soon after its node dies rather than after the default delay: every login
+      # and every proxied app waits on it, and it holds no volume that would keep it there.
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 30
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 30
       # Per component, which is where this chart puts the metrics service and its
       # ServiceMonitor.
       metrics:

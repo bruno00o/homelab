@@ -264,6 +264,18 @@
       "automerge": false
     },
     {
+      "description": "Loki image - its own branch, out of the monitoring group, so a held minor does not hold the rest of the stack",
+      "matchPackageNames": ["docker.io/grafana/loki"],
+      "groupName": "Loki image"
+    },
+    {
+      "description": "Loki image - review minor and major by hand. It is pinned over a chart written for one Loki minor, so a new minor may need config the chart does not render",
+      "matchPackageNames": ["docker.io/grafana/loki"],
+      "matchUpdateTypes": ["major", "minor"],
+      "labels": ["review-required"],
+      "automerge": false
+    },
+    {
       "description": "Kubernetes - review manually (kubectl must follow the cluster). Patches get their own PR, or a held-back minor hides them",
       "matchPackageNames": ["kubernetes/kubernetes", "kubectl", "kubernetes/kubectl"],
       "labels": ["kubernetes", "infrastructure"],

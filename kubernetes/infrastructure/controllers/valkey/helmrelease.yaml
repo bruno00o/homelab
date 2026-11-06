@@ -68,6 +68,10 @@ spec:
     metrics:
       enabled: true
       exporter:
+        # The chart pins this image and its releases do not follow the exporter's.
+        image:
+          # renovate: datasource=docker depName=ghcr.io/oliver006/redis_exporter
+          tag: v1.97.0
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

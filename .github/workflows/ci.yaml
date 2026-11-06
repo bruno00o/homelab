@@ -184,11 +184,12 @@ jobs:
           persist-credentials: false
 
       - name: Install Trivy
-        # Pinned to v0.69.3 — last version before CVE-2026-33634 supply-chain
-        # compromise on v0.69.4/v0.69.5/v0.69.6.
+        # The version comes from .mise.toml, as for kubeconform, so `task validate` runs the
+        # same one. Read the warning there before changing it: some releases were compromised.
         run: |
+          TRIVY=$(grep -oP '(?<=^trivy = ")[^"]+' .mise.toml)
           curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b /usr/local/bin v0.69.3
+            | sh -s -- -b /usr/local/bin "v${TRIVY}"
 
       - name: Scan manifests for misconfigurations
         run: |

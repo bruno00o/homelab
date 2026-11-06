@@ -40,6 +40,7 @@ tasks:
       - task: validate:renovate
       - task: validate:helm-values
       - task: validate:flate
+      - task: validate:trivy
 
   validate:yaml:
     desc: Lint YAML (same paths as CI)
@@ -102,7 +103,16 @@ tasks:
     desc: Render every Kustomization and HelmRelease offline, as CI does
     deps: [deps:verify]
     cmds:
-      - flate test all --path ./kubernetes --no-progress
+      # It hung once in the pre-push hook, and a push without a limit waits in silence.
+      - timeout 300 flate test all --path ./kubernetes --no-progress
+
+  validate:trivy:
+    desc: Scan the manifests for misconfigurations and leaked secrets, as CI does
+    deps: [deps:verify]
+    cmds:
+      # Same flags as the CI job: a direct push to main skips that job, so only this runs.
+      - trivy config kubernetes/ --quiet --severity HIGH,CRITICAL --exit-code 1 --skip-files '**/*.sops.yaml' --ignorefile .trivyignore.yaml
+      - trivy fs kubernetes/ --quiet --scanners secret --severity HIGH,CRITICAL --exit-code 1 --skip-files '**/*.sops.yaml' --ignorefile .trivyignore.yaml
 
   validate:renovate:
     desc: Validate the Renovate config

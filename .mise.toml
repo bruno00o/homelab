@@ -20,5 +20,8 @@ kubeconform = "0.8.0"
 # Renders the Flux tree offline; replaces the archived flux-local. Not in mise's registry,
 # hence the ubi backend. Must match the version in .github/workflows/ci.yaml.
 "ubi:home-operations/flate" = "0.6.5"
+# Scans the manifests as the CI job does, which reads its version from here. Never 0.69.4
+# to 0.69.6: those releases were compromised (CVE-2026-33634).
+trivy = "0.69.3"
 # Git hooks — run `task hooks:install` after installing
 lefthook = "2.2.2"

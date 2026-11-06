@@ -1,0 +1,44 @@
+---
+# A launchd job on the Mac fetches the certificate with this account, which can read that
+# one Secret and nothing else.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jarvis-tls-reader
+  namespace: jarvis
+---
+# A token that does not expire, so renewals reach the Mac with nobody involved. Deleting
+# this Secret revokes it; the cluster fills in the token, git never holds it.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jarvis-tls-reader
+  namespace: jarvis
+  annotations:
+    kubernetes.io/service-account.name: jarvis-tls-reader
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jarvis-tls-reader
+  namespace: jarvis
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [jarvis-tls]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jarvis-tls-reader
+  namespace: jarvis
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jarvis-tls-reader
+subjects:
+  - kind: ServiceAccount
+    name: jarvis-tls-reader
+    namespace: jarvis

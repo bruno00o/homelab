@@ -26,5 +26,6 @@ resources:
   - open-webui/ks.yaml
   - uptime-kuma/ks.yaml
   - ca-portal/ks.yaml
+  - jarvis/ks.yaml
   - vaultwarden/ks.yaml
   - zot/ks.yaml

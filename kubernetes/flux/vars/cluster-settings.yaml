@@ -45,3 +45,5 @@ data:
   FRANKY_IP: "10.0.20.17"
   # The Synology NAS outside the cluster: NFS for immich, frigate and the backups. A PersistentVolume cannot change server, so moving it means recreating them.
   ROBIN_IP: "10.0.20.51"
+  # Bruno's MacBook on Wi-Fi, reserved in UniFi: jarvisd runs there.
+  MACBOOK_IP: "10.0.10.202"

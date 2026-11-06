@@ -63,15 +63,20 @@ data:
         - domain: '*.${PUBLIC_DOMAIN}'
           answer: ${LB_GATEWAY}
           enabled: true
-        # The two exceptions to the wildcard above: the SFU is the only host in
-        # this zone that does not live in the cluster, so pointing it at the
-        # gateway breaks calls from the LAN while they work from outside. An
-        # exact rewrite wins over the wildcard.
+        # Exceptions to the wildcard above, for the hosts in this zone that do
+        # not live in the cluster. An exact rewrite wins over the wildcard.
+        # The SFU: pointing it at the gateway breaks calls from the LAN while
+        # they work from outside.
         - domain: 'livekit.${PUBLIC_DOMAIN}'
           answer: ${LIVEKIT_VM_IP}
           enabled: true
         - domain: 'livekit-turn.${PUBLIC_DOMAIN}'
           answer: ${LIVEKIT_VM_IP}
+          enabled: true
+        # jarvisd, on the Mac, which serves its own certificate. Home only: no
+        # public record and no tunnel.
+        - domain: 'jarvis.${PUBLIC_DOMAIN}'
+          answer: ${MACBOOK_IP}
           enabled: true
       filtering_enabled: true
       rewrites_enabled: true

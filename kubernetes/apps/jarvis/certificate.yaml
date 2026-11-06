@@ -1,0 +1,23 @@
+---
+# jarvisd runs on Bruno's MacBook and serves its own TLS, so the phone is encrypted all the
+# way to it. The name resolves only at home, through AdGuard. Its own certificate rather
+# than the wildcard: the key leaves the cluster, and the wildcard's would answer for every
+# public hostname.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jarvis-tls
+  namespace: jarvis
+spec:
+  secretName: jarvis-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - jarvis.${PUBLIC_DOMAIN}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    # The most widely read key format, whatever jarvisd is written in.
+    encoding: PKCS8
+    rotationPolicy: Always

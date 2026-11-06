@@ -317,6 +317,33 @@ data:
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
             - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
 
+      # Jarvis, the iPhone app and its daemon. A public client with PKCE, since an app on a
+      # phone cannot keep a secret; the daemon checks the JWTs against the JWKS. Each refresh
+      # renews the refresh token, so the app stays signed in as long as it is used.
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-jarvis-oidc
+        state: present
+        identifiers:
+          name: Jarvis OIDC
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          client_type: public
+          client_id: jarvis
+          sub_mode: user_uuid
+          grant_types:
+            - authorization_code
+            - refresh_token
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+          redirect_uris:
+            - matching_mode: strict
+              url: com.bruno00o.jarvis:/oauth
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+
       # flux-operator web UI. The UI impersonates the user with the groups from this token,
       # hence the groups scope; offline_access because the UI requests it by default to
       # refresh its session.
@@ -1017,6 +1044,30 @@ data:
           order: 0
           target: !Find [authentik_core.application, [slug, gaspard]]
           user: !Find [authentik_core.user, [username, bruno]]
+        attrs:
+          enabled: true
+          negate: false
+          timeout: 30
+
+      # Jarvis (family). No launch URL: it is an app on the phone, not a page.
+      - model: authentik_core.application
+        id: app-jarvis
+        state: present
+        identifiers:
+          slug: jarvis
+        attrs:
+          name: Jarvis
+          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Jarvis OIDC]]
+          meta_launch_url: blank://blank
+          policy_engine_mode: all
+
+      - model: authentik_policies.policybinding
+        id: binding-jarvis-users
+        state: present
+        identifiers:
+          order: 0
+          target: !Find [authentik_core.application, [slug, jarvis]]
+          policy: !Find [authentik_policies_expression.expressionpolicy, [name, require-homelab-users]]
         attrs:
           enabled: true
           negate: false

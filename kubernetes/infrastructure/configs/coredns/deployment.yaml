@@ -32,6 +32,13 @@ spec:
       priorityClassName: system-cluster-critical
       # Resolves upstream through the node, not through itself.
       dnsPolicy: Default
+      # The user the image already runs as, stated so nothing can run it as root.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:

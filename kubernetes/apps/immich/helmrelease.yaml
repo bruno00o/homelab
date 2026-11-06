@@ -117,6 +117,19 @@ spec:
                   memory: 3Gi
                   gpu.intel.com/i915: "1"
       defaultPodOptions:
+        # Essential so a worker upgrade moves it before the reboot: it holds no Longhorn
+        # volume, so nothing else would, and the phones' photo backups go through it.
+        priorityClassName: homelab-essential
+        # Rescheduled soon after its node dies rather than after the default delay.
+        tolerations:
+          - key: node.kubernetes.io/not-ready
+            operator: Exists
+            effect: NoExecute
+            tolerationSeconds: 30
+          - key: node.kubernetes.io/unreachable
+            operator: Exists
+            effect: NoExecute
+            tolerationSeconds: 30
         securityContext:
           runAsNonRoot: true
           runAsUser: 1000

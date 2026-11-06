@@ -27,6 +27,11 @@ spec:
     deploymentMode: SingleBinary
 
     loki:
+      # Pinned here: this chart is now kept for the enterprise edition, and the image it pins
+      # lags behind the Loki releases it names.
+      image:
+        # renovate: datasource=docker depName=docker.io/grafana/loki
+        tag: 3.6.19
       analytics:
         reporting_enabled: false
       auth_enabled: false

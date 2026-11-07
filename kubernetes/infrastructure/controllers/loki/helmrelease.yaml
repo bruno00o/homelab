@@ -13,25 +13,22 @@ spec:
     - name: longhorn
       namespace: longhorn-system
 
+  # The community chart: grafana/loki is kept for the enterprise edition and lagged behind the
+  # Loki releases it named. Same release, StatefulSet and volume, so the logs stayed.
   chart:
     spec:
       chart: loki
-      version: "7.5.0"
+      version: "21.0.0"
       sourceRef:
         kind: HelmRepository
-        name: grafana
+        name: grafana-community
         namespace: flux-system
       interval: 1h
 
   values:
-    deploymentMode: SingleBinary
+    deploymentMode: Monolithic
 
     loki:
-      # Pinned here: this chart is now kept for the enterprise edition, and the image it pins
-      # lags behind the Loki releases it names.
-      image:
-        # renovate: datasource=docker depName=docker.io/grafana/loki
-        tag: 3.7.9
       analytics:
         reporting_enabled: false
       auth_enabled: false
@@ -61,6 +58,10 @@ spec:
         delete_request_store: filesystem
         retention_delete_delay: 2h
       structuredConfig:
+        # The chart turns this on. Alone, Loki finds itself in the ring only once it is
+        # ready, so a slow start, a long WAL replay, would end in a restart loop.
+        memberlist:
+          abort_if_cluster_join_fails: false
         ruler:
           enable_api: true
           # Every replica, as Prometheus does: the Service would pick one per send, and replicas
@@ -126,12 +127,8 @@ spec:
     resultsCache:
       enabled: false
 
-    # Disable self-monitoring. Scraping stays on: nothing else says that the ruler is failing.
+    # Scraping stays on: nothing else says that the ruler is failing.
     monitoring:
-      selfMonitoring:
-        enabled: false
-        grafanaAgent:
-          installOperator: false
       serviceMonitor:
         enabled: true
 

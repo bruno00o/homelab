@@ -193,6 +193,11 @@ spec:
         - matchName: data.iledefrance-mobilites.fr
         - matchName: data.geopf.fr
         - matchName: download.geofabrik.de
+        # Android push: the token exchange, then the send.
+        - matchName: oauth2.googleapis.com
+        - matchName: fcm.googleapis.com
+        # iPhone push, production only.
+        - matchName: api.push.apple.com
       toPorts:
         - ports:
             - port: "443"

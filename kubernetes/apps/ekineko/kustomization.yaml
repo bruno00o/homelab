@@ -4,6 +4,8 @@ resources:
   - namespace.yaml
   - ghcr-pull.sops.yaml
   - prim.sops.yaml
+  - fcm.sops.yaml
+  - apns.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - postgres-cluster.yaml
   - helmrelease-server.yaml

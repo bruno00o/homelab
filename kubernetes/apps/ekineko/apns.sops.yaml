@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ekineko-apns
+  namespace: ekineko
+stringData:
+  AuthKey.p8: ENC[AES256_GCM,data:cP+AmR7UF3xFYLcrkK+E8yqZ8qycH12QkXZzYOZC9B/KdyU0pj/nEgZGZZS8n4cP7jDSbBsx1JbicYwxKEd9an9++NBJ+twYuF4GN/iGR5gOJ4GYodQc/s7mZap12aLq+lNo2I1FjiGkXhFqtI9Q4UiDOL/Dq0GNa68GuZF0V6bzuHI3JqLX3H464IuhFl28TJXbQBNGQZIX+nmZxu+Ujs++rAxzhTVtGLqlFwRRljtS7MbDFTUyGlA2tghsO3vxtJ5nwXbLBbUU6VgkRZ3U9xgdGsMnYUQ+RdWe5B3azm9HanxAgUKyp/vfI3ixFcWj1nrIgR08zDVW349ckPddL9Pd,iv:qD4lAi+80p9ay5JTFYHbrZfkg44Omf1GZTWHV+XGfDM=,tag:cU+Gv8sJG4Dlrk7lb8gOmQ==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0QjZsUjhKODRHMHRnL08r
+        OFlMdXVXdGx3SjVVRHRaNkRHNjVJVWc3dGg4CkVCZnlNQ1BkR1hWa1JvL2FGMG5X
+        RFJWc2xNZEZtcFNoalQ4c21zZEZqQlUKLS0tIElNNS9GQWEwb0VFQ3NBSmkzMjAx
+        cXc0MUVxQlh0akJ6UzBHcGFPTTROeTAKcG/Z8f9FmN9bnzEVwv8Y3tkZsqcjlelo
+        b8Tg2cwUSy/JOiHP3HJCqmAdF/a8IQbM3Aj1uFvWPQ6t+Ij01nNr4A==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age19l6qdztn2ff797tdlsekuaycgq2gdgt49tp490cpsz8mgd9f6s9s4xf0yl
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA5bU9jT24vMjdBNmp2anBZ
+        QU85OHNDSWJGS2xtRk1HQjNFWTFsemI1MnpjCmpyazJIdG0wZ3R6Z3Y0Sjk0MFQ0
+        TjFJZTEvTTE5RTlBdzR6K2VOU3d2cE0KLS0tIGpaa2tPcGNHQjdkampmWU9JMUpz
+        YmlWSUc0M1RCa01XcW1ZMCsxb1Z3U1EK/CIbTRbMhF/1I4uUnrd16DRRKMlfRF8u
+        5uwPOm4meqCuEXDY9Shxx3M80c6CHhE1XG0lK8kSIyUXhUmKXkDJ3Q==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1wx3xdwl20yvywlhnzlfdv03eaz73ye26ryrrm4afsehh9psc63tq5supkm
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-11-07T09:07:40Z"
+  mac: ENC[AES256_GCM,data:dN17QNysfOApfTTW0eVP9446ScRcZWjZSqGHCq0nVWe+4UWRkyesZvYEd/mtk0GtDEt0LfpYdx9KBzbhIWoTW2zLhVtJ9s/BwGPopJuggFMzqBMLfhsijwR8nSod4ES94JgtWYLrvYUHjROwtzhxkh1ZQKtT0eB60IScYdx6rLc=,iv:UlgU6Lh/OUllEzqzAlfNQuGmNBy6W9cNbyjkBV/jZSo=,tag:tAZQIhMoC2ufqeP7duFP6w==,type:str]
+  version: 3.13.3

@@ -39,7 +39,15 @@ spec:
               EKINEKO_CLIENT_IP_HEADER: cf-connecting-ip
               # /api/status reports memory only to these hosts, never through Cloudflare.
               EKINEKO_STATUS_INTERNAL_HOSTS: ekineko.${CLUSTER_DOMAIN},localhost,127.0.0.1,::1
-              EKINEKO_FEATURES: sky,bus,pages
+              EKINEKO_FEATURES: sky,bus,pages,livepush
+              # The server refuses to start if this is set and the file is missing, so it goes
+              # with the fcm mount below.
+              EKINEKO_FCM_SERVICE_ACCOUNT_FILE: /etc/ekineko/fcm/fcm.json
+              # iPhone push, with the team key Kazimo also uses. All three or none, and the key
+              # file present: the server refuses to start otherwise.
+              EKINEKO_APNS_KEY_FILE: /etc/ekineko/apns/AuthKey.p8
+              EKINEKO_APNS_KEY_ID: XAR57M4J72
+              EKINEKO_APNS_TEAM_ID: 7G8GCY5LMH
               EKINEKO_DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
@@ -147,3 +155,20 @@ spec:
         sizeLimit: 1Gi
         globalMounts:
           - path: /tmp
+      # Push credentials, for the server container only: MOTIS has no use for them.
+      fcm:
+        type: secret
+        name: ekineko-fcm
+        advancedMounts:
+          ekineko-server:
+            app:
+              - path: /etc/ekineko/fcm
+                readOnly: true
+      apns:
+        type: secret
+        name: ekineko-apns
+        advancedMounts:
+          ekineko-server:
+            app:
+              - path: /etc/ekineko/apns
+                readOnly: true

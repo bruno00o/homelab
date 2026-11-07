@@ -6,7 +6,7 @@
 # MAC, so it survives a reboot and changes with the network card. The firewall lets it reach the
 # APIs, so a new card means updating it here first.
 talosVersion: v1.14.5
-kubernetesVersion: v1.36.6
+kubernetesVersion: v1.37.2
 
 nodes:
   # --- Control Plane ---
